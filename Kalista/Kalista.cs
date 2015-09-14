@@ -11,10 +11,13 @@ namespace Hellsing.Kalista
         public static bool IsAfterAttack { get; private set; }
         public static AttackableUnit AfterAttackTarget { get; private set; }
 
-        public static void Initialize()
+        static Kalista()
         {
             Loading.OnLoadingComplete += OnLoadingComplete;
         }
+
+        public static void Main(string[] args)
+        { }
 
         private static void OnLoadingComplete(EventArgs args)
         {
