@@ -151,7 +151,7 @@ namespace Hellsing.Kalista.Modes
                                 var wallPositionOpposite = (Vector3) VectorHelper.GetFirstWallPoint((Vector3)wallCheck, wallPosition, 5);
 
                                 // Check if it's worth to jump considering the path length
-                                if (Player.GetPath(wallPositionOpposite).ToList().To2D().PathLength() - Player.Distance(wallPositionOpposite) > 200)
+                                if (Player.GetPath(wallPositionOpposite).Sum(o => o.To2D().LengthSquared()).Sqrt() - Player.Distance(wallPositionOpposite) > 200)
                                 {
                                     // Check the distance to the opposite side of the wall
                                     if (Player.Distance(wallPositionOpposite, true) < Math.Pow(300 - Player.BoundingRadius / 2, 2))
