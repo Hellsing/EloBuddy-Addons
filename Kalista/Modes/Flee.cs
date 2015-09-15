@@ -165,7 +165,7 @@ namespace Hellsing.Kalista.Modes
                                         jumpTriggered = true;
 
                                         // Break the loop
-                                        bre
+                                        break;
                                     }
                                     // If we are not able to jump due to the distance, draw the spot to
                                     // make the user notice the possibliy
