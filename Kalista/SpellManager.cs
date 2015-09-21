@@ -14,7 +14,7 @@ namespace Hellsing.Kalista
         static SpellManager()
         {
             // Initialize spells
-            Q = new Spell.Skillshot(SpellSlot.Q, 1200, SkillShotType.Linear, 350, 2400, 40);
+            Q = new Spell.Skillshot(SpellSlot.Q, 1150, SkillShotType.Linear, 250, 1200, 40);
             W = new Spell.Targeted(SpellSlot.W, 5000);
             E = new Spell.Active(SpellSlot.E, 1000);
             R = new Spell.Active(SpellSlot.R, 1500);
