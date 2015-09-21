@@ -190,7 +190,7 @@ namespace Hellsing.Kalista.Modes
             }
         }
 
-        private void OnDash(Obj_AI_Base sender, DashEventArgs args)
+        private void OnDash(Obj_AI_Base sender, Dash.DashEventArgs args)
         {
             if (sender.IsMe)
             {
