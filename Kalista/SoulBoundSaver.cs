@@ -43,13 +43,13 @@ namespace Hellsing.Kalista
             }
 
             // Check spell arrival
-            foreach (var entry in IncDamage.Where(entry => entry.Key < Game.Time))
+            foreach (var entry in IncDamage.Where(entry => entry.Key < Game.Time).ToArray())
             {
                 IncDamage.Remove(entry.Key);
             }
 
             // Instant damage removal
-            foreach (var entry in InstDamage.Where(entry => entry.Key < Game.Time))
+            foreach (var entry in InstDamage.Where(entry => entry.Key < Game.Time).ToArray())
             {
                 InstDamage.Remove(entry.Key);
             }
@@ -66,7 +66,7 @@ namespace Hellsing.Kalista
                     if ((!(sender is AIHeroClient) || args.SData.IsAutoAttack()) && args.Target != null && args.Target.NetworkId == SoulBound.NetworkId)
                     {
                         // Calculate arrival time and damage
-                        IncDamage.Add(SoulBound.ServerPosition.Distance(sender.ServerPosition) / args.SData.MissileSpeed + Game.Time, sender.GetAutoAttackDamage(SoulBound));
+                        IncDamage[SoulBound.ServerPosition.Distance(sender.ServerPosition) / args.SData.MissileSpeed + Game.Time] = sender.GetAutoAttackDamage(SoulBound);
                     }
                     // Sender is a hero
                     else
@@ -81,7 +81,7 @@ namespace Hellsing.Kalista
                                 if (slot == attacker.GetSpellSlotFromName("SummonerDot") && args.Target != null && args.Target.NetworkId == SoulBound.NetworkId)
                                 {
                                     // Ingite damage (dangerous)
-                                    InstDamage.Add(Game.Time + 2, attacker.GetSummonerSpellDamage(SoulBound, DamageLibrary.SummonerSpells.Ignite));
+                                    InstDamage[Game.Time + 2] = attacker.GetSummonerSpellDamage(SoulBound, DamageLibrary.SummonerSpells.Ignite);
                                 }
                                 else
                                 {
@@ -91,11 +91,11 @@ namespace Hellsing.Kalista
                                         case SpellSlot.W:
                                         case SpellSlot.E:
                                         case SpellSlot.R:
-
+                                            
                                             if ((args.Target != null && args.Target.NetworkId == SoulBound.NetworkId) || args.End.Distance(SoulBound.ServerPosition) < Math.Pow(args.SData.LineWidth, 2))
                                             {
                                                 // Instant damage to target
-                                                InstDamage.Add(Game.Time + 2, attacker.GetSpellDamage(SoulBound, slot));
+                                                InstDamage[Game.Time + 2] = attacker.GetSpellDamage(SoulBound, slot);
                                             }
 
                                             break;

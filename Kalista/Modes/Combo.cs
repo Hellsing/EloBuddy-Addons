@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.Remoting;
 using EloBuddy;
 using EloBuddy.SDK;
 using Settings = Hellsing.Kalista.Config.Modes.Combo;
@@ -66,9 +67,7 @@ namespace Hellsing.Kalista.Modes
                     !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
                     // Force a new target for the Orbwalker
-                    Orbwalker.ForcedTarget = Orbwalker.GetTarget(Orbwalker.TargetTypes.LaneMinion) ??
-                                             Orbwalker.GetTarget(Orbwalker.TargetTypes.JungleMob) ??
-                                             ObjectManager.Get<AttackableUnit>().FirstOrDefault(o => o.IsValidTarget(Player.GetAutoAttackRange()));
+                    Orbwalker.ForcedTarget = ObjectManager.Get<Obj_AI_Base>().FirstOrDefault(o => !o.IsAlly && o.IsValidTarget(Player.GetAutoAttackRange()));
                 }
             }
         }
