@@ -29,6 +29,7 @@ namespace AddonTemplate
             }
 
             // Initialize the classes that we need
+            Config.Initialize();
             SpellManager.Initialize();
             ModeManager.Initialize();
 
