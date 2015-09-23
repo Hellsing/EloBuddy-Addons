@@ -73,7 +73,7 @@ namespace Hellsing.Kalista.Modes
                 }
 
                 // Define more position point
-                Vector3 movePosition = wallCheck != null ? (Vector3)wallCheck : Game.CursorPos;
+                var movePosition = wallCheck != null ? (Vector3)wallCheck : Game.CursorPos;
 
                 // Update fleeTargetPosition
                 var tempGrid = NavMesh.WorldToGrid(movePosition.X, movePosition.Y);

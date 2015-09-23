@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using EloBuddy;
 using EloBuddy.SDK;
 
@@ -19,21 +20,12 @@ namespace Hellsing.Kalista
 
         public static bool HasUndyingBuff(this AIHeroClient target)
         {
-            // Tryndamere R
-            if (target.ChampionName == "Tryndamere" &&
-                target.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValid() && b.DisplayName == "Undying Rage"))
-            {
-                return true;
-            }
-
-            // Zilean R
-            if (target.Buffs.Any(b => b.IsValid() && b.DisplayName == "Chrono Shift"))
-            {
-                return true;
-            }
-
-            // Kayle R
-            if (target.Buffs.Any(b => b.IsValid() && b.DisplayName == "JudicatorIntervention"))
+            // Various buffs
+            if (target.Buffs.Any(
+                b => b.IsValid() &&
+                     (b.DisplayName == "Chrono Shift" /* Zilean R */||
+                      b.DisplayName == "JudicatorIntervention" /* Kayle R */||
+                      b.DisplayName == "Undying Rage" /* Tryndamere R */)))
             {
                 return true;
             }
@@ -41,27 +33,28 @@ namespace Hellsing.Kalista
             // Poppy R
             if (target.ChampionName == "Poppy")
             {
-                if (HeroManager.Allies.Any(o =>
-                    !o.IsMe &&
-                    o.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValid() && b.DisplayName == "PoppyDITarget")))
+                if (HeroManager.Allies.Any(o => !o.IsMe && o.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValid() && b.DisplayName == "PoppyDITarget")))
                 {
                     return true;
                 }
             }
 
-            return false;
+            return target.IsInvulnerable;
+        }
+
+        public static bool HasSpellShield(this AIHeroClient target)
+        {
+            // Various spellshields
+            return target.HasBuffOfType(BuffType.SpellShield) || target.HasBuffOfType(BuffType.SpellImmunity);
         }
 
         public static List<T> MakeUnique<T>(this List<T> list) where T : Obj_AI_Base, new()
         {
             var uniqueList = new List<T>();
 
-            foreach (var entry in list)
+            foreach (var entry in list.Where(entry => uniqueList.All(e => e.NetworkId != entry.NetworkId)))
             {
-                if (uniqueList.All(e => e.NetworkId != entry.NetworkId))
-                {
-                    uniqueList.Add(entry);
-                }
+                uniqueList.Add(entry);
             }
 
             list.Clear();

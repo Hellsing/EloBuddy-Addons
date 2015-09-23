@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
 using Settings = Hellsing.Kalista.Config.Misc;
@@ -10,8 +9,7 @@ namespace Hellsing.Kalista.Modes
     {
         public PermaActive()
         {
-            // TODO: Add when existing
-            //Orbwalker.OnNonKillableMinion += OnNonKillableMinion;
+            Orbwalker.OnUnkillableMinion += OnUnkillableMinion;
         }
 
         public override bool ShouldBeExecuted()
@@ -28,54 +26,62 @@ namespace Hellsing.Kalista.Modes
             {
                 #region Killsteal
 
-                if (Settings.UseKillsteal && HeroManager.Enemies.Any(h => h.IsValidTarget(E.Range) && h.IsRendKillable()))
+                if (Settings.UseKillsteal && HeroManager.Enemies.Any(h => h.IsValidTarget(E.Range) && h.IsRendKillable()) && E.Cast())
                 {
-                    E.Cast();
+                    return;
                 }
 
                 #endregion
 
                 #region E on big mobs
 
-                else if (Settings.UseEBig &&
-                    ObjectManager.Get<Obj_AI_Minion>().Any(m => m.IsValidTarget(E.Range) && (m.BaseSkinName.Contains("MinionSiege") || m.BaseSkinName.Contains("Dragon") || m.BaseSkinName.Contains("Baron")) && m.IsRendKillable()))
+                if (Settings.UseEBig && ObjectManager.Get<Obj_AI_Base>().Any(m =>
                 {
-                    E.Cast();
+                    if (!m.IsAlly && m.IsValidTarget(E.Range) && m.HasRendBuff())
+                    {
+                        var skinName = m.BaseSkinName.ToLower();
+                        return (skinName.Contains("siege") || skinName.Contains("super") || skinName.Contains("dragon") || skinName.Contains("baron")) &&
+                               m.IsRendKillable();
+                    }
+                    return false;
+                }) && E.Cast())
+                {
+                    return;
                 }
 
                 #endregion
 
-                #region E combo (minion + champ)
+                #region E combo (harass plus)
 
-                else if (Settings.UseHarassPlus)
+                if (Settings.UseHarassPlus)
                 {
-                    var enemy = HeroManager.Enemies.Where(o => o.HasRendBuff()).OrderBy(o => o.Distance(Player, true)).FirstOrDefault();
-                    if (enemy != null)
+                    if (HeroManager.Enemies.Any(o => E.IsInRange(o) && o.HasRendBuff()) &&
+                        ObjectManager.Get<Obj_AI_Base>().Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
+                        E.Cast())
                     {
-                        if (enemy.Distance(Player, true) < Math.Pow(E.Range + 200, 2))
-                        {
-                            if (ObjectManager.Get<Obj_AI_Minion>().Any(o => o.IsRendKillable() && E.IsInRange(o)))
-                            {
-                                E.Cast();
-                            }
-                        }
+                        return;
                     }
+                }
+
+                #endregion
+
+                #region E before death
+
+                if (Player.HealthPercent < Settings.AutoEBelowHealth && E.Cast())
+                {
+                    return;
                 }
 
                 #endregion
             }
         }
 
-        private void OnNonKillableMinion(AttackableUnit minion)
+        private void OnUnkillableMinion(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args)
         {
-            if (Settings.SecureMinionKillsE && E.IsReady())
+            if (Settings.SecureMinionKillsE && E.IsReady() && target.IsRendKillable())
             {
-                var target = minion as Obj_AI_Base;
-                if (target != null && target.IsRendKillable())
-                {
-                    // Cast since it's killable with E
-                    SpellManager.E.Cast();
-                }
+                // Cast since it's killable with E
+                SpellManager.E.Cast();
             }
         }
     }

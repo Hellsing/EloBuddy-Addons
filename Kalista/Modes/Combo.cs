@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
 using Settings = Hellsing.Kalista.Config.Modes.Combo;
@@ -22,64 +21,54 @@ namespace Hellsing.Kalista.Modes
                 ItemManager.UseYoumuu((Obj_AI_Base) Kalista.AfterAttackTarget);
             }
 
-            // Validate spell usage
-            if (!(Settings.UseQ && Q.IsReady()) && !(Settings.UseE && E.IsReady()))
-            {
-                return;
-            }
-
             var target = TargetSelector.GetTarget((Settings.UseQ && Q.IsReady()) ? Q.Range : (E.Range * 1.2f), DamageType.Physical);
             if (target != null)
             {
                 // Q usage
-                if (Settings.UseQ && Q.IsReady())
+                if (Settings.UseQ && Q.IsReady() && Q.Cast(target))
                 {
-                    Q.Cast(target);
+                    return;
                 }
 
                 // E usage
-                if (Settings.UseE && (E.State == SpellState.Ready || E.State == SpellState.Surpressed) && target.HasRendBuff())
+                var buff = target.GetRendBuff();
+                if (Settings.UseE && (E.IsLearned && !E.IsOnCooldown) && buff != null && E.IsInRange(target))
                 {
-                    // Target is not in range but has E stacks on
-                    if (Player.Distance(target, true) > Math.Pow(Player.GetAutoAttackRange(target), 2))
+                    // Check if the target would die from E
+                    if (!Config.Misc.UseKillsteal && target.IsRendKillable() && E.Cast())
                     {
-                        // Get minions around
-                        var minions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(Player.GetAutoAttackRange(m))).ToArray();
+                        return;
+                    }
 
-                        // Check if a minion can die with the current E stacks
-                        if (minions.Any(m => m.IsRendKillable()))
-                        {
-                            E.Cast();
-                        }
-                        else
-                        {
-                            // Check if a minion can die with one AA and E. Also, the AA minion has be be behind the player direction for a further leap
-                            var minion = VectorHelper.GetDashObjects(minions).Find(m => m.Health > Player.GetAutoAttackDamage(m) && m.Health < Player.GetAutoAttackDamage(m) + Damages.GetRendDamage(m, (m.HasRendBuff() ? m.GetRendBuff().Count + 1 : 1)));
-                            if (minion != null)
-                            {
-                                Orbwalker.ForcedTarget = minion;
-                            }
-                        }
-                    }
-                    // Target is in E range
-                    else if (E.IsInRange(target))
+                    // Check if target has the desired amount of E stacks on
+                    if (buff.Count >= Settings.MinNumberE)
                     {
-                        // Check if the target would die from E
-                        if (target.IsRendKillable())
+                        // Check if target is about to leave our E range or the buff is about to run out
+                        if ((target.Distance(Player, true) > (E.Range * 0.8).Pow() ||
+                             buff.EndTime - Game.Time < 0.3) && E.Cast())
                         {
-                            E.Cast();
-                        }
-                        // Check if target has the desired amount of E stacks on
-                        else if (target.GetRendBuff().Count >= Settings.MinNumberE)
-                        {
-                            // Check if target is about to leave our E range or the buff is about to run out
-                            if (target.ServerPosition.Distance(Player.ServerPosition, true) > Math.Pow(E.Range * 0.8, 2) ||
-                                target.GetRendBuff().EndTime - Game.Time < 0.3)
-                            {
-                                E.Cast();
-                            }
+                            return;
                         }
                     }
+
+                    // E to slow
+                    if (!Config.Misc.UseHarassPlus && Settings.UseESlow &&
+                        ObjectManager.Get<Obj_AI_Base>().Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
+                        E.Cast())
+                    {
+                        return;
+                    }
+                }
+
+                // Auto attacks
+                if (Settings.UseAA && Orbwalker.CanAutoAttack && !Player.IsInAutoAttackRange(target) &&
+                    !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) &&
+                    !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+                {
+                    // Force a new target for the Orbwalker
+                    Orbwalker.ForcedTarget = Orbwalker.GetTarget(Orbwalker.TargetTypes.LaneMinion) ??
+                                             Orbwalker.GetTarget(Orbwalker.TargetTypes.JungleMob) ??
+                                             ObjectManager.Get<AttackableUnit>().FirstOrDefault(o => o.IsValidTarget(Player.GetAutoAttackRange()));
                 }
             }
         }

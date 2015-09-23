@@ -1,4 +1,5 @@
-﻿using EloBuddy;
+﻿using System;
+using EloBuddy;
 using EloBuddy.SDK;
 
 namespace Hellsing.Kalista
@@ -26,8 +27,16 @@ namespace Hellsing.Kalista
 
         public static bool IsRendKillable(this Obj_AI_Base target)
         {
+            var totalHealth = target.Health + target.AttackShield + target.MagicShield /* + target.AllShield */;
             var hero = target as AIHeroClient;
-            return GetRendDamage(target) > target.Health && (hero == null || !hero.HasUndyingBuff());
+            if (hero != null)
+            {
+                if (hero.ChampionName == "Blitzcrank" && !target.HasBuff("BlitzcrankManaBarrierCD") && !target.HasBuff("ManaBarrier"))
+                {
+                    totalHealth = totalHealth + target.Mana / 2;
+                }
+            }
+            return GetRendDamage(target) > totalHealth && (hero == null || !(hero.HasUndyingBuff() || hero.HasSpellShield()));
         }
 
         public static float GetRendDamage(AIHeroClient target)
@@ -38,7 +47,7 @@ namespace Hellsing.Kalista
         public static float GetRendDamage(Obj_AI_Base target, int customStacks = -1)
         {
             // Calculate the damage and return
-            return (Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, GetRawRendDamage(target, customStacks)) - 20) * 0.98f;
+            return Math.Max(0, Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, GetRawRendDamage(target, customStacks) - Config.Misc.DamageReductionE));
         }
 
         // ReSharper disable once PossibleNullReferenceException

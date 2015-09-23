@@ -18,22 +18,9 @@ namespace Hellsing.Kalista
             W = new Spell.Targeted(SpellSlot.W, 5000);
             E = new Spell.Active(SpellSlot.E, 1000);
             R = new Spell.Active(SpellSlot.R, 1500);
-        }
 
-        public static Spell.SpellBase GetSpellFromSlot(SpellSlot slot)
-        {
-            switch (slot)
-            {
-                case SpellSlot.Q:
-                    return Q;
-                case SpellSlot.W:
-                    return W;
-                case SpellSlot.E:
-                    return E;
-                case SpellSlot.R:
-                    return R;
-            }
-            return null;
+            // Testing Q high hitchance for now
+            Q.MinimumHitChance = HitChance.High;
         }
     }
 }
