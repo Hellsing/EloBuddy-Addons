@@ -19,6 +19,9 @@ namespace AddonTemplate
         {
             // Initialize the menu
             Menu = MainMenu.AddMenu(MenuName, MenuName.ToLower());
+            Menu.AddGroupLabel("Welcome to this AddonTemplate!");
+            Menu.AddLabel("To change the menu, please have a look at the");
+            Menu.AddLabel("Config.cs class inside the project, now have fun!");
 
             // Initialize the modes
             Modes.Initialize();
@@ -77,6 +80,7 @@ namespace AddonTemplate
                 static Combo()
                 {
                     // Initialize the menu values
+                    Menu.AddGroupLabel("Combo");
                     _useQ = Menu.Add("comboUseQ", new CheckBox("Use Q"));
                     _useW = Menu.Add("comboUseW", new CheckBox("Use W"));
                     _useE = Menu.Add("comboUseE", new CheckBox("Use E"));
@@ -115,6 +119,7 @@ namespace AddonTemplate
                 {
                     // Here is another option on how to use the menu, but I prefer the
                     // way that I used in the combo class
+                    Menu.AddGroupLabel("Harass");
                     Menu.Add("harassUseQ", new CheckBox("Use Q"));
                     Menu.Add("harassUseW", new CheckBox("Use W"));
                     Menu.Add("harassUseE", new CheckBox("Use E"));
