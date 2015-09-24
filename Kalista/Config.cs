@@ -1,8 +1,13 @@
-﻿using EloBuddy.SDK.Menu;
+﻿using System;
+using System.Linq;
+using EloBuddy;
+using EloBuddy.SDK;
+using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable MemberHidesStaticFromOuterClass
+
 namespace Hellsing.Kalista
 {
     public static class Config
@@ -36,7 +41,7 @@ namespace Hellsing.Kalista
 
         public static class Modes
         {
-            public static Menu Menu { get; private set; }
+            private static Menu Menu { get; set; }
 
             static Modes()
             {
@@ -243,7 +248,7 @@ namespace Hellsing.Kalista
 
         public static class Misc
         {
-            public static Menu Menu { get; private set; }
+            private static Menu Menu { get; set; }
 
             private static readonly CheckBox _killsteal;
             private static readonly CheckBox _bigE;
@@ -302,7 +307,7 @@ namespace Hellsing.Kalista
 
         public static class Items
         {
-            public static Menu Menu { get; private set; }
+            private static Menu Menu { get; set; }
 
             private static readonly CheckBox _cutlass;
             private static readonly CheckBox _botrk;
@@ -328,6 +333,96 @@ namespace Hellsing.Kalista
                 _cutlass = Menu.Add("cutlass", new CheckBox("Use Bilgewater Cutlass"));
                 _botrk = Menu.Add("botrk", new CheckBox("Use Blade of the Ruined King"));
                 _ghostblade = Menu.Add("ghostblade", new CheckBox("Use Youmuu's Ghostblade"));
+            }
+
+            public static void Initialize()
+            {
+            }
+        }
+
+        public static class Specials
+        {
+            private static Menu Menu { get; set; }
+
+            private static CheckBox _useBalista;
+            private static CheckBox _balistaComboOnly;
+            private static CheckBox _balistaMoreHealth;
+            private static Slider _balistaTriggerRange;
+
+            public static bool UseBalista
+            {
+                get { return _useBalista != null && _useBalista.CurrentValue; }
+            }
+            public static bool BalistaComboOnly
+            {
+                get { return _balistaComboOnly.CurrentValue; }
+            }
+            public static bool BalistaMoreHealthOnly
+            {
+                get { return _balistaMoreHealth.CurrentValue; }
+            }
+            public static int BalistaTriggerRange
+            {
+                get { return _balistaTriggerRange.CurrentValue; }
+            }
+
+            static Specials()
+            {
+                Menu = Config.Menu.AddSubMenu("Specials");
+
+                Menu.AddGroupLabel("Balista");
+                if (HeroManager.Allies.Any(o => o.ChampionName == "Blitzcrank"))
+                {
+                    Menu.Add("infoLabel", new Label("You have no soul bound yet!"));
+                    Game.OnTick += BalistaCheckSoulBound;
+                }
+                else
+                {
+                    Menu.AddLabel("You don't have Blitzcrank on your team, so no Balista :(");
+                }
+            }
+
+            private static void BalistaCheckSoulBound(EventArgs args)
+            {
+                if (SoulBoundSaver.SoulBound != null)
+                {
+                    Game.OnTick -= BalistaCheckSoulBound;
+                    Menu.Remove("infoLabel");
+
+                    if (SoulBoundSaver.SoulBound.ChampionName != "Blitzcrank")
+                    {
+                        Menu.AddLabel("You are not bound to Blitzcrank!");
+                        Menu.AddLabel("If you decided to rebind, please reload the addon to make sure");
+                        Menu.AddLabel("it recognizes your new bind! Now have fun playing!");
+                        return;
+                    }
+                    
+                    _useBalista = Menu.Add("useBalista", new CheckBox("Enabled"));
+                    Menu.AddSeparator(0);
+                    _balistaComboOnly = Menu.Add("balistaComboOnly", new CheckBox("Combo mode only", false));
+                    _balistaMoreHealth = Menu.Add("moreHealth", new CheckBox("Only if I have more health"));
+
+                    const int blitzcrankQrange = 925;
+                    _balistaTriggerRange = Menu.Add("balistaTriggerRange",
+                        new Slider("Trigger range between you and the grabbed target", (int) SpellManager.R.Range + blitzcrankQrange / 2, (int) SpellManager.R.Range,
+                            (int) (SpellManager.R.Range + blitzcrankQrange * 0.8f)));
+
+                    // Handle Blitzcrank hooks in Kalista.OnTickBalistaCheck
+                    Obj_AI_Base.OnBuffGain += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs eventArgs)
+                    {
+                        if (eventArgs.Buff.Name == "rocketgrab2" && HeroManager.Enemies.Contains(sender))
+                        {
+                            Game.OnTick += Kalista.OnTickBalistaCheck;
+                        }
+                    };
+                    Obj_AI_Base.OnBuffLose += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffLoseEventArgs eventArgs)
+                    {
+                        if (eventArgs.Buff.Name == "rocketgrab2")
+                        {
+                            Game.OnTick -= Kalista.OnTickBalistaCheck;
+                        }
+                    };
+                }
             }
 
             public static void Initialize()

@@ -56,6 +56,31 @@ namespace Hellsing.Kalista
             AfterAttackTarget = target;
         }
 
+        public static void OnTickBalistaCheck(EventArgs args)
+        {
+            if (!Config.Specials.UseBalista || !SpellManager.R.IsReady() ||
+                (Config.Specials.BalistaComboOnly && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo)))
+            {
+                return;
+            }
+
+            var target = HeroManager.Enemies.FirstOrDefault(o => o.Buffs.Any(b => b.Name == "rocketgrab2" && b.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId));
+            if (target != null)
+            {
+                if ((Config.Specials.BalistaMoreHealthOnly && Player.Instance.HealthPercent < target.HealthPercent) ||
+                    Player.Instance.Distance(target, true) < Config.Specials.BalistaTriggerRange.Pow())
+                {
+                    // Remove hook, target too close or has more health
+                    Game.OnTick -= OnTickBalistaCheck;
+                    return;
+                }
+
+                // Cast ult
+                SpellManager.R.Cast();
+                Game.OnTick -= OnTickBalistaCheck;
+            }
+        }
+
         private static void OnDraw(EventArgs args)
         {
             // TODO: Add when existing
