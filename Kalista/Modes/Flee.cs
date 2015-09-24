@@ -5,6 +5,7 @@ using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
 using SharpDX;
 using Settings = Hellsing.Kalista.Config.Modes.Flee;
+using EloBuddy.SDK.Rendering;
 
 namespace Hellsing.Kalista.Modes
 {
@@ -204,8 +205,7 @@ namespace Hellsing.Kalista.Modes
             // Flee position the player moves to
             if (FleePosition != Vector3.Zero)
             {
-                // TODO: Add later
-                //Render.Circle.DrawCircle(FleePosition, 50, IsJumpPossible ? Color.Green : SpellManager.Q.IsReady() ? Color.Red : Color.Teal, 10);
+                Circle.Draw(IsJumpPossible ? Color.Green : SpellManager.Q.IsReady() ? Color.Red : Color.Teal, 50, 10, FleePosition);
             }
         }
     }
