@@ -1,5 +1,4 @@
-﻿using System;
-using EloBuddy;
+﻿using EloBuddy;
 using EloBuddy.SDK;
 
 namespace Hellsing.Kalista
@@ -27,16 +26,32 @@ namespace Hellsing.Kalista
 
         public static bool IsRendKillable(this Obj_AI_Base target)
         {
+            // Validate unit
+            if (target == null || !target.IsValidTarget() || !target.HasRendBuff())
+            {
+                return false;
+            }
+
+            // Take into account all kinds of shields
             var totalHealth = target.Health + target.AttackShield + target.MagicShield /* + target.AllShield */;
+
             var hero = target as AIHeroClient;
             if (hero != null)
             {
+                // Validate that target has no undying buff or spellshield
+                if (hero.HasUndyingBuff() || hero.HasSpellShield())
+                {
+                    return false;
+                }
+
+                // Take into account Blitzcranks passive
                 if (hero.ChampionName == "Blitzcrank" && !target.HasBuff("BlitzcrankManaBarrierCD") && !target.HasBuff("ManaBarrier"))
                 {
-                    totalHealth = totalHealth + target.Mana / 2;
+                    totalHealth += target.Mana / 2;
                 }
             }
-            return GetRendDamage(target) > totalHealth && (hero == null || !(hero.HasUndyingBuff() || hero.HasSpellShield()));
+
+            return GetRendDamage(target) > totalHealth;
         }
 
         public static float GetRendDamage(AIHeroClient target)
@@ -47,43 +62,21 @@ namespace Hellsing.Kalista
         public static float GetRendDamage(Obj_AI_Base target, int customStacks = -1)
         {
             // Calculate the damage and return
-            return Math.Max(0, Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, GetRawRendDamage(target, customStacks) - Config.Misc.DamageReductionE));
+            return Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, GetRawRendDamage(target, customStacks) - Config.Misc.DamageReductionE) *
+                   (Player.Instance.HasBuff("SummonerExhaustSlow") ? 0.6f : 1); // Take into account Exhaust, migh just add that to the SDK
         }
 
-        // ReSharper disable once PossibleNullReferenceException
         public static float GetRawRendDamage(Obj_AI_Base target, int customStacks = -1)
         {
-            // Get buff
-            var buff = target.GetRendBuff();
-
-            if (buff != null || customStacks > -1)
+            var stacks = (customStacks > -1 ? customStacks : target.HasRendBuff() ? target.GetRendBuff().Count : 0) - 1;
+            if (stacks > -1)
             {
-                return (RawRendDamage[SpellManager.E.Level - 1] + RawRendDamageMultiplier[SpellManager.E.Level - 1] * Player.Instance.TotalAttackDamage) + // Base damage
-                       ((customStacks < 0 ? buff.Count : customStacks) - 1) * // Spear count
-                       (RawRendDamagePerSpear[SpellManager.E.Level - 1] + RawRendDamagePerSpearMultiplier[SpellManager.E.Level - 1] * Player.Instance.TotalAttackDamage); // Damage per spear
+                var index = SpellManager.E.Level - 1;
+                return RawRendDamage[index] + stacks * RawRendDamagePerSpear[index] +
+                       Player.Instance.TotalAttackDamage * (RawRendDamageMultiplier[index] + stacks * RawRendDamagePerSpearMultiplier[index]);
             }
 
             return 0;
-        }
-
-        public static float GetTotalDamage(AIHeroClient target)
-        {
-            // Auto attack damage
-            var damage = Player.Instance.GetAutoAttackDamage(target);
-
-            // Q damage
-            if (SpellManager.Q.IsReady())
-            {
-                damage += QDamage.GetDamage(target);
-            }
-
-            // E stack damage
-            if (SpellManager.E.IsReady())
-            {
-                damage += GetRendDamage(target);
-            }
-
-            return damage;
         }
     }
 }
