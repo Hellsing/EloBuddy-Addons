@@ -56,7 +56,14 @@ namespace Hellsing.Kalista.Modes
                 if (Settings.UseHarassPlus)
                 {
                     if (HeroManager.Enemies.Any(o => E.IsInRange(o) && o.HasRendBuff()) &&
-                        ObjectManager.Get<Obj_AI_Base>().Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
+                        ObjectManager.Get<Obj_AI_Base>().Any(o => {
+                            if (!o.IsAlly && o.IsValidTarget(E.Range) && o.HasRendBuff())
+                            {
+                                return o.IsRendKillable();
+                            }
+                            return false;
+                        }
+                        ) &&
                         E.Cast())
                     {
                         return;
