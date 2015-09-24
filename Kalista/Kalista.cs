@@ -64,7 +64,7 @@ namespace Hellsing.Kalista
                 return;
             }
 
-            var target = HeroManager.Enemies.FirstOrDefault(o => o.Buffs.Any(b => b.Name == "rocketgrab2" && b.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId));
+            var target = HeroManager.Enemies.FirstOrDefault(o => o.Buffs.Any(b => b.DisplayName == "RocketGrab" && b.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId));
             if (target != null)
             {
                 if ((Config.Specials.BalistaMoreHealthOnly && Player.Instance.HealthPercent < target.HealthPercent) ||

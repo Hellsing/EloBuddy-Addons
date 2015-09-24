@@ -33,6 +33,9 @@ namespace Hellsing.Kalista
             // Drawing
             // TODO
             //Drawing.Initialize();
+
+            // Specials
+            Specials.Initialize();
         }
 
         public static void Initialize()
@@ -410,14 +413,16 @@ namespace Hellsing.Kalista
                     // Handle Blitzcrank hooks in Kalista.OnTickBalistaCheck
                     Obj_AI_Base.OnBuffGain += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs eventArgs)
                     {
-                        if (eventArgs.Buff.Name == "rocketgrab2" && HeroManager.Enemies.Contains(sender))
+                        if (eventArgs.Buff.DisplayName == "RocketGrab" &&
+                            eventArgs.Buff.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId &&
+                            HeroManager.Enemies.Any(o => o.NetworkId == sender.NetworkId))
                         {
                             Game.OnTick += Kalista.OnTickBalistaCheck;
                         }
                     };
                     Obj_AI_Base.OnBuffLose += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffLoseEventArgs eventArgs)
                     {
-                        if (eventArgs.Buff.Name == "rocketgrab2")
+                        if (eventArgs.Buff.DisplayName == "RocketGrab")
                         {
                             Game.OnTick -= Kalista.OnTickBalistaCheck;
                         }
