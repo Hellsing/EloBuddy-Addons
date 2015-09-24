@@ -422,7 +422,7 @@ namespace Hellsing.Kalista
                     };
                     Obj_AI_Base.OnBuffLose += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffLoseEventArgs eventArgs)
                     {
-                        if (eventArgs.Buff.DisplayName == "RocketGrab")
+                        if (eventArgs.Buff.DisplayName == "RocketGrab" && eventArgs.Buff.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId)
                         {
                             Game.OnTick -= Kalista.OnTickBalistaCheck;
                         }
