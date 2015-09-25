@@ -18,6 +18,11 @@ namespace Blitzcrank
         {
             Loading.OnLoadingComplete += delegate
             {
+                if (Player.Instance.ChampionName != "Blitzcrank")
+                {
+                    return;
+                }
+
                 #region Menu Stuff
 
                 var menu = MainMenu.AddMenu("Blitzcrank", "blitziii");
