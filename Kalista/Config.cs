@@ -413,9 +413,7 @@ namespace Hellsing.Kalista
                     // Handle Blitzcrank hooks in Kalista.OnTickBalistaCheck
                     Obj_AI_Base.OnBuffGain += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs eventArgs)
                     {
-                        if (eventArgs.Buff.DisplayName == "RocketGrab" &&
-                            eventArgs.Buff.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId &&
-                            HeroManager.Enemies.Any(o => o.NetworkId == sender.NetworkId))
+                        if (eventArgs.Buff.DisplayName == "RocketGrab" && eventArgs.Buff.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId)
                         {
                             Game.OnTick += Kalista.OnTickBalistaCheck;
                         }
