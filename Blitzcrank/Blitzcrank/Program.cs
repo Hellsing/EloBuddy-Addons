@@ -64,7 +64,7 @@ namespace Blitzcrank
                     if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Q.IsReady())
                     {
                         foreach (var enemy in HeroManager.Enemies.Where(enemy => menu[enemy.ChampionName].Cast<CheckBox>().CurrentValue &&
-                                                                                 Player.Instance.Distance(enemy, true) < (Q.Range + 150).Pow()))
+                                                                                 enemy.IsValidTarget(Q.Range + 150)))
                         {
                             var prediction = Q.GetPrediction(enemy);
                             if (prediction.HitChance >= hitchances[0])
