@@ -85,43 +85,39 @@ namespace Hellsing.Kalista
             // All circles
             foreach (var spell in SpellManager.AllSpells)
             {
-                var color = Color.IndianRed;
                 switch (spell.Slot)
                 {
                     case SpellSlot.Q:
                         if (!Config.Drawing.DrawQ)
                         {
-                            return;
+                            continue;
                         }
                         break;
                     case SpellSlot.W:
                         if (!Config.Drawing.DrawW)
                         {
-                            return;
+                            continue;
                         }
-                        color = Color.MediumPurple;
                         break;
                     case SpellSlot.E:
-                        color = Color.DarkRed;
                         if (Config.Drawing.DrawELeaving)
                         {
-                            Circle.Draw(color, spell.Range * 0.8f, Player.Instance.Position);
+                            Circle.Draw(spell.GetColor(), spell.Range * 0.8f, Player.Instance.Position);
                         }
                         if (!Config.Drawing.DrawE)
                         {
-                            return;
+                            continue;
                         }
                         break;
                     case SpellSlot.R:
                         if (!Config.Drawing.DrawR)
                         {
-                            return;
+                            continue;
                         }
-                        color = Color.Red;
                         break;
                 }
 
-                Circle.Draw(color, spell.Range, Player.Instance.Position);
+                Circle.Draw(spell.GetColor(), spell.Range, Player.Instance.Position);
             }
 
             // TODO
