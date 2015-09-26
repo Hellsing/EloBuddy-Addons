@@ -31,8 +31,7 @@ namespace Hellsing.Kalista
             Items.Initialize();
 
             // Drawing
-            // TODO
-            //Drawing.Initialize();
+            Drawing.Initialize();
 
             // Specials
             Specials.Initialize();
@@ -343,6 +342,53 @@ namespace Hellsing.Kalista
             }
         }
 
+        public static class Drawing
+        {
+            private static Menu Menu { get; set; }
+
+            private static readonly CheckBox _drawQ;
+            private static readonly CheckBox _drawW;
+            private static readonly CheckBox _drawE;
+            private static readonly CheckBox _drawEleaving;
+            private static readonly CheckBox _drawR;
+
+            public static bool DrawQ
+            {
+                get { return _drawQ.CurrentValue; }
+            }
+            public static bool DrawW
+            {
+                get { return _drawW.CurrentValue; }
+            }
+            public static bool DrawE
+            {
+                get { return _drawE.CurrentValue; }
+            }
+            public static bool DrawELeaving
+            {
+                get { return _drawEleaving.CurrentValue; }
+            }
+            public static bool DrawR
+            {
+                get { return _drawR.CurrentValue; }
+            }
+
+            static Drawing()
+            {
+                Menu = Config.Menu.AddSubMenu("Drawing");
+
+                _drawQ = Menu.Add("drawQ", new CheckBox("Draw Q"));
+                _drawW = Menu.Add("drawW", new CheckBox("Draw W"));
+                _drawE = Menu.Add("drawE", new CheckBox("Draw E"));
+                _drawEleaving = Menu.Add("drawEleaving", new CheckBox("Draw E (trigger range)"));
+                _drawR = Menu.Add("drawR", new CheckBox("Draw R"));
+            }
+
+            public static void Initialize()
+            {
+            }
+        }
+
         public static class Specials
         {
             private static Menu Menu { get; set; }
@@ -399,7 +445,7 @@ namespace Hellsing.Kalista
                         Menu.AddLabel("it recognizes your new bind! Now have fun playing!");
                         return;
                     }
-                    
+
                     _useBalista = Menu.Add("useBalista", new CheckBox("Enabled"));
                     Menu.AddSeparator(0);
                     _balistaComboOnly = Menu.Add("balistaComboOnly", new CheckBox("Combo mode only", false));

@@ -4,7 +4,9 @@ using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Enumerations;
 using EloBuddy.SDK.Events;
+using EloBuddy.SDK.Rendering;
 using EloBuddy.SDK.Utils;
+using SharpDX;
 
 namespace Hellsing.Kalista
 {
@@ -16,10 +18,7 @@ namespace Hellsing.Kalista
         static Kalista()
         {
             Loading.OnLoadingComplete += OnLoadingComplete;
-            AppDomain.CurrentDomain.UnhandledException += delegate(object sender, UnhandledExceptionEventArgs args)
-            {
-                Logger.Log(LogLevel.Error, args.ExceptionObject.ToString());
-            };
+            AppDomain.CurrentDomain.UnhandledException += delegate(object sender, UnhandledExceptionEventArgs args) { Logger.Log(LogLevel.Error, args.ExceptionObject.ToString()); };
         }
 
         public static void Main(string[] args)
@@ -64,8 +63,8 @@ namespace Hellsing.Kalista
                 return;
             }
 
-            var target = HeroManager.Enemies.FirstOrDefault(o => o.Buffs.Any(b => b.DisplayName == "RocketGrab" && b.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId));
-            if (target != null)
+            var target = HeroManager.Enemies.Find(o => o.Buffs.Any(b => b.DisplayName == "RocketGrab" && b.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId));
+            if (target != null && target.IsValidTarget())
             {
                 if ((Config.Specials.BalistaMoreHealthOnly && Player.Instance.HealthPercent < target.HealthPercent) ||
                     Player.Instance.Distance(target, true) < Config.Specials.BalistaTriggerRange.Pow())
@@ -83,21 +82,52 @@ namespace Hellsing.Kalista
 
         private static void OnDraw(EventArgs args)
         {
-            // TODO: Add when existing
-            /*
             // All circles
-            foreach (var circleLink in Config.Drawing.AllCircles)
+            foreach (var spell in SpellManager.AllSpells)
             {
-                if (circleLink.Value.Active)
+                var color = Color.IndianRed;
+                switch (spell.Slot)
                 {
-                    Render.Circle.DrawCircle(Player.Position, circleLink.Value.Radius, circleLink.Value.Color);
+                    case SpellSlot.Q:
+                        if (!Config.Drawing.DrawQ)
+                        {
+                            return;
+                        }
+                        break;
+                    case SpellSlot.W:
+                        if (!Config.Drawing.DrawW)
+                        {
+                            return;
+                        }
+                        color = Color.MediumPurple;
+                        break;
+                    case SpellSlot.E:
+                        color = Color.DarkRed;
+                        if (Config.Drawing.DrawELeaving)
+                        {
+                            Circle.Draw(color, spell.Range * 0.8f, Player.Instance.Position);
+                        }
+                        if (!Config.Drawing.DrawE)
+                        {
+                            return;
+                        }
+                        break;
+                    case SpellSlot.R:
+                        if (!Config.Drawing.DrawR)
+                        {
+                            return;
+                        }
+                        color = Color.Red;
+                        break;
                 }
+
+                Circle.Draw(color, spell.Range, Player.Instance.Position);
             }
 
+            // TODO
             // E damage on healthbar
-            DamageIndicator.DrawingColor = Config.Drawing.HealthbarE.Value.Color;
-            DamageIndicator.Enabled = Config.Drawing.HealthbarE.Value.Active;
-            */
+            //DamageIndicator.DrawingColor = Config.Drawing.HealthbarE.Value.Color;
+            //DamageIndicator.Enabled = Config.Drawing.HealthbarE.Value.Active;
         }
 
         private static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
