@@ -380,8 +380,8 @@ namespace Hellsing.Kalista
                 _drawQ = Menu.Add("drawQ", new CheckBox("Draw Q"));
                 _drawW = Menu.Add("drawW", new CheckBox("Draw W"));
                 _drawE = Menu.Add("drawE", new CheckBox("Draw E"));
-                _drawEleaving = Menu.Add("drawEleaving", new CheckBox("Draw E (trigger range)"));
-                _drawR = Menu.Add("drawR", new CheckBox("Draw R"));
+                _drawEleaving = Menu.Add("drawEleaving", new CheckBox("Draw E (trigger range)", false));
+                _drawR = Menu.Add("drawR", new CheckBox("Draw R", false));
             }
 
             public static void Initialize()
@@ -453,7 +453,7 @@ namespace Hellsing.Kalista
 
                     const int blitzcrankQrange = 925;
                     _balistaTriggerRange = Menu.Add("balistaTriggerRange",
-                        new Slider("Trigger range between you and the grabbed target", (int) SpellManager.R.Range + blitzcrankQrange / 2, (int) SpellManager.R.Range,
+                        new Slider("Trigger range between you and the grabbed target", (int) SpellManager.R.Range, (int) SpellManager.R.Range,
                             (int) (SpellManager.R.Range + blitzcrankQrange * 0.8f)));
 
                     // Handle Blitzcrank hooks in Kalista.OnTickBalistaCheck
