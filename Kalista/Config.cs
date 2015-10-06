@@ -77,16 +77,22 @@ namespace Hellsing.Kalista
             public static class Combo
             {
                 private static readonly CheckBox _useQ;
+                private static readonly CheckBox _useQAA;
                 private static readonly CheckBox _useAA;
                 private static readonly CheckBox _useE;
                 private static readonly CheckBox _useEslow;
                 private static readonly Slider _numE;
+                private static readonly Slider _mana;
 
                 private static readonly CheckBox _useItems;
 
                 public static bool UseQ
                 {
                     get { return _useQ.CurrentValue; }
+                }
+                public static bool UseQAA
+                {
+                    get { return _useQAA.CurrentValue; }
                 }
                 public static bool UseE
                 {
@@ -108,17 +114,23 @@ namespace Hellsing.Kalista
                 {
                     get { return _useItems.CurrentValue; }
                 }
+                public static int ManaQ
+                {
+                    get { return _mana.CurrentValue; }
+                }
 
                 static Combo()
                 {
                     Menu.AddGroupLabel("Combo");
 
                     _useQ = Menu.Add("comboUseQ", new CheckBox("Use Q"));
-                    _useAA = Menu.Add("comboUseAA", new CheckBox("Use auto attacks to get closer"));
+                    _useQAA = Menu.Add("comboUseQAA", new CheckBox("Use Q after auto attack only"));
                     _useE = Menu.Add("comboUseE", new CheckBox("Use E"));
-                    _useEslow = Menu.Add("comboUseEslow", new CheckBox("Kill minions with E to slow"));
+                    _useEslow = Menu.Add("comboUseEslow", new CheckBox("Kill minions with E to slow enemy"));
+                    _useAA = Menu.Add("comboUseAA", new CheckBox("Attack minions to gap close"));
                     _useItems = Menu.Add("comboUseItems", new CheckBox("Use items"));
-                    _numE = Menu.Add("comboNumE", new Slider("Min stacks to use E", 5, 1, 50));
+                    _numE = Menu.Add("comboNumE", new Slider("Mininum stacks to use E", 5, 1, 50));
+                    _mana = Menu.Add("comboMana", new Slider("Mana usage for Q in percent ({0}%)", 30));
                 }
 
                 public static void Initialize()

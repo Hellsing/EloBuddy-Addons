@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
 using Settings = Hellsing.Kalista.Config.Misc;
@@ -9,6 +10,8 @@ namespace Hellsing.Kalista.Modes
     {
         public PermaActive()
         {
+            // Listen to required events
+            Orbwalker.OnPostAttack += OnPostAttack;
             Orbwalker.OnUnkillableMinion += OnUnkillableMinion;
         }
 
@@ -73,6 +76,22 @@ namespace Hellsing.Kalista.Modes
                 }
 
                 #endregion
+            }
+        }
+
+        private void OnPostAttack(AttackableUnit target, EventArgs args)
+        {
+            if (Config.Modes.Combo.UseQAA &&
+                Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) &&
+                Player.ManaPercent > Config.Modes.Combo.ManaQ &&
+                Q.IsReady())
+            {
+                var hero = target as AIHeroClient;
+                if (hero != null && Player.GetAutoAttackDamage(hero) < hero.Health + hero.AllShield + hero.AttackShield)
+                {
+                    // Cast Q after auto attack (combo setting)
+                    Q.Cast(hero);
+                }
             }
         }
 

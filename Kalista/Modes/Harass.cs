@@ -14,7 +14,7 @@ namespace Hellsing.Kalista.Modes
         public override void Execute()
         {
             // Mana check
-            if (((Player.Mana / Player.MaxMana) * 100) < Settings.MinMana)
+            if (Player.ManaPercent < Settings.MinMana)
             {
                 return;
             }

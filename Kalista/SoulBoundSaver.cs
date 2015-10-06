@@ -10,7 +10,10 @@ namespace Hellsing.Kalista
 {
     public class SoulBoundSaver
     {
-        private static Spell.Active R { get { return SpellManager.R; } }
+        private static Spell.Active R
+        {
+            get { return SpellManager.R; }
+        }
         public static AIHeroClient SoulBound { get; private set; }
 
         private static readonly Dictionary<float, float> IncDamage = new Dictionary<float, float>();
@@ -32,7 +35,7 @@ namespace Hellsing.Kalista
             // SoulBound is not found yet!
             if (SoulBound == null)
             {
-                SoulBound = HeroManager.Allies.Find(h => !h.IsMe && h.Buffs.Any(b => b.Caster.IsMe && b.Name == "kalistacoopstrikeally"));
+                SoulBound = EntityManager.Heroes.Allies.Find(h => !h.IsMe && h.Buffs.Any(b => b.Caster.IsMe && b.Name == "kalistacoopstrikeally"));
             }
             else if (Settings.SaveSouldBound && R.IsReady())
             {
@@ -91,7 +94,7 @@ namespace Hellsing.Kalista
                                         case SpellSlot.W:
                                         case SpellSlot.E:
                                         case SpellSlot.R:
-                                            
+
                                             if ((args.Target != null && args.Target.NetworkId == SoulBound.NetworkId) || args.End.Distance(SoulBound.ServerPosition) < Math.Pow(args.SData.LineWidth, 2))
                                             {
                                                 // Instant damage to target
