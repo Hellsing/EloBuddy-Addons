@@ -19,7 +19,7 @@ namespace Hellsing.Kalista.Modes
             }
 
             // Get a jungle mob that can die with E
-            if (EntityManager.GetJungleMonsters(Player.ServerPosition.To2D(), E.Range).Any(m => m.IsRendKillable()))
+            if (EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.ServerPosition, E.Range, false).Any(m => m.IsRendKillable()))
             {
                 E.Cast();
             }

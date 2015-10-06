@@ -26,7 +26,7 @@ namespace Hellsing.Kalista.Modes
             }
 
             // Minions around
-            var minions = EntityManager.GetLaneMinions(EntityManager.UnitTeam.Enemy, Player.ServerPosition.To2D(), Q.Range);
+            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, Player.ServerPosition, Q.Range, false);
             if (minions.Count == 0)
             {
                 return;

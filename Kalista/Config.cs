@@ -352,6 +352,9 @@ namespace Hellsing.Kalista
             private static readonly CheckBox _drawEleaving;
             private static readonly CheckBox _drawR;
 
+            private static readonly CheckBox _healthbar;
+            private static readonly CheckBox _percent;
+
             public static bool DrawQ
             {
                 get { return _drawQ.CurrentValue; }
@@ -372,16 +375,29 @@ namespace Hellsing.Kalista
             {
                 get { return _drawR.CurrentValue; }
             }
+            public static bool IndicatorHealthbar
+            {
+                get { return _healthbar.CurrentValue; }
+            }
+            public static bool IndicatorPercent
+            {
+                get { return _percent.CurrentValue; }
+            }
 
             static Drawing()
             {
                 Menu = Config.Menu.AddSubMenu("Drawing");
 
-                _drawQ = Menu.Add("drawQ", new CheckBox("Draw Q"));
-                _drawW = Menu.Add("drawW", new CheckBox("Draw W"));
-                _drawE = Menu.Add("drawE", new CheckBox("Draw E"));
-                _drawEleaving = Menu.Add("drawEleaving", new CheckBox("Draw E (trigger range)", false));
-                _drawR = Menu.Add("drawR", new CheckBox("Draw R", false));
+                Menu.AddGroupLabel("Spell ranges");
+                _drawQ = Menu.Add("drawQ", new CheckBox("Q range"));
+                _drawW = Menu.Add("drawW", new CheckBox("W range"));
+                _drawE = Menu.Add("drawE", new CheckBox("E range"));
+                _drawEleaving = Menu.Add("drawEleaving", new CheckBox("E trigger range (see combo)", false));
+                _drawR = Menu.Add("drawR", new CheckBox("R range", false));
+
+                Menu.AddGroupLabel("Damage indicators (Rend - E)");
+                _healthbar = Menu.Add("healthbar", new CheckBox("Healthbar overlay"));
+                _percent = Menu.Add("percent", new CheckBox("Damage percent info"));
             }
 
             public static void Initialize()
@@ -420,7 +436,7 @@ namespace Hellsing.Kalista
                 Menu = Config.Menu.AddSubMenu("Specials");
 
                 Menu.AddGroupLabel("Balista");
-                if (HeroManager.Allies.Any(o => o.ChampionName == "Blitzcrank"))
+                if (EntityManager.Heroes.Allies.Any(o => o.ChampionName == "Blitzcrank"))
                 {
                     Menu.Add("infoLabel", new Label("You have no soul bound yet!"));
                     Game.OnTick += BalistaCheckSoulBound;

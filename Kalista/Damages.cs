@@ -33,7 +33,7 @@ namespace Hellsing.Kalista
             }
 
             // Take into account all kinds of shields
-            var totalHealth = target.Health + target.AttackShield + target.MagicShield + target.AllShield;
+            var totalHealth = target.TotalShieldHealth();
 
             var hero = target as AIHeroClient;
             if (hero != null)

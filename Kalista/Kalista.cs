@@ -6,7 +6,6 @@ using EloBuddy.SDK.Enumerations;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Rendering;
 using EloBuddy.SDK.Utils;
-using SharpDX;
 
 namespace Hellsing.Kalista
 {
@@ -43,7 +42,6 @@ namespace Hellsing.Kalista
 
             // Listen to some required events
             Drawing.OnDraw += OnDraw;
-            Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
             Spellbook.OnCastSpell += OnCastSpell;
             Orbwalker.OnPostAttack += OnPostAttack;
             Game.OnPostTick += delegate { IsAfterAttack = false; };
@@ -63,7 +61,7 @@ namespace Hellsing.Kalista
                 return;
             }
 
-            var target = HeroManager.Enemies.Find(o => o.Buffs.Any(b => b.DisplayName == "RocketGrab" && b.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId));
+            var target = EntityManager.Heroes.Enemies.Find(o => o.Buffs.Any(b => b.DisplayName == "RocketGrab" && b.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId));
             if (target != null && target.IsValidTarget())
             {
                 if ((Config.Specials.BalistaMoreHealthOnly && Player.Instance.HealthPercent < target.HealthPercent) ||
@@ -120,23 +118,9 @@ namespace Hellsing.Kalista
                 Circle.Draw(spell.GetColor(), spell.Range, Player.Instance.Position);
             }
 
-            // TODO
             // E damage on healthbar
-            //DamageIndicator.DrawingColor = Config.Drawing.HealthbarE.Value.Color;
-            //DamageIndicator.Enabled = Config.Drawing.HealthbarE.Value.Active;
-        }
-
-        private static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (sender.IsMe)
-            {
-                // E - Rend
-                if (args.SData.Name == "KalistaExpungeWrapper")
-                {
-                    // Make the orbwalker attack again, might get stuck after casting E
-                    Core.DelayAction(Orbwalker.ResetAutoAttack, 250);
-                }
-            }
+            DamageIndicator.HealthbarEnabled = Config.Drawing.IndicatorHealthbar;
+            DamageIndicator.PercentEnabled = Config.Drawing.IndicatorPercent;
         }
 
         private static void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)

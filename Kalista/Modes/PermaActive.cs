@@ -26,7 +26,7 @@ namespace Hellsing.Kalista.Modes
             {
                 #region Killsteal
 
-                if (Settings.UseKillsteal && HeroManager.Enemies.Any(h => h.IsValidTarget(E.Range) && h.IsRendKillable()) && E.Cast())
+                if (Settings.UseKillsteal && EntityManager.Heroes.Enemies.Any(h => h.IsValidTarget(E.Range) && h.IsRendKillable()) && E.Cast())
                 {
                     return;
                 }
@@ -55,7 +55,7 @@ namespace Hellsing.Kalista.Modes
 
                 if (Settings.UseHarassPlus)
                 {
-                    if (HeroManager.Enemies.Any(o => E.IsInRange(o) && o.HasRendBuff()) &&
+                    if (EntityManager.Heroes.Enemies.Any(o => E.IsInRange(o) && o.HasRendBuff()) &&
                         ObjectManager.Get<Obj_AI_Base>().Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
                         E.Cast())
                     {

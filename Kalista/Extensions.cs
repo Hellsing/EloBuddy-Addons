@@ -32,7 +32,7 @@ namespace Hellsing.Kalista
             // Poppy R
             if (target.ChampionName == "Poppy")
             {
-                if (HeroManager.Allies.Any(o => !o.IsMe && o.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValid() && b.DisplayName == "PoppyDITarget")))
+                if (EntityManager.Heroes.Allies.Any(o => !o.IsMe && o.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValid() && b.DisplayName == "PoppyDITarget")))
                 {
                     return true;
                 }
@@ -60,6 +60,11 @@ namespace Hellsing.Kalista
             list.AddRange(uniqueList);
 
             return list;
+        }
+
+        public static float TotalShieldHealth(this Obj_AI_Base target)
+        {
+            return target.Health + target.AllShield + target.AttackShield + target.MagicShield;
         }
     }
 }
