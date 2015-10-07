@@ -72,7 +72,7 @@
     <Compile Include="Modes\JungleClear.cs" />
     <Compile Include="Modes\ModeBase.cs" />
     <Compile Include="Modes\PermaActive.cs" />
-    <Compile Include="Modes\WaveClear.cs" />
+    <Compile Include="Modes\LaneClear.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SoulBoundSaver.cs" />
     <Compile Include="SpellManager.cs" />

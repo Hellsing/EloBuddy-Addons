@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using EloBuddy.SDK;
-using Settings = Hellsing.Kalista.Config.Modes.WaveClear;
+using Settings = Hellsing.Kalista.Config.Modes.LaneClear;
 
 namespace Hellsing.Kalista.Modes
 {
-    public class WaveClear : ModeBase
+    public class LaneClear : ModeBase
     {
         public override bool ShouldBeExecuted()
         {
@@ -19,8 +19,7 @@ namespace Hellsing.Kalista.Modes
             }
 
             // Precheck
-            if (!(Settings.UseQ && Q.IsReady()) &&
-                !(Settings.UseE && E.IsReady()))
+            if (!(Settings.UseQ && Q.IsReady()) && !(Settings.UseE && E.IsReady()))
             {
                 return;
             }

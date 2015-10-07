@@ -59,7 +59,7 @@ namespace Hellsing.Kalista
 
                 // WaveClear
                 Menu.AddSeparator();
-                WaveClear.Initialize();
+                LaneClear.Initialize();
 
                 // JungleClear
                 Menu.AddSeparator();
@@ -165,7 +165,7 @@ namespace Hellsing.Kalista
                 }
             }
 
-            public static class WaveClear
+            public static class LaneClear
             {
                 private static readonly CheckBox _useQ;
                 private static readonly Slider _numQ;
@@ -194,16 +194,16 @@ namespace Hellsing.Kalista
                     get { return _mana.CurrentValue; }
                 }
 
-                static WaveClear()
+                static LaneClear()
                 {
-                    Menu.AddGroupLabel("WaveClear");
+                    Menu.AddGroupLabel("LaneClear");
 
-                    _useQ = Menu.Add("waveUseQ", new CheckBox("Use Q"));
-                    _useE = Menu.Add("waveUseE", new CheckBox("Use E"));
-                    _numQ = Menu.Add("waveNumQ", new Slider("Minion kill number for Q", 3, 1, 10));
-                    _numE = Menu.Add("waveNumE", new Slider("Minion kill number for E", 2, 1, 10));
+                    _useQ = Menu.Add("laneUseQ", new CheckBox("Use Q"));
+                    _useE = Menu.Add("laneUseE", new CheckBox("Use E"));
+                    _numQ = Menu.Add("laneNumQ", new Slider("Minion kill number for Q", 3, 1, 10));
+                    _numE = Menu.Add("laneNumE", new Slider("Minion kill number for E", 2, 1, 10));
                     Menu.AddSeparator();
-                    _mana = Menu.Add("waveMana", new Slider("Minimum mana in %", 30));
+                    _mana = Menu.Add("laneMana", new Slider("Minimum mana in %", 30));
                 }
 
                 public static void Initialize()
@@ -305,6 +305,7 @@ namespace Hellsing.Kalista
             {
                 Menu = Config.Menu.AddSubMenu("Misc");
 
+                Menu.AddGroupLabel("Misc features");
                 _killsteal = Menu.Add("killsteal", new CheckBox("Killsteal with E"));
                 _bigE = Menu.Add("bigE", new CheckBox("Always use E on big minions"));
                 _saveSoulbound = Menu.Add("saveSoulbound", new CheckBox("Use R to save your soulbound ally"));
@@ -312,10 +313,78 @@ namespace Hellsing.Kalista
                 _harassPlus = Menu.Add("harassPlus", new CheckBox("Auto E when a minion can die and enemies have 1+ stacks"));
                 _autoBelowHealthE = Menu.Add("autoBelowHealthE", new Slider("Auto E when our health is below ({0}%) percent", 10));
                 _reductionE = Menu.Add("reductionE", new Slider("Reduce E damage by {0} points", 20));
+
+                // Initialize other misc features
+                Sentinel.Initialize();
             }
 
             public static void Initialize()
             {
+            }
+
+            public static class Sentinel
+            {
+                private static readonly CheckBox _enabled;
+                private static readonly CheckBox _noMode;
+                private static readonly Slider _mana;
+
+                private static readonly CheckBox _baron;
+                private static readonly CheckBox _dragon;
+                private static readonly CheckBox _mid;
+                private static readonly CheckBox _blue;
+                private static readonly CheckBox _red;
+
+                public static bool Enabled
+                {
+                    get { return _enabled.CurrentValue; }
+                }
+                public static bool NoModeOnly
+                {
+                    get { return _noMode.CurrentValue; }
+                }
+                public static int Mana
+                {
+                    get { return _mana.CurrentValue; }
+                }
+
+                public static bool SendBaron
+                {
+                    get { return _baron.CurrentValue; }
+                }
+                public static bool SendDragon
+                {
+                    get { return _dragon.CurrentValue; }
+                }
+                public static bool SendMid
+                {
+                    get { return _mid.CurrentValue; }
+                }
+                public static bool SendBlue
+                {
+                    get { return _blue.CurrentValue; }
+                }
+                public static bool SendRed
+                {
+                    get { return _red.CurrentValue; }
+                }
+
+                static Sentinel()
+                {
+                    Menu.AddGroupLabel("Sentinel (W) usage");
+                    _enabled = Menu.Add("enabled", new CheckBox("Enabled"));
+                    _noMode = Menu.Add("noMode", new CheckBox("Only use when no mode active"));
+                    _mana = Menu.Add("mana", new Slider("Minimum mana available when casting W ({0}%)", 40));
+                    Menu.AddLabel("Send to the following locations:");
+                    _baron = Menu.Add("baron", new CheckBox("Baron"));
+                    _dragon = Menu.Add("dragon", new CheckBox("Dragon"));
+                    _mid = Menu.Add("mid", new CheckBox("Mid lane brush"));
+                    _blue = Menu.Add("blue", new CheckBox("Blue buff"));
+                    _red = Menu.Add("red", new CheckBox("Red buff"));
+                }
+
+                public static void Initialize()
+                {
+                }
             }
         }
 

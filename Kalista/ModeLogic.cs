@@ -16,7 +16,7 @@ namespace Hellsing.Kalista
                 new PermaActive(),
                 new Combo(),
                 new Harass(),
-                new WaveClear(),
+                new LaneClear(),
                 new JungleClear(),
                 new Flee()
             };

@@ -33,9 +33,6 @@ namespace Hellsing.Kalista
                 { SpellSlot.E, Color.DarkRed.ToArgb(150) },
                 { SpellSlot.R, Color.Red.ToArgb(150) }
             };
-
-            // Testing Q high hitchance for now
-            Q.MinimumHitChance = HitChance.High;
         }
 
         private static Color ToArgb(this Color color, byte a)
