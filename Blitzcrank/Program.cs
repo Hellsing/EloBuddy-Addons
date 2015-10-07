@@ -95,7 +95,7 @@ namespace Blitzcrank
 
                     foreach (var prediction in predictedPositions.ToArray())
                     {
-                        if (Environment.TickCount - prediction.Value.Item1 > 1500)
+                        if (Environment.TickCount - prediction.Value.Item1 > 2000)
                         {
                             predictedPositions.Remove(prediction.Key);
                             continue;
