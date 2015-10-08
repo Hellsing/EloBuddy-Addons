@@ -7,6 +7,7 @@ using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
+using EloBuddy.SDK.Rendering;
 using SharpDX;
 using Color = System.Drawing.Color;
 
@@ -33,6 +34,14 @@ namespace TestAddon
         private static bool ShowAaDamage
         {
             get { return Menu["autoAttack"].Cast<CheckBox>().CurrentValue; }
+        }
+        private static bool ObjectNames
+        {
+            get { return Menu["objectNames"].Cast<CheckBox>().CurrentValue; }
+        }
+        private static bool OnlyBase
+        {
+            get { return Menu["onlyBase"].Cast<CheckBox>().CurrentValue; }
         }
 
         private static bool BasicAttack
@@ -79,6 +88,8 @@ namespace TestAddon
                 Menu.AddGroupLabel("General");
                 Menu.Add("buffs", new CheckBox("Show buffs"));
                 Menu.Add("autoAttack", new CheckBox("Auto attack damage"));
+                Menu.Add("objectNames", new CheckBox("Show object names and types near mouse"));
+                Menu.Add("onlyBase", new CheckBox("Only show Obj_AI_Base objects"));
 
                 Menu.AddGroupLabel("Core event property stress tests");
                 Menu.Add("basicAttack", new CheckBox("Obj_AI_Base.OnBasicAttack", false)).CurrentValue = false;
@@ -119,28 +130,44 @@ namespace TestAddon
 
                 Drawing.OnDraw += delegate
                 {
-                    if (!ShowBuffs && !ShowAaDamage)
+                    if (ShowBuffs || ShowAaDamage)
                     {
-                        return;
+                        foreach (var hero in EntityManager.Heroes.AllHeroes)
+                        {
+                            if (hero.IsEnemy && ShowAaDamage && hero.IsValidTarget() && hero.IsHPBarRendered)
+                            {
+                                Drawing.DrawText(hero.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0}", Player.Instance.GetAutoAttackDamage(hero, true)), 10);
+                            }
+
+                            if (ShowBuffs)
+                            {
+                                var i = 0;
+                                const int step = 20;
+
+                                foreach (var buff in hero.Buffs.Where(o => o.IsValid()))
+                                {
+                                    Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
+                                        string.Format("DisplayName: {0} | Caster: {1} | Count: {2}", buff.DisplayName, buff.Caster.Name, buff.Count), 10);
+                                    i += step;
+                                }
+                            }
+                        }
                     }
 
-                    foreach (var hero in EntityManager.Heroes.AllHeroes)
+                    if (ObjectNames)
                     {
-                        if (hero.IsEnemy && ShowAaDamage && hero.IsValidTarget() && hero.IsHPBarRendered)
-                        {
-                            Drawing.DrawText(hero.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0}", Player.Instance.GetAutoAttackDamage(hero, true)), 10);
-                        }
+                        const float range = 500;
+                        Circle.Draw(SharpDX.Color.Red, range, Game.CursorPos);
 
-                        if (ShowBuffs)
+                        foreach (var obj in (OnlyBase ? ObjectManager.Get<Obj_AI_Base>() : ObjectManager.Get<GameObject>()).Where(o => o.Distance(Game.CursorPos, true) < range.Pow()))
                         {
-                            var i = 0;
-                            const int step = 20;
-
-                            foreach (var buff in hero.Buffs.Where(o => o.IsValid()))
+                            Circle.Draw(SharpDX.Color.DarkRed, obj.BoundingRadius, obj.Position);
+                            Drawing.DrawText(obj.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", obj.GetType().Name, obj.Name), 10);
+                            if (OnlyBase)
                             {
-                                Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.LawnGreen,
-                                    string.Format("DisplayName: {0} | Caster: {1} | Count: {2}", buff.DisplayName, buff.Caster.Name, buff.Count), 10);
-                                i += step;
+                                var baseObject = (Obj_AI_Base) obj;
+                                Drawing.DrawText(obj.Position.WorldToScreen() + new Vector2(0, 20), Color.NavajoWhite,
+                                    string.Format("Buffs: {0}", string.Join(" | ", baseObject.Buffs.Select(o => string.Format("{0} ({1}x - {2})", o.DisplayName, o.Count, o.SourceName)))), 10);
                             }
                         }
                     }
