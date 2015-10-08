@@ -163,9 +163,10 @@ namespace TestAddon
                         {
                             Circle.Draw(SharpDX.Color.DarkRed, obj.BoundingRadius, obj.Position);
                             Drawing.DrawText(obj.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", obj.GetType().Name, obj.Name), 10);
-                            if (OnlyBase)
+
+                            var baseObject = obj as Obj_AI_Base;
+                            if (baseObject != null)
                             {
-                                var baseObject = (Obj_AI_Base) obj;
                                 Drawing.DrawText(obj.Position.WorldToScreen() + new Vector2(0, 20), Color.NavajoWhite,
                                     string.Format("Buffs: {0}", string.Join(" | ", baseObject.Buffs.Select(o => string.Format("{0} ({1}x - {2})", o.DisplayName, o.Count, o.SourceName)))), 10);
                             }
