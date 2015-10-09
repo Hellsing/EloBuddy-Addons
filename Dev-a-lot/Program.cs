@@ -178,7 +178,7 @@ namespace TestAddon
 
                     if (AnalyzeAzir)
                     {
-                        foreach (var obj in (ObjectManager.Get<Obj_AI_Minion>()).Where(obj => obj.Name == "AzirSoldier" && obj.GetBuffCount("azirwspawnsound") == 1))
+                        foreach (var obj in Orbwalker.ValidAzirSoldiers)
                         {
                             Circle.Draw(SharpDX.Color.DarkRed, obj.BoundingRadius, obj.Position);
                             Drawing.DrawText(obj.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", obj.GetType().Name, obj.Name), 10);
