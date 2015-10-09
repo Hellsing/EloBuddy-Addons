@@ -43,6 +43,10 @@ namespace TestAddon
         {
             get { return Menu["onlyBase"].Cast<CheckBox>().CurrentValue; }
         }
+        private static bool AnalyzeAzir
+        {
+            get { return Menu["azir"].Cast<CheckBox>().CurrentValue; }
+        }
 
         private static bool BasicAttack
         {
@@ -75,21 +79,17 @@ namespace TestAddon
 
         private static void Main(string[] args)
         {
-            if (!Directory.Exists(ResultPath))
-            {
-                Directory.CreateDirectory(ResultPath);
-            }
-
             Loading.OnLoadingComplete += delegate
             {
                 // Setup a menu
                 Menu = MainMenu.AddMenu("Dev-a-lot", "devalot");
 
                 Menu.AddGroupLabel("General");
-                Menu.Add("buffs", new CheckBox("Show buffs"));
+                Menu.Add("buffs", new CheckBox("Show buffs", false));
                 Menu.Add("autoAttack", new CheckBox("Auto attack damage"));
-                Menu.Add("objectNames", new CheckBox("Show object names and types near mouse"));
+                Menu.Add("objectNames", new CheckBox("Show object names and types near mouse", false));
                 Menu.Add("onlyBase", new CheckBox("Only show Obj_AI_Base objects"));
+                Menu.Add("azir", new CheckBox("Analyze Azir soldiers", false));
 
                 Menu.AddGroupLabel("Core event property stress tests");
                 Menu.Add("basicAttack", new CheckBox("Obj_AI_Base.OnBasicAttack", false)).CurrentValue = false;
@@ -130,27 +130,30 @@ namespace TestAddon
 
                 Drawing.OnDraw += delegate
                 {
-                    if (ShowBuffs || ShowAaDamage)
+                    if (ShowBuffs)
                     {
                         foreach (var hero in EntityManager.Heroes.AllHeroes)
                         {
-                            if (hero.IsEnemy && ShowAaDamage && hero.IsValidTarget() && hero.IsHPBarRendered)
-                            {
-                                Drawing.DrawText(hero.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0}", Player.Instance.GetAutoAttackDamage(hero, true)), 10);
-                            }
+                            var i = 0;
+                            const int step = 20;
 
-                            if (ShowBuffs)
+                            foreach (var buff in hero.Buffs.Where(o => o.IsValid()))
                             {
-                                var i = 0;
-                                const int step = 20;
-
-                                foreach (var buff in hero.Buffs.Where(o => o.IsValid()))
-                                {
-                                    Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
-                                        string.Format("DisplayName: {0} | Caster: {1} | Count: {2}", buff.DisplayName, buff.Caster.Name, buff.Count), 10);
-                                    i += step;
-                                }
+                                Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
+                                    string.Format("DisplayName: {0} | Caster: {1} | Count: {2}", buff.DisplayName, buff.SourceName, buff.Count), 10);
+                                i += step;
                             }
+                        }
+                    }
+
+                    if (ShowAaDamage)
+                    {
+                        foreach (
+                            var unit in
+                                EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget() && unit.IsHPBarRendered)
+                                    .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget() && o.IsHPBarRendered)))
+                        {
+                            Drawing.DrawText(unit.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0}", Player.Instance.GetAutoAttackDamage(unit, true)), 10);
                         }
                     }
 
@@ -169,6 +172,26 @@ namespace TestAddon
                             {
                                 Drawing.DrawText(obj.Position.WorldToScreen() + new Vector2(0, 20), Color.NavajoWhite,
                                     string.Format("Buffs: {0}", string.Join(" | ", baseObject.Buffs.Select(o => string.Format("{0} ({1}x - {2})", o.DisplayName, o.Count, o.SourceName)))), 10);
+                            }
+                        }
+                    }
+
+                    if (AnalyzeAzir)
+                    {
+                        foreach (var obj in (ObjectManager.Get<Obj_AI_Minion>()).Where(obj => obj.Name == "AzirSoldier" && obj.GetBuffCount("azirwspawnsound") == 1))
+                        {
+                            Circle.Draw(SharpDX.Color.DarkRed, obj.BoundingRadius, obj.Position);
+                            Drawing.DrawText(obj.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", obj.GetType().Name, obj.Name), 10);
+
+                            Drawing.DrawText(obj.Position.WorldToScreen() + new Vector2(0, 20), Color.NavajoWhite,
+                                string.Format("Buffs: {0}", string.Join(" | ", obj.Buffs.Select(o => string.Format("{0} ({1}x - {2})", o.DisplayName, o.Count, o.SourceName)))), 10);
+
+                            Circle.Draw(SharpDX.Color.LawnGreen, Orbwalker.AzirSoldierAutoAttackRange, obj.Position);
+                            Drawing.DrawLine(Player.Instance.Position.WorldToScreen(), Player.Instance.Position.Extend(obj, Player.Instance.AttackRange).To3DWorld().WorldToScreen(), 3, Color.OrangeRed);
+
+                            if (obj.Distance(Player.Instance, true) < (700 + Player.Instance.BoundingRadius + obj.BoundingRadius).Pow())
+                            {
+                                Circle.Draw(SharpDX.Color.AliceBlue, 500, obj.Position);
                             }
                         }
                     }
@@ -236,6 +259,11 @@ namespace TestAddon
                 return;
             }
 
+            if (!Directory.Exists(ResultPath))
+            {
+                Directory.CreateDirectory(ResultPath);
+            }
+
             using (var writer = File.CreateText(DeleteLocation))
             {
                 writer.WriteLine("----------------------------------------------------------------------------------");
@@ -270,6 +298,11 @@ namespace TestAddon
                 return;
             }
 
+            if (!Directory.Exists(ResultPath))
+            {
+                Directory.CreateDirectory(ResultPath);
+            }
+
             using (var writer = File.CreateText(CreateLocation))
             {
                 writer.WriteLine("----------------------------------------------------------------------------------");
@@ -302,6 +335,11 @@ namespace TestAddon
             if (!StopCast)
             {
                 return;
+            }
+
+            if (!Directory.Exists(ResultPath))
+            {
+                Directory.CreateDirectory(ResultPath);
             }
 
             using (var writer = File.CreateText(StopCastLocation))
@@ -352,6 +390,11 @@ namespace TestAddon
                 return;
             }
 
+            if (!Directory.Exists(ResultPath))
+            {
+                Directory.CreateDirectory(ResultPath);
+            }
+
             using (var writer = File.CreateText(NewPathLocation))
             {
                 writer.WriteLine("----------------------------------------------------------------------------------");
@@ -395,6 +438,11 @@ namespace TestAddon
 
         private static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (!Directory.Exists(ResultPath))
+            {
+                Directory.CreateDirectory(ResultPath);
+            }
+
             using (var writer = File.CreateText(ProcessSpellLocation))
             {
                 writer.WriteLine("----------------------------------------------------------------------------------");
