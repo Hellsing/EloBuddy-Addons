@@ -178,7 +178,7 @@ namespace TestAddon
 
                     if (AnalyzeAzir)
                     {
-                        foreach (var obj in Orbwalker.ValidAzirSoldiers)
+                        foreach (var obj in Orbwalker.AzirSoldiers)
                         {
                             Circle.Draw(SharpDX.Color.DarkRed, obj.BoundingRadius, obj.Position);
                             Drawing.DrawText(obj.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", obj.GetType().Name, obj.Name), 10);
@@ -189,7 +189,7 @@ namespace TestAddon
                             Circle.Draw(SharpDX.Color.LawnGreen, Orbwalker.AzirSoldierAutoAttackRange, obj.Position);
                             Drawing.DrawLine(Player.Instance.Position.WorldToScreen(), Player.Instance.Position.Extend(obj, Player.Instance.AttackRange).To3DWorld().WorldToScreen(), 3, Color.OrangeRed);
 
-                            if (obj.Distance(Player.Instance, true) < (700 + Player.Instance.BoundingRadius + obj.BoundingRadius).Pow())
+                            if (Orbwalker.ValidAzirSoldiers.Any(o => o.IdEquals(obj)))
                             {
                                 Circle.Draw(SharpDX.Color.AliceBlue, 500, obj.Position);
                             }
