@@ -249,7 +249,7 @@ namespace TestAddon
                                 var data = new Dictionary<string, object>
                                 {
                                     { "IsValid", hero.IsValid },
-                                    { "IsVisiable", hero.IsVisible },
+                                    { "IsVisible", hero.IsVisible },
                                     { "IsTargetable", hero.IsTargetable },
                                     { "IsDead", hero.IsDead }
                                 };
