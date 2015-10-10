@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -27,6 +28,10 @@ namespace TestAddon
 
         private static Menu Menu { get; set; }
 
+        private static bool ShowGeneral
+        {
+            get { return Menu["general"].Cast<CheckBox>().CurrentValue; }
+        }
         private static bool ShowBuffs
         {
             get { return Menu["buffs"].Cast<CheckBox>().CurrentValue; }
@@ -85,6 +90,7 @@ namespace TestAddon
                 Menu = MainMenu.AddMenu("Dev-a-lot", "devalot");
 
                 Menu.AddGroupLabel("General");
+                Menu.Add("general", new CheckBox("Show general info", false));
                 Menu.Add("buffs", new CheckBox("Show buffs", false));
                 Menu.Add("autoAttack", new CheckBox("Auto attack damage"));
                 Menu.Add("objectNames", new CheckBox("Show object names and types near mouse", false));
@@ -130,18 +136,40 @@ namespace TestAddon
 
                 Drawing.OnDraw += delegate
                 {
-                    if (ShowBuffs)
+                    if (ShowBuffs || ShowGeneral)
                     {
                         foreach (var hero in EntityManager.Heroes.AllHeroes)
                         {
                             var i = 0;
                             const int step = 20;
 
-                            foreach (var buff in hero.Buffs.Where(o => o.IsValid()))
+                            if (ShowGeneral)
                             {
-                                Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
-                                    string.Format("DisplayName: {0} | Caster: {1} | Count: {2}", buff.DisplayName, buff.SourceName, buff.Count), 10);
-                                i += step;
+                                var data = new Dictionary<string, object>
+                                {
+                                    { "IsValid", hero.IsValid },
+                                    { "IsVisiable", hero.IsVisible },
+                                    { "IsTargetable", hero.IsTargetable },
+                                    { "IsDead", hero.IsDead }
+                                };
+
+                                Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "General properties", 10);
+                                foreach (var dataEntry in data)
+                                {
+                                    Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite, string.Format("{0}: {1}", dataEntry.Key, dataEntry.Value), 10);
+                                    i += step;
+                                }
+                            }
+
+                            if (ShowBuffs)
+                            {
+                                Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "Buffs", 10);
+                                foreach (var buff in hero.Buffs.Where(o => o.IsValid()))
+                                {
+                                    Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
+                                        string.Format("DisplayName: {0} | Caster: {1} | Count: {2}", buff.DisplayName, buff.SourceName, buff.Count), 10);
+                                    i += step;
+                                }
                             }
                         }
                     }
@@ -153,7 +181,10 @@ namespace TestAddon
                                 EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget() && unit.IsHPBarRendered)
                                     .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget() && o.IsHPBarRendered)))
                         {
-                            Drawing.DrawText(unit.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0}", Player.Instance.GetAutoAttackDamage(unit, true)), 10);
+                            var damageWithPassive = Player.Instance.GetAutoAttackDamage(unit, true);
+                            var damageWithoutPassive = Player.Instance.GetAutoAttackDamage(unit);
+                            var difference = Math.Round(damageWithPassive - damageWithoutPassive);
+                            Drawing.DrawText(unit.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0} ({1})", damageWithPassive, string.Concat(difference > 0 ? "+" : "", difference)), 10);
                         }
                     }
 
@@ -162,7 +193,7 @@ namespace TestAddon
                         const float range = 500;
                         Circle.Draw(SharpDX.Color.Red, range, Game.CursorPos);
 
-                        foreach (var obj in (OnlyBase ? ObjectManager.Get<Obj_AI_Base>() : ObjectManager.Get<GameObject>()).Where(o => o.Distance(Game.CursorPos, true) < range.Pow()))
+                        foreach (var obj in (OnlyBase ? ObjectManager.Get<Obj_AI_Base>() : ObjectManager.Get<GameObject>()).Where(o => o.IsInRange(Game.CursorPos, range)))
                         {
                             Circle.Draw(SharpDX.Color.DarkRed, obj.BoundingRadius, obj.Position);
                             Drawing.DrawText(obj.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", obj.GetType().Name, obj.Name), 10);
@@ -178,20 +209,27 @@ namespace TestAddon
 
                     if (AnalyzeAzir)
                     {
-                        foreach (var obj in Orbwalker.AzirSoldiers)
+                        foreach (var soldier in Orbwalker.AzirSoldiers)
                         {
-                            Circle.Draw(SharpDX.Color.DarkRed, obj.BoundingRadius, obj.Position);
-                            Drawing.DrawText(obj.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", obj.GetType().Name, obj.Name), 10);
+                            Circle.Draw(SharpDX.Color.DarkRed, soldier.BoundingRadius, soldier.Position);
+                            Drawing.DrawText(soldier.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", soldier.GetType().Name, soldier.Name), 10);
 
-                            Drawing.DrawText(obj.Position.WorldToScreen() + new Vector2(0, 20), Color.NavajoWhite,
-                                string.Format("Buffs: {0}", string.Join(" | ", obj.Buffs.Select(o => string.Format("{0} ({1}x - {2})", o.DisplayName, o.Count, o.SourceName)))), 10);
+                            Drawing.DrawText(soldier.Position.WorldToScreen() + new Vector2(0, 20), Color.NavajoWhite,
+                                string.Format("Buffs: {0}", string.Join(" | ", soldier.Buffs.Select(o => string.Format("{0} ({1}x - {2})", o.DisplayName, o.Count, o.SourceName)))), 10);
 
-                            Circle.Draw(SharpDX.Color.LawnGreen, Orbwalker.AzirSoldierAutoAttackRange, obj.Position);
-                            Drawing.DrawLine(Player.Instance.Position.WorldToScreen(), Player.Instance.Position.Extend(obj, Player.Instance.AttackRange).To3DWorld().WorldToScreen(), 3, Color.OrangeRed);
+                            Circle.Draw(SharpDX.Color.LawnGreen, 275, soldier.Position);
+                            Drawing.DrawLine(Player.Instance.Position.WorldToScreen(), Player.Instance.Position.Extend(soldier, Player.Instance.AttackRange).To3DWorld().WorldToScreen(), 3,
+                                Color.OrangeRed);
 
-                            if (Orbwalker.ValidAzirSoldiers.Any(o => o.IdEquals(obj)))
+                            if (Orbwalker.ValidAzirSoldiers.Any(o => o.IdEquals(soldier)))
                             {
-                                Circle.Draw(SharpDX.Color.AliceBlue, 500, obj.Position);
+                                Circle.Draw(SharpDX.Color.AliceBlue, 500, soldier.Position);
+
+                                foreach (var enemy in EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget())
+                                    .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget())).Where(enemy => enemy.IsInRange(soldier, 275 + enemy.BoundingRadius)))
+                                {
+                                    Circle.Draw(SharpDX.Color.Red, enemy.BoundingRadius, enemy.Position);
+                                }
                             }
                         }
                     }
