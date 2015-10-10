@@ -57,6 +57,10 @@ namespace TestAddon
         {
             get { return Menu["mouse"].Cast<CheckBox>().CurrentValue; }
         }
+        private static bool ShowMouseLines
+        {
+            get { return Menu["mouseLines"].Cast<CheckBox>().CurrentValue; }
+        }
         private static bool ShowGrid
         {
             get { return Menu["grid"].Cast<CheckBox>().CurrentValue; }
@@ -115,6 +119,7 @@ namespace TestAddon
                 Menu.Add("objectNames", new CheckBox("Show object names and types", false));
                 Menu.Add("onlyBase", new CheckBox("Only analyze Obj_AI_Base"));
                 Menu.Add("mouse", new CheckBox("Show info about mouse position", false));
+                Menu.Add("mouseLines", new CheckBox("Show mouse coordinate lines", false));
                 Menu.Add("grid", new CheckBox("Visualize game grid", false));
                 Menu.Add("gridSize", new Slider("Grid size {0} x {0}", 11, 1, 55));
 
@@ -212,6 +217,12 @@ namespace TestAddon
                                 (world2D + new Vector2(0, NavMesh.CellHeight)).To3DWorld(),
                                 cell.WorldPosition);
                         }
+                    }
+
+                    if (ShowMouseLines)
+                    {
+                        Line.DrawLine(Color.GhostWhite, new Vector2(Game.CursorPos2D.X, 0), new Vector2(Game.CursorPos2D.X, Drawing.Height));
+                        Line.DrawLine(Color.GhostWhite, new Vector2(0, Game.CursorPos2D.Y), new Vector2(Drawing.Width, Game.CursorPos2D.Y));
                     }
 
                     if (ShowMouse)
