@@ -154,6 +154,7 @@ namespace TestAddon
                                 };
 
                                 Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "General properties", 10);
+                                i += step;
                                 foreach (var dataEntry in data)
                                 {
                                     Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite, string.Format("{0}: {1}", dataEntry.Key, dataEntry.Value), 10);
@@ -164,6 +165,7 @@ namespace TestAddon
                             if (ShowBuffs)
                             {
                                 Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "Buffs", 10);
+                                i += step;
                                 foreach (var buff in hero.Buffs.Where(o => o.IsValid()))
                                 {
                                     Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
