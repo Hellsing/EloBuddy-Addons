@@ -216,10 +216,6 @@ namespace TestAddon
                             {
                                 color = Color.Yellow;
                             }
-                            else if (cell.CollFlags.HasFlag(CollisionFlags.Prop))
-                            {
-                                color = Color.SaddleBrown;
-                            }
 
                             var world2D = cell.WorldPosition.To2D();
 
@@ -294,7 +290,7 @@ namespace TestAddon
                     {
                         foreach (
                             var unit in
-                                EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget() && unit.IsHPBarRendered)
+                                EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget() && unit.IsHPBarRendered).Cast<Obj_AI_Base>()
                                     .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget() && o.IsHPBarRendered && o.VisibleOnScreen)))
                         {
                             var damageWithPassive = Player.Instance.GetAutoAttackDamage(unit, true);
@@ -341,7 +337,7 @@ namespace TestAddon
                             {
                                 Circle.Draw(SharpDX.Color.AliceBlue, 500, soldier.Position);
 
-                                foreach (var enemy in EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget())
+                                foreach (var enemy in EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget()).Cast<Obj_AI_Base>()
                                     .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget())).Where(enemy => enemy.IsInRange(soldier, 275 + enemy.BoundingRadius)))
                                 {
                                     Circle.Draw(SharpDX.Color.Red, enemy.BoundingRadius, enemy.Position);
