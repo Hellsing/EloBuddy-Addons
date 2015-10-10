@@ -164,9 +164,6 @@ namespace TestAddon
                         var startPos = new NavMeshCell(sourceGrid.GridX - (short) Math.Floor(GridSize / 2f), sourceGrid.GridY - (short) Math.Floor(GridSize / 2f));
 
                         var cells = new List<NavMeshCell> { startPos };
-                        var visionCells = new List<NavMeshCell>();
-                        var grassCells = new List<NavMeshCell>();
-                        var wallCells = new List<NavMeshCell>();
                         for (var y = startPos.GridY; y < startPos.GridY + GridSize; y++)
                         {
                             for (var x = startPos.GridX; x < startPos.GridX + GridSize; x++)
@@ -186,37 +183,29 @@ namespace TestAddon
                             }
                         }
 
-                        foreach (var cell in cells.ToArray())
+                        foreach (var cell in cells.OrderBy(o => o.CollFlags))
                         {
-                            if (cell.CollFlags.HasFlag(CollisionFlags.Wall))
+                            var color = Color.AntiqueWhite;
+                            switch (cell.CollFlags)
                             {
-                                cells.Remove(cell);
-                                wallCells.Add(cell);
+                                case CollisionFlags.Wall:
+                                    color = Color.DodgerBlue;
+                                    break;
+                                case CollisionFlags.Grass:
+                                    color = Color.LimeGreen;
+                                    break;
+                                case (CollisionFlags) 256:
+                                    color = Color.Yellow;
+                                    break;
                             }
-                            else if (cell.CollFlags.HasFlag(CollisionFlags.Grass))
-                            {
-                                cells.Remove(cell);
-                                grassCells.Add(cell);
-                            }
-                            else if (cell.CollFlags.HasFlag((CollisionFlags) 256))
-                            {
-                                cells.Remove(cell);
-                                visionCells.Add(cell);
-                            }
-                        }
 
-                        foreach (var cell in cells.Concat(visionCells).Concat(grassCells).Concat(wallCells))
-                        {
-                            var color = cell.CollFlags.HasFlag(CollisionFlags.Wall) ? Color.DodgerBlue :
-                                cell.CollFlags.HasFlag(CollisionFlags.Grass) ? Color.LimeGreen :
-                                cell.CollFlags.HasFlag((CollisionFlags) 256) ? Color.Yellow :
-                                Color.AntiqueWhite;
+                            var world2D = cell.WorldPosition.To2D();
 
                             Line.DrawLine(color,
                                 cell.WorldPosition,
-                                (cell.WorldPosition.To2D() + new Vector2(NavMesh.CellWidth, 0)).To3DWorld(),
-                                (cell.WorldPosition.To2D() + new Vector2(NavMesh.CellWidth, NavMesh.CellHeight)).To3DWorld(),
-                                (cell.WorldPosition.To2D() + new Vector2(0, NavMesh.CellHeight)).To3DWorld(),
+                                (world2D + new Vector2(NavMesh.CellWidth, 0)).To3DWorld(),
+                                (world2D + new Vector2(NavMesh.CellWidth, NavMesh.CellHeight)).To3DWorld(),
+                                (world2D + new Vector2(0, NavMesh.CellHeight)).To3DWorld(),
                                 cell.WorldPosition);
                         }
                     }
