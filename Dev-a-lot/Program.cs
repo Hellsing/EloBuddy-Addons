@@ -105,7 +105,7 @@ namespace TestAddon
                 Menu.AddGroupLabel("General");
                 Menu.Add("general", new CheckBox("Show general info", false));
                 Menu.Add("buffs", new CheckBox("Show buffs", false));
-                Menu.Add("autoAttack", new CheckBox("Show auto attack damage"));
+                Menu.Add("autoAttack", new CheckBox("Show auto attack damage", false));
                 if (Player.Instance.Hero == Champion.Azir)
                 {
                     Menu.Add("azir", new CheckBox("Analyze Azir soldiers", false));
@@ -118,7 +118,8 @@ namespace TestAddon
                 Menu.Add("grid", new CheckBox("Visualize game grid", false));
                 Menu.Add("gridSize", new Slider("Grid size {0} x {0}", 11, 1, 55));
 
-                Menu.AddGroupLabel("Core event property stress tests");
+                Menu.AddGroupLabel("Core event property stress tests, no use for addon devs");
+                Menu.AddLabel("This will create a folder on your desktop called 'Test Results'");
                 Menu.Add("basicAttack", new CheckBox("Obj_AI_Base.OnBasicAttack", false)).CurrentValue = false;
                 Menu.Add("spellCast", new CheckBox("Obj_AI_Base.OnSpellCast", false)).CurrentValue = false;
                 Menu.Add("processSpell", new CheckBox("Obj_AI_Base.OnProcessSpellCast", false)).CurrentValue = false;
