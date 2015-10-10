@@ -219,11 +219,7 @@ namespace TestAddon
                         Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 40), Color.Orange, string.Format("NavMesh Position: X:{0} Y:{1}",
                             navMeshCell.GridX, navMeshCell.GridY), 10);
 
-                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 60), Color.NavajoWhite, string.Format("IsWall: {0} | IsGrass: {1} | IsBuilding: {2} | IsProp: {3}",
-                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Wall),
-                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Grass),
-                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Building),
-                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Prop)), 10);
+                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 60), Color.NavajoWhite, string.Format("Collision flags: {0}", navMeshCell.CollFlags), 10);
                     }
 
                     if (ShowBuffs || ShowGeneral)
