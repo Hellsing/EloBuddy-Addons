@@ -164,8 +164,9 @@ namespace TestAddon
                         var startPos = new NavMeshCell(sourceGrid.GridX - (short) Math.Floor(GridSize / 2f), sourceGrid.GridY - (short) Math.Floor(GridSize / 2f));
 
                         var cells = new List<NavMeshCell> { startPos };
-                        var wallCells = new List<NavMeshCell>();
+                        var visionCells = new List<NavMeshCell>();
                         var grassCells = new List<NavMeshCell>();
+                        var wallCells = new List<NavMeshCell>();
                         for (var y = startPos.GridY; y < startPos.GridY + GridSize; y++)
                         {
                             for (var x = startPos.GridX; x < startPos.GridX + GridSize; x++)
@@ -197,11 +198,20 @@ namespace TestAddon
                                 cells.Remove(cell);
                                 grassCells.Add(cell);
                             }
+                            else if (cell.CollFlags.HasFlag((CollisionFlags) 256))
+                            {
+                                cells.Remove(cell);
+                                visionCells.Add(cell);
+                            }
                         }
 
-                        foreach (var cell in cells.Concat(grassCells).Concat(wallCells))
+                        foreach (var cell in cells.Concat(visionCells).Concat(grassCells).Concat(wallCells))
                         {
-                            var color = cell.CollFlags.HasFlag(CollisionFlags.Wall) ? Color.DodgerBlue : cell.CollFlags.HasFlag(CollisionFlags.Grass) ? Color.LimeGreen : Color.AntiqueWhite;
+                            var color = cell.CollFlags.HasFlag(CollisionFlags.Wall) ? Color.DodgerBlue :
+                                cell.CollFlags.HasFlag(CollisionFlags.Grass) ? Color.LimeGreen :
+                                cell.CollFlags.HasFlag((CollisionFlags) 256) ? Color.Yellow :
+                                Color.AntiqueWhite;
+
                             Line.DrawLine(color,
                                 cell.WorldPosition,
                                 (cell.WorldPosition.To2D() + new Vector2(NavMesh.CellWidth, 0)).To3DWorld(),
