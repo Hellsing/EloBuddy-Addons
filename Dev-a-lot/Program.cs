@@ -157,22 +157,6 @@ namespace TestAddon
 
                 Drawing.OnDraw += delegate
                 {
-                    if (ShowMouse)
-                    {
-                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 0), Color.Orange, string.Format("Screen Position: X:{0} Y:{1}", Game.CursorPos2D.X, Game.CursorPos2D.Y), 10);
-                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 20), Color.Orange, string.Format("Game Position: X:{0} Y:{1} Z:{2}",
-                            Math.Round(Game.CursorPos.X), Math.Round(Game.CursorPos.Y), Math.Round(Game.CursorPos.Z)), 10);
-                        var navMeshCell = Game.CursorPos.ToNavMeshCell();
-                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 40), Color.Orange, string.Format("NavMesh Position: X:{0} Y:{1}",
-                            navMeshCell.GridX, navMeshCell.GridY), 10);
-
-                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 60), Color.NavajoWhite, string.Format("IsWall: {0} | IsGrass: {1} | IsBuilding: {2} | IsProp: {3}",
-                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Wall),
-                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Grass),
-                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Building),
-                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Prop)), 10);
-                    }
-
                     if (ShowGrid)
                     {
                         var sourceGrid = Game.CursorPos.ToNavMeshCell();
@@ -224,6 +208,22 @@ namespace TestAddon
                                 (cell.WorldPosition.To2D() + new Vector2(0, NavMesh.CellHeight)).To3DWorld(),
                                 cell.WorldPosition);
                         }
+                    }
+
+                    if (ShowMouse)
+                    {
+                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 0), Color.Orange, string.Format("Screen Position: X:{0} Y:{1}", Game.CursorPos2D.X, Game.CursorPos2D.Y), 10);
+                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 20), Color.Orange, string.Format("Game Position: X:{0} Y:{1} Z:{2}",
+                            Math.Round(Game.CursorPos.X), Math.Round(Game.CursorPos.Y), Math.Round(Game.CursorPos.Z)), 10);
+                        var navMeshCell = Game.CursorPos.ToNavMeshCell();
+                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 40), Color.Orange, string.Format("NavMesh Position: X:{0} Y:{1}",
+                            navMeshCell.GridX, navMeshCell.GridY), 10);
+
+                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 60), Color.NavajoWhite, string.Format("IsWall: {0} | IsGrass: {1} | IsBuilding: {2} | IsProp: {3}",
+                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Wall),
+                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Grass),
+                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Building),
+                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Prop)), 10);
                     }
 
                     if (ShowBuffs || ShowGeneral)
