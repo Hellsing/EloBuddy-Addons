@@ -40,6 +40,11 @@ namespace TestAddon
         {
             get { return Menu["autoAttack"].Cast<CheckBox>().CurrentValue; }
         }
+        private static bool AnalyzeAzir
+        {
+            get { return Menu["azir"].Cast<CheckBox>().CurrentValue; }
+        }
+
         private static bool ObjectNames
         {
             get { return Menu["objectNames"].Cast<CheckBox>().CurrentValue; }
@@ -48,9 +53,17 @@ namespace TestAddon
         {
             get { return Menu["onlyBase"].Cast<CheckBox>().CurrentValue; }
         }
-        private static bool AnalyzeAzir
+        private static bool ShowMouse
         {
-            get { return Menu["azir"].Cast<CheckBox>().CurrentValue; }
+            get { return Menu["mouse"].Cast<CheckBox>().CurrentValue; }
+        }
+        private static bool ShowGrid
+        {
+            get { return Menu["grid"].Cast<CheckBox>().CurrentValue; }
+        }
+        private static int GridSize
+        {
+            get { return Menu["gridSize"].Cast<Slider>().CurrentValue; }
         }
 
         private static bool BasicAttack
@@ -92,10 +105,18 @@ namespace TestAddon
                 Menu.AddGroupLabel("General");
                 Menu.Add("general", new CheckBox("Show general info", false));
                 Menu.Add("buffs", new CheckBox("Show buffs", false));
-                Menu.Add("autoAttack", new CheckBox("Auto attack damage"));
-                Menu.Add("objectNames", new CheckBox("Show object names and types near mouse", false));
-                Menu.Add("onlyBase", new CheckBox("Only show Obj_AI_Base objects"));
-                Menu.Add("azir", new CheckBox("Analyze Azir soldiers", false));
+                Menu.Add("autoAttack", new CheckBox("Show auto attack damage"));
+                if (Player.Instance.Hero == Champion.Azir)
+                {
+                    Menu.Add("azir", new CheckBox("Analyze Azir soldiers", false));
+                }
+
+                Menu.AddGroupLabel("Near mouse analyzing");
+                Menu.Add("objectNames", new CheckBox("Show object names and types", false));
+                Menu.Add("onlyBase", new CheckBox("Only analyze Obj_AI_Base"));
+                Menu.Add("mouse", new CheckBox("Show info about mouse position", false));
+                Menu.Add("grid", new CheckBox("Visualize game grid", false));
+                Menu.Add("gridSize", new Slider("Grid size {0} x {0}", 11, 1, 55));
 
                 Menu.AddGroupLabel("Core event property stress tests");
                 Menu.Add("basicAttack", new CheckBox("Obj_AI_Base.OnBasicAttack", false)).CurrentValue = false;
@@ -136,6 +157,75 @@ namespace TestAddon
 
                 Drawing.OnDraw += delegate
                 {
+                    if (ShowMouse)
+                    {
+                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 0), Color.Orange, string.Format("Screen Position: X:{0} Y:{1}", Game.CursorPos2D.X, Game.CursorPos2D.Y), 10);
+                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 20), Color.Orange, string.Format("Game Position: X:{0} Y:{1} Z:{2}",
+                            Math.Round(Game.CursorPos.X), Math.Round(Game.CursorPos.Y), Math.Round(Game.CursorPos.Z)), 10);
+                        var navMeshCell = Game.CursorPos.ToNavMeshCell();
+                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 40), Color.Orange, string.Format("NavMesh Position: X:{0} Y:{1}",
+                            navMeshCell.GridX, navMeshCell.GridY), 10);
+
+                        Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 60), Color.NavajoWhite, string.Format("IsWall: {0} | IsGrass: {1} | IsBuilding: {2} | IsProp: {3}",
+                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Wall),
+                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Grass),
+                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Building),
+                            navMeshCell.CollFlags.HasFlag(CollisionFlags.Prop)), 10);
+                    }
+
+                    if (ShowGrid)
+                    {
+                        var sourceGrid = Game.CursorPos.ToNavMeshCell();
+                        var startPos = new NavMeshCell(sourceGrid.GridX - (short) Math.Floor(GridSize / 2f), sourceGrid.GridY - (short) Math.Floor(GridSize / 2f));
+
+                        var cells = new List<NavMeshCell> { startPos };
+                        var wallCells = new List<NavMeshCell>();
+                        var grassCells = new List<NavMeshCell>();
+                        for (var y = startPos.GridY; y < startPos.GridY + GridSize; y++)
+                        {
+                            for (var x = startPos.GridX; x < startPos.GridX + GridSize; x++)
+                            {
+                                if (x == startPos.GridX && y == startPos.GridY)
+                                {
+                                    continue;
+                                }
+                                if (x == sourceGrid.GridX && y == sourceGrid.GridY)
+                                {
+                                    cells.Add(sourceGrid);
+                                }
+                                else
+                                {
+                                    cells.Add(new NavMeshCell(x, y));
+                                }
+                            }
+                        }
+
+                        foreach (var cell in cells.ToArray())
+                        {
+                            if (cell.CollFlags.HasFlag(CollisionFlags.Wall))
+                            {
+                                cells.Remove(cell);
+                                wallCells.Add(cell);
+                            }
+                            else if (cell.CollFlags.HasFlag(CollisionFlags.Grass))
+                            {
+                                cells.Remove(cell);
+                                grassCells.Add(cell);
+                            }
+                        }
+
+                        foreach (var cell in cells.Concat(grassCells).Concat(wallCells))
+                        {
+                            var color = cell.CollFlags.HasFlag(CollisionFlags.Wall) ? Color.DodgerBlue : cell.CollFlags.HasFlag(CollisionFlags.Grass) ? Color.LimeGreen : Color.AntiqueWhite;
+                            Line.DrawLine(color,
+                                cell.WorldPosition,
+                                (cell.WorldPosition.To2D() + new Vector2(NavMesh.CellWidth, 0)).To3DWorld(),
+                                (cell.WorldPosition.To2D() + new Vector2(NavMesh.CellWidth, NavMesh.CellHeight)).To3DWorld(),
+                                (cell.WorldPosition.To2D() + new Vector2(0, NavMesh.CellHeight)).To3DWorld(),
+                                cell.WorldPosition);
+                        }
+                    }
+
                     if (ShowBuffs || ShowGeneral)
                     {
                         foreach (var hero in EntityManager.Heroes.AllHeroes.Where(o => o.VisibleOnScreen))
@@ -209,7 +299,7 @@ namespace TestAddon
                         }
                     }
 
-                    if (AnalyzeAzir)
+                    if (Player.Instance.Hero == Champion.Azir && AnalyzeAzir)
                     {
                         foreach (var soldier in Orbwalker.AzirSoldiers)
                         {
