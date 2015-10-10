@@ -138,7 +138,7 @@ namespace TestAddon
                 {
                     if (ShowBuffs || ShowGeneral)
                     {
-                        foreach (var hero in EntityManager.Heroes.AllHeroes)
+                        foreach (var hero in EntityManager.Heroes.AllHeroes.Where(o => o.VisibleOnScreen))
                         {
                             var i = 0;
                             const int step = 20;
@@ -181,7 +181,7 @@ namespace TestAddon
                         foreach (
                             var unit in
                                 EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget() && unit.IsHPBarRendered)
-                                    .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget() && o.IsHPBarRendered)))
+                                    .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget() && o.IsHPBarRendered && o.VisibleOnScreen)))
                         {
                             var damageWithPassive = Player.Instance.GetAutoAttackDamage(unit, true);
                             var damageWithoutPassive = Player.Instance.GetAutoAttackDamage(unit);
