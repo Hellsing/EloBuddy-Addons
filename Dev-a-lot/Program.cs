@@ -186,17 +186,21 @@ namespace TestAddon
                         foreach (var cell in cells.OrderBy(o => o.CollFlags))
                         {
                             var color = Color.AntiqueWhite;
-                            switch (cell.CollFlags)
+                            if (cell.CollFlags.HasFlag(CollisionFlags.Wall))
                             {
-                                case CollisionFlags.Wall:
-                                    color = Color.DodgerBlue;
-                                    break;
-                                case CollisionFlags.Grass:
-                                    color = Color.LimeGreen;
-                                    break;
-                                case (CollisionFlags) 256:
-                                    color = Color.Yellow;
-                                    break;
+                                color = Color.DodgerBlue;
+                            }
+                            else if (cell.CollFlags.HasFlag(CollisionFlags.Grass))
+                            {
+                                color = Color.LimeGreen;
+                            }
+                            else if (cell.CollFlags.HasFlag((CollisionFlags) 256))
+                            {
+                                color = Color.Yellow;
+                            }
+                            else if (cell.CollFlags.HasFlag(CollisionFlags.Prop))
+                            {
+                                color = Color.SaddleBrown;
                             }
 
                             var world2D = cell.WorldPosition.To2D();
