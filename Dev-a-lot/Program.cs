@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
@@ -18,13 +19,6 @@ namespace TestAddon
     {
         private static readonly string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         private static readonly string ResultPath = Path.Combine(DesktopPath, "Test Results");
-
-        private static readonly string ProcessSpellLocation = Path.Combine(ResultPath, "process_spell.txt");
-        private static readonly string ObjectManagerLocation = Path.Combine(ResultPath, "object_manager.txt");
-        private static readonly string NewPathLocation = Path.Combine(ResultPath, "new_path.txt");
-        private static readonly string StopCastLocation = Path.Combine(ResultPath, "stop_cast.txt");
-        private static readonly string CreateLocation = Path.Combine(ResultPath, "object_create.txt");
-        private static readonly string DeleteLocation = Path.Combine(ResultPath, "object_delete.txt");
 
         private static Menu Menu { get; set; }
 
@@ -98,6 +92,18 @@ namespace TestAddon
         {
             get { return Menu["delete"].Cast<CheckBox>().CurrentValue; }
         }
+        private static bool Animation
+        {
+            get { return Menu["animation"].Cast<CheckBox>().CurrentValue; }
+        }
+        private static bool BuffGain
+        {
+            get { return Menu["buffGain"].Cast<CheckBox>().CurrentValue; }
+        }
+        private static bool BuffLose
+        {
+            get { return Menu["buffLose"].Cast<CheckBox>().CurrentValue; }
+        }
 
         private static void Main(string[] args)
         {
@@ -128,10 +134,13 @@ namespace TestAddon
                 Menu.Add("basicAttack", new CheckBox("Obj_AI_Base.OnBasicAttack", false)).CurrentValue = false;
                 Menu.Add("spellCast", new CheckBox("Obj_AI_Base.OnSpellCast", false)).CurrentValue = false;
                 Menu.Add("processSpell", new CheckBox("Obj_AI_Base.OnProcessSpellCast", false)).CurrentValue = false;
-                Menu.Add("newPath", new CheckBox("Obj_AI_Base.OnNewPath", false)).CurrentValue = false;
                 Menu.Add("stopCast", new CheckBox("Spellbook.OnStopCast", false)).CurrentValue = false;
+                Menu.Add("newPath", new CheckBox("Obj_AI_Base.OnNewPath", false)).CurrentValue = false;
+                Menu.Add("animation", new CheckBox("Obj_AI_Base.OnPlayAnimation", false)).CurrentValue = false;
                 Menu.Add("create", new CheckBox("GameObject.OnCreate", false)).CurrentValue = false;
                 Menu.Add("delete", new CheckBox("GameObject.OnDelete", false)).CurrentValue = false;
+                Menu.Add("buffGain", new CheckBox("Obj_AI_Base.OnBuffGain", false)).CurrentValue = false;
+                Menu.Add("buffLose", new CheckBox("Obj_AI_Base.OnBuffLose", false)).CurrentValue = false;
 
                 Obj_AI_Base.OnBasicAttack += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs eventArgs)
                 {
@@ -155,7 +164,11 @@ namespace TestAddon
                     }
                 };
 
+                Obj_AI_Base.OnBuffGain += OnBuffGain;
+                Obj_AI_Base.OnBuffLose += OnBuffLose;
                 Obj_AI_Base.OnNewPath += OnNewPath;
+                Obj_AI_Base.OnPlayAnimation += OnPlayAnimation;
+
                 Spellbook.OnStopCast += OnStopCast;
 
                 GameObject.OnCreate += OnCreate;
@@ -342,7 +355,7 @@ namespace TestAddon
 
                 Game.OnUpdate += delegate
                 {
-                    using (var writer = File.CreateText(ObjectManagerLocation))
+                    using (var writer = File.CreateText(Path.Combine(ResultPath, "ObjectManager.MissileClient.txt")))
                     {
                         writer.WriteLine("----------------------------------------------------------------------------------");
                         writer.WriteLine("OnUpdate, analysing all MissileClient properties in ObjectManager...");
@@ -393,6 +406,148 @@ namespace TestAddon
             };
         }
 
+        private static void OnBuffGain(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)
+        {
+            if (!BuffGain)
+            {
+                return;
+            }
+
+            if (!Directory.Exists(ResultPath))
+            {
+                Directory.CreateDirectory(ResultPath);
+            }
+
+            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
+            {
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("OnBuffGain, analysing properties...");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.Flush();
+                writer.Write(" - Sender type: ");
+                writer.Flush();
+                writer.WriteLine(sender.GetType().Name);
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("Analyzing all public properties of sender");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.Flush();
+                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
+                {
+                    writer.Write(" - " + propertyInfo.Name + ": ");
+                    writer.Flush();
+                    writer.WriteLine(propertyInfo.GetValue(sender, null));
+                    writer.Flush();
+                }
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("Analyzing buff");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.Flush();
+                foreach (var propertyInfo in args.Buff.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
+                {
+                    writer.Write(" - " + propertyInfo.Name + ": ");
+                    writer.Flush();
+                    writer.WriteLine(propertyInfo.GetValue(args.Buff, null));
+                    writer.Flush();
+                }
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("Analyzing OnBuffGain complete!");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine();
+            }
+        }
+
+        private static void OnBuffLose(Obj_AI_Base sender, Obj_AI_BaseBuffLoseEventArgs args)
+        {
+            if (!BuffLose)
+            {
+                return;
+            }
+
+            if (!Directory.Exists(ResultPath))
+            {
+                Directory.CreateDirectory(ResultPath);
+            }
+
+            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
+            {
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("OnBuffLose, analysing properties...");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.Flush();
+                writer.Write(" - Sender type: ");
+                writer.Flush();
+                writer.WriteLine(sender.GetType().Name);
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("Analyzing all public properties of sender");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.Flush();
+                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
+                {
+                    writer.Write(" - " + propertyInfo.Name + ": ");
+                    writer.Flush();
+                    writer.WriteLine(propertyInfo.GetValue(sender, null));
+                    writer.Flush();
+                }
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("Analyzing buff");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.Flush();
+                foreach (var propertyInfo in args.Buff.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
+                {
+                    writer.Write(" - " + propertyInfo.Name + ": ");
+                    writer.Flush();
+                    writer.WriteLine(propertyInfo.GetValue(args.Buff, null));
+                    writer.Flush();
+                }
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("Analyzing OnBuffLose complete!");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine();
+            }
+        }
+
+        private static void OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
+        {
+            if (!Animation)
+            {
+                return;
+            }
+
+            if (!Directory.Exists(ResultPath))
+            {
+                Directory.CreateDirectory(ResultPath);
+            }
+
+            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
+            {
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("OnPlayAnimation, analysing properties...");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.Flush();
+                writer.Write(" - Sender type: ");
+                writer.Flush();
+                writer.WriteLine(sender.GetType().Name);
+                writer.Write(" - Animation: ");
+                writer.Flush();
+                writer.WriteLine(args.Animation);
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("Analyzing all public properties of sender");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.Flush();
+                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
+                {
+                    writer.Write(" - " + propertyInfo.Name + ": ");
+                    writer.Flush();
+                    writer.WriteLine(propertyInfo.GetValue(sender, null));
+                    writer.Flush();
+                }
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine("Analyzing OnPlayAnimation complete!");
+                writer.WriteLine("----------------------------------------------------------------------------------");
+                writer.WriteLine();
+            }
+        }
+
         private static void OnDelete(GameObject sender, EventArgs args)
         {
             if (!Delete)
@@ -405,7 +560,7 @@ namespace TestAddon
                 Directory.CreateDirectory(ResultPath);
             }
 
-            using (var writer = File.CreateText(DeleteLocation))
+            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
             {
                 writer.WriteLine("----------------------------------------------------------------------------------");
                 writer.WriteLine("OnDelete, analysing properties...");
@@ -444,7 +599,7 @@ namespace TestAddon
                 Directory.CreateDirectory(ResultPath);
             }
 
-            using (var writer = File.CreateText(CreateLocation))
+            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
             {
                 writer.WriteLine("----------------------------------------------------------------------------------");
                 writer.WriteLine("OnCreate, analysing properties...");
@@ -483,7 +638,7 @@ namespace TestAddon
                 Directory.CreateDirectory(ResultPath);
             }
 
-            using (var writer = File.CreateText(StopCastLocation))
+            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
             {
                 writer.WriteLine("----------------------------------------------------------------------------------");
                 writer.WriteLine("OnStopCast, analysing properties...");
@@ -536,7 +691,7 @@ namespace TestAddon
                 Directory.CreateDirectory(ResultPath);
             }
 
-            using (var writer = File.CreateText(NewPathLocation))
+            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
             {
                 writer.WriteLine("----------------------------------------------------------------------------------");
                 writer.WriteLine("OnNewPath, analysing properties...");
@@ -584,7 +739,7 @@ namespace TestAddon
                 Directory.CreateDirectory(ResultPath);
             }
 
-            using (var writer = File.CreateText(ProcessSpellLocation))
+            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
             {
                 writer.WriteLine("----------------------------------------------------------------------------------");
                 writer.WriteLine("OnProcessSpellCast (" + new StackTrace().GetFrame(1).GetMethod().Name + "), analysing properties...");
