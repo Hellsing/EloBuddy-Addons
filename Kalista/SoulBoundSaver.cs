@@ -40,7 +40,7 @@ namespace Hellsing.Kalista
             else if (Settings.SaveSouldBound && R.IsReady())
             {
                 // Ult casting
-                if (SoulBound.HealthPercent < 5 && SoulBound.CountEnemiesInRange(500) > 0 ||
+                if (SoulBound.HealthPercent() < 5 && SoulBound.CountEnemiesInRange(500) > 0 ||
                     IncomingDamage > SoulBound.Health)
                     R.Cast();
             }

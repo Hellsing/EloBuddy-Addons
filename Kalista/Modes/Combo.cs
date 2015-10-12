@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Drawing;
+using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
 using Settings = Hellsing.Kalista.Config.Modes.Combo;
@@ -25,7 +26,8 @@ namespace Hellsing.Kalista.Modes
             if (target != null)
             {
                 // Q usage
-                if (Settings.UseQ && (!Settings.UseQAA || Player.GetSpellDamage(target, SpellSlot.Q) > target.TotalShieldHealth()) && Q.IsReady() && Player.ManaPercent > Settings.ManaQ && Q.Cast(target))
+                if (Q.IsReady() && Settings.UseQ && (!Settings.UseQAA || (Player.GetSpellDamage(target, SpellSlot.Q) > target.TotalShieldHealth() && !target.HasBuffOfType(BuffType.SpellShield))) &&
+                    Player.ManaPercent() >= Settings.ManaQ && Q.Cast(target))
                 {
                     return;
                 }
@@ -53,7 +55,7 @@ namespace Hellsing.Kalista.Modes
 
                     // E to slow
                     if (!Config.Misc.UseHarassPlus && Settings.UseESlow &&
-                        ObjectManager.Get<Obj_AI_Base>().Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
+                        EntityManager.MinionsAndMonsters.AllEntities.Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
                         E.Cast())
                     {
                         return;
@@ -66,7 +68,8 @@ namespace Hellsing.Kalista.Modes
                     !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
                     // Force a new target for the Orbwalker
-                    Orbwalker.ForcedTarget = ObjectManager.Get<Obj_AI_Base>().FirstOrDefault(o => !o.IsAlly && o.IsValidTarget(Player.GetAutoAttackRange()));
+                    Orbwalker.ForcedTarget = EntityManager.MinionsAndMonsters.EnemyMinions.Concat(EntityManager.MinionsAndMonsters.Monsters)
+                        .FirstOrDefault(o => Player.IsInAutoAttackRange(o));
                 }
             }
         }

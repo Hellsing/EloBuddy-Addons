@@ -4,6 +4,7 @@ using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
+using Hellsing.Kalista.Modes;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable MemberHidesStaticFromOuterClass
@@ -326,6 +327,7 @@ namespace Hellsing.Kalista
             {
                 private static readonly CheckBox _enabled;
                 private static readonly CheckBox _noMode;
+                private static readonly CheckBox _alert;
                 private static readonly Slider _mana;
 
                 private static readonly CheckBox _baron;
@@ -341,6 +343,10 @@ namespace Hellsing.Kalista
                 public static bool NoModeOnly
                 {
                     get { return _noMode.CurrentValue; }
+                }
+                public static bool Alert
+                {
+                    get { return _alert.CurrentValue; }
                 }
                 public static int Mana
                 {
@@ -373,13 +379,21 @@ namespace Hellsing.Kalista
                     Menu.AddGroupLabel("Sentinel (W) usage");
                     _enabled = Menu.Add("enabled", new CheckBox("Enabled"));
                     _noMode = Menu.Add("noMode", new CheckBox("Only use when no mode active"));
+                    _alert = Menu.Add("alert", new CheckBox("Alert when sentinel is taking damage"));
                     _mana = Menu.Add("mana", new Slider("Minimum mana available when casting W ({0}%)", 40));
-                    Menu.AddLabel("Send to the following locations:");
-                    _baron = Menu.Add("baron", new CheckBox("Baron"));
-                    _dragon = Menu.Add("dragon", new CheckBox("Dragon"));
-                    _mid = Menu.Add("mid", new CheckBox("Mid lane brush"));
-                    _blue = Menu.Add("blue", new CheckBox("Blue buff"));
-                    _red = Menu.Add("red", new CheckBox("Red buff"));
+
+                    Menu.AddLabel("Send to the following locations (no specific order):");
+                    (_baron = Menu.Add("baron", new CheckBox("Baron (stuck bug usage)"))).OnValueChange += OnValueChange;
+                    (_dragon = Menu.Add("dragon", new CheckBox("Dragon (stuck bug usage)"))).OnValueChange += OnValueChange;
+                    (_mid = Menu.Add("mid", new CheckBox("Mid lane brush"))).OnValueChange += OnValueChange;
+                    (_blue = Menu.Add("blue", new CheckBox("Blue buff"))).OnValueChange += OnValueChange;
+                    (_red = Menu.Add("red", new CheckBox("Red buff"))).OnValueChange += OnValueChange;
+                    PermaActive.RecalculateOpenLocations();
+                }
+
+                private static void OnValueChange(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
+                {
+                    PermaActive.RecalculateOpenLocations();
                 }
 
                 public static void Initialize()

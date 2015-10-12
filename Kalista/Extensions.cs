@@ -66,5 +66,17 @@ namespace Hellsing.Kalista
         {
             return target.Health + target.AllShield + target.AttackShield + target.MagicShield;
         }
+
+        // TODO: finn0x please
+        public static float HealthPercent(this Obj_AI_Base target)
+        {
+            return (target.Health / target.MaxHealth) * 100;
+        }
+
+        // TODO: finn0x please
+        public static float ManaPercent(this Obj_AI_Base target)
+        {
+            return (target.Mana / target.MaxMana) * 100;
+        }
     }
 }
