@@ -55,7 +55,7 @@ namespace Hellsing.Kalista.Modes
 
                     // E to slow
                     if (!Config.Misc.UseHarassPlus && Settings.UseESlow &&
-                        EntityManager.MinionsAndMonsters.AllEntities.Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
+                        EntityManager.MinionsAndMonsters.CombinedAttackable.Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
                         E.Cast())
                     {
                         return;
@@ -68,8 +68,7 @@ namespace Hellsing.Kalista.Modes
                     !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
                     // Force a new target for the Orbwalker
-                    Orbwalker.ForcedTarget = EntityManager.MinionsAndMonsters.EnemyMinions.Concat(EntityManager.MinionsAndMonsters.Monsters)
-                        .FirstOrDefault(o => Player.IsInAutoAttackRange(o));
+                    Orbwalker.ForcedTarget = EntityManager.MinionsAndMonsters.CombinedAttackable.FirstOrDefault(o => Player.IsInAutoAttackRange(o));
                 }
             }
         }

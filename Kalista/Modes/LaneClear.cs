@@ -26,10 +26,6 @@ namespace Hellsing.Kalista.Modes
 
             // Minions around
             var minions = EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, Player.ServerPosition, Q.Range, false);
-            if (minions.Count == 0)
-            {
-                return;
-            }
 
             // TODO: Readd Q logic once Collision is added
 
@@ -45,19 +41,16 @@ namespace Hellsing.Kalista.Modes
                 {
                     // Check if enough minions die with E
                     var killableNum = 0;
-                    foreach (var minion in minionsInRange)
+                    foreach (var minion in minionsInRange.Where(minion => minion.IsRendKillable()))
                     {
-                        if (minion.IsRendKillable())
-                        {
-                            // Increase kill number
-                            killableNum++;
+                        // Increase kill number
+                        killableNum++;
 
-                            // Cast on condition met
-                            if (killableNum >= Settings.MinNumberE)
-                            {
-                                E.Cast();
-                                break;
-                            }
+                        // Cast on condition met
+                        if (killableNum >= Settings.MinNumberE)
+                        {
+                            E.Cast();
+                            break;
                         }
                     }
                 }

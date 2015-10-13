@@ -98,9 +98,9 @@ namespace Hellsing.Kalista.Modes
 
                 if (Settings.UseEBig)
                 {
-                    if (EntityManager.MinionsAndMonsters.Monsters.Concat(EntityManager.MinionsAndMonsters.EnemyMinions).Any(m =>
+                    if (EntityManager.MinionsAndMonsters.CombinedAttackable.Any(m =>
                     {
-                        if (!m.IsAlly && m.IsValidTarget(E.Range) && m.HasRendBuff())
+                        if (!m.IsAlly && E.IsInRange(m) && m.HasRendBuff())
                         {
                             var skinName = m.BaseSkinName.ToLower();
                             return (skinName.Contains("siege") ||
@@ -124,7 +124,7 @@ namespace Hellsing.Kalista.Modes
                 if (Settings.UseHarassPlus)
                 {
                     if (EntityManager.Heroes.Enemies.Any(o => o.IsValidTarget() && E.IsInRange(o) && o.HasRendBuff()) &&
-                        EntityManager.MinionsAndMonsters.EnemyMinions.Concat(EntityManager.MinionsAndMonsters.Monsters).Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
+                        EntityManager.MinionsAndMonsters.CombinedAttackable.Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
                         E.Cast())
                     {
                         return;

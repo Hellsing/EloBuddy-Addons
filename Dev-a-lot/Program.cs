@@ -347,7 +347,7 @@ namespace TestAddon
                             {
                                 Circle.Draw(SharpDX.Color.AliceBlue, 500, soldier.Position);
 
-                                foreach (var enemy in EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget()).Cast<Obj_AI_Base>()
+                                foreach (var enemy in EntityManager.MinionsAndMonsters.Combined.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget()).Cast<Obj_AI_Base>()
                                     .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget())).Where(enemy => enemy.IsInRange(soldier, 275 + enemy.BoundingRadius)))
                                 {
                                     Circle.Draw(SharpDX.Color.Red, enemy.BoundingRadius, enemy.Position);
@@ -361,17 +361,17 @@ namespace TestAddon
 
                 Game.OnUpdate += delegate
                 {
-                    using (var writer = File.CreateText(Path.Combine(ResultPath, "ObjectManager.MissileClient.txt")))
+                    using (var writer = File.CreateText(Path.Combine(ResultPath, "ObjectManager.Obj_AI_Minion.txt")))
                     {
                         writer.WriteLine("----------------------------------------------------------------------------------");
                         writer.WriteLine("OnUpdate, analysing all MissileClient properties in ObjectManager...");
                         writer.WriteLine("----------------------------------------------------------------------------------");
                         writer.Flush();
-                        foreach (var obj in ObjectManager.Get<MissileClient>())
+                        foreach (var obj in ObjectManager.Get<Obj_AI_Minion>())
                         {
                             writer.WriteLine("Checking if current unit is valid");
                             writer.Flush();
-                            if (true)
+                            if (obj.IsValidTarget())
                             {
                                 writer.Write(" - Object type: ");
                                 writer.Flush();
@@ -387,21 +387,6 @@ namespace TestAddon
                                     writer.WriteLine(propertyInfo.GetValue(obj));
                                     writer.Flush();
                                 }
-                                writer.WriteLine("----------------------------------------------------------------------------------");
-                                writer.WriteLine("All properties analyzed, analyzing underlaying SData");
-                                writer.WriteLine("----------------------------------------------------------------------------------");
-                                writer.Flush();
-                                foreach (var propertyInfo in obj.SData.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                                {
-                                    writer.Write(" - " + propertyInfo.Name + ": ");
-                                    writer.Flush();
-                                    writer.WriteLine(propertyInfo.GetValue(obj.SData, null));
-                                    writer.Flush();
-                                }
-                                writer.WriteLine("----------------------------------------------------------------------------------");
-                                writer.WriteLine("Analyzing of " + obj.GetType().Name + " complete!");
-                                writer.WriteLine("----------------------------------------------------------------------------------");
-                                writer.WriteLine();
                             }
                         }
                         writer.WriteLine("----------------------------------------------------------------------------------");
