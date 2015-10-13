@@ -74,6 +74,7 @@
     <Compile Include="Modes\PermaActive.cs" />
     <Compile Include="Modes\LaneClear.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SentinelManager.cs" />
     <Compile Include="SoulBoundSaver.cs" />
     <Compile Include="SpellManager.cs" />
     <Compile Include="VectorHelper.cs" />

@@ -388,12 +388,12 @@ namespace Hellsing.Kalista
                     (_mid = Menu.Add("mid", new CheckBox("Mid lane brush"))).OnValueChange += OnValueChange;
                     (_blue = Menu.Add("blue", new CheckBox("Blue buff"))).OnValueChange += OnValueChange;
                     (_red = Menu.Add("red", new CheckBox("Red buff"))).OnValueChange += OnValueChange;
-                    PermaActive.RecalculateOpenLocations();
+                    SentinelManager.RecalculateOpenLocations();
                 }
 
                 private static void OnValueChange(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
                 {
-                    PermaActive.RecalculateOpenLocations();
+                    SentinelManager.RecalculateOpenLocations();
                 }
 
                 public static void Initialize()
