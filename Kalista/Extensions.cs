@@ -79,6 +79,7 @@ namespace Hellsing.Kalista
             return (target.Mana / target.MaxMana) * 100;
         }
 
+        // TODO: finn0x please
         public static Obj_AI_Base Caster(this BuffInstance buffInstance)
         {
             var caster = EntityManager.Heroes.AllHeroes.FirstOrDefault(o => o.Name == buffInstance.SourceName);
