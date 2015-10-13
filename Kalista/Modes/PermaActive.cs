@@ -170,7 +170,7 @@ namespace Hellsing.Kalista.Modes
             }
 
             // Auto sentinel management
-            if (Settings.Sentinel.Enabled && W.IsReady() && Player.ManaPercent() >= Settings.Sentinel.Mana)
+            if (Settings.Sentinel.Enabled && W.IsReady() && Player.ManaPercent() >= Settings.Sentinel.Mana && !Player.IsRecalling)
             {
                 if (!Settings.Sentinel.NoModeOnly || Orbwalker.ActiveModesFlags == Orbwalker.ActiveModes.None)
                 {
