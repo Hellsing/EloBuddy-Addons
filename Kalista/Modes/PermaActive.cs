@@ -28,7 +28,7 @@ namespace Hellsing.Kalista.Modes
                 GameObjectTeam.Order, new Dictionary<SentinelLocations, Vector2>
                 {
                     { SentinelLocations.Mid, new Vector2(8428, 6465) },
-                    { SentinelLocations.Blue, new Vector2(3871.489f, 9701.054f) },
+                    { SentinelLocations.Blue, new Vector2(3871.489f, 7901.054f) },
                     { SentinelLocations.Red, new Vector2(7862.244f, 4111.187f) }
                 }
             },
