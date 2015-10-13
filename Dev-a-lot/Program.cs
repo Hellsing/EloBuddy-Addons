@@ -364,7 +364,7 @@ namespace TestAddon
                     using (var writer = File.CreateText(Path.Combine(ResultPath, "ObjectManager.Obj_AI_Minion.txt")))
                     {
                         writer.WriteLine("----------------------------------------------------------------------------------");
-                        writer.WriteLine("OnUpdate, analysing all MissileClient properties in ObjectManager...");
+                        writer.WriteLine("OnUpdate, analysing all Obj_AI_Minion properties in ObjectManager...");
                         writer.WriteLine("----------------------------------------------------------------------------------");
                         writer.Flush();
                         foreach (var obj in ObjectManager.Get<Obj_AI_Minion>())
@@ -376,6 +376,7 @@ namespace TestAddon
                                 writer.Write(" - Object type: ");
                                 writer.Flush();
                                 writer.WriteLine(obj.GetType().Name);
+                                /*
                                 writer.WriteLine("----------------------------------------------------------------------------------");
                                 writer.WriteLine("Analyzing all public properties of " + obj.GetType().Name);
                                 writer.WriteLine("----------------------------------------------------------------------------------");
@@ -386,6 +387,23 @@ namespace TestAddon
                                     writer.Flush();
                                     writer.WriteLine(propertyInfo.GetValue(obj));
                                     writer.Flush();
+                                }
+                                */
+                                writer.WriteLine("----------------------------------------------------------------------------------");
+                                writer.WriteLine("Analyzing all buffs of " + obj.GetType().Name);
+                                writer.WriteLine("----------------------------------------------------------------------------------");
+                                writer.Flush();
+                                foreach (var buff in obj.Buffs)
+                                {
+                                    writer.WriteLine("------------------- Analyzing new buff");
+                                    writer.Flush();
+                                    foreach (var propertyInfo in buff.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
+                                    {
+                                        writer.Write(" - " + propertyInfo.Name + ": ");
+                                        writer.Flush();
+                                        writer.WriteLine(propertyInfo.GetValue(buff));
+                                        writer.Flush();
+                                    }
                                 }
                             }
                         }

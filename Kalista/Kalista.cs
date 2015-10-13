@@ -61,7 +61,7 @@ namespace Hellsing.Kalista
                 return;
             }
 
-            var target = EntityManager.Heroes.Enemies.Find(o => o.Buffs.Any(b => b.DisplayName == "RocketGrab" && b.Caster.NetworkId == SoulBoundSaver.SoulBound.NetworkId));
+            var target = EntityManager.Heroes.Enemies.Find(o => o.Buffs.Any(b => b.DisplayName == "RocketGrab" && b.Caster().NetworkId == SoulBoundSaver.SoulBound.NetworkId));
             if (target != null && target.IsValidTarget())
             {
                 if ((Config.Specials.BalistaMoreHealthOnly && Player.Instance.HealthPercent() < target.HealthPercent()) ||

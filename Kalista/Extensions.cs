@@ -14,7 +14,7 @@ namespace Hellsing.Kalista
 
         public static BuffInstance GetRendBuff(this Obj_AI_Base target)
         {
-            return target.Buffs.Find(b => b.Caster.IsMe && b.IsValid() && b.DisplayName == "KalistaExpungeMarker");
+            return target.Buffs.Find(b => b.Caster().IsMe && b.IsValid() && b.DisplayName == "KalistaExpungeMarker");
         }
 
         public static bool HasUndyingBuff(this AIHeroClient target)
@@ -32,7 +32,7 @@ namespace Hellsing.Kalista
             // Poppy R
             if (target.ChampionName == "Poppy")
             {
-                if (EntityManager.Heroes.Allies.Any(o => !o.IsMe && o.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValid() && b.DisplayName == "PoppyDITarget")))
+                if (EntityManager.Heroes.Allies.Any(o => !o.IsMe && o.Buffs.Any(b => b.Caster().NetworkId == target.NetworkId && b.IsValid() && b.DisplayName == "PoppyDITarget")))
                 {
                     return true;
                 }
@@ -77,6 +77,12 @@ namespace Hellsing.Kalista
         public static float ManaPercent(this Obj_AI_Base target)
         {
             return (target.Mana / target.MaxMana) * 100;
+        }
+
+        public static Obj_AI_Base Caster(this BuffInstance buffInstance)
+        {
+            var caster = EntityManager.Heroes.AllHeroes.FirstOrDefault(o => o.Name == buffInstance.SourceName);
+            return caster ?? Player.Instance;
         }
     }
 }

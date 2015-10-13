@@ -35,7 +35,7 @@ namespace Hellsing.Kalista
             // SoulBound is not found yet!
             if (SoulBound == null)
             {
-                SoulBound = EntityManager.Heroes.Allies.Find(h => !h.IsMe && h.Buffs.Any(b => b.Caster.IsMe && b.Name == "kalistacoopstrikeally"));
+                SoulBound = EntityManager.Heroes.Allies.Find(h => !h.IsMe && h.Buffs.Any(b => b.Caster().IsMe && b.Name == "kalistacoopstrikeally"));
             }
             else if (Settings.SaveSouldBound && R.IsReady())
             {
