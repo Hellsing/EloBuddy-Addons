@@ -43,10 +43,6 @@ namespace TestAddon
         {
             get { return Menu["objectNames"].Cast<CheckBox>().CurrentValue; }
         }
-        private static bool OnlyBase
-        {
-            get { return Menu["onlyBase"].Cast<CheckBox>().CurrentValue; }
-        }
         private static bool ShowMouse
         {
             get { return Menu["mouse"].Cast<CheckBox>().CurrentValue; }
@@ -105,6 +101,10 @@ namespace TestAddon
             get { return Menu["buffLose"].Cast<CheckBox>().CurrentValue; }
         }
 
+        private static Vector2 CurrentGridPosition { get; set; }
+        private static int CurrentGridSize { get; set; }
+        private static Dictionary<short, Dictionary<short, float>> GridHeight { get; set; }
+
         private static void Main(string[] args)
         {
             Loading.OnLoadingComplete += delegate
@@ -112,9 +112,10 @@ namespace TestAddon
                 // Setup a menu
                 Menu = MainMenu.AddMenu("Dev-a-lot", "devalot");
 
-                Menu.AddGroupLabel("General");
-                Menu.Add("general", new CheckBox("Show general info", false));
+                Menu.AddGroupLabel("General Obj_AI_Base analyzing");
+                Menu.Add("general", new CheckBox("General properties", false));
                 Menu.Add("buffs", new CheckBox("Show buffs", false));
+                Menu.Add("heroes", new CheckBox("Heroes only")).CurrentValue = true;
                 Menu.Add("autoAttack", new CheckBox("Show auto attack damage", false));
                 if (Player.Instance.Hero == Champion.Azir)
                 {
@@ -122,12 +123,11 @@ namespace TestAddon
                 }
 
                 Menu.AddGroupLabel("Near mouse analyzing");
-                Menu.Add("objectNames", new CheckBox("Show object names and types", false));
-                Menu.Add("onlyBase", new CheckBox("Only analyze Obj_AI_Base"));
+                Menu.Add("objectNames", new CheckBox("General info about object", false));
                 Menu.Add("mouse", new CheckBox("Show info about mouse position", false));
                 Menu.Add("mouseLines", new CheckBox("Show mouse coordinate lines", false));
                 Menu.Add("grid", new CheckBox("Visualize game grid", false));
-                Menu.Add("gridSize", new Slider("Grid size {0} x {0}", 11, 1, 55));
+                Menu.Add("gridSize", new Slider("Grid size {0} x {0}", 11, 1, 55)).OnValueChange += delegate { OnMouseMove(null); };
 
                 Menu.AddGroupLabel("Core event property stress tests, no use for addon devs");
                 Menu.AddLabel("This will create a folder on your desktop called 'Test Results'");
@@ -174,8 +174,12 @@ namespace TestAddon
                 GameObject.OnCreate += OnCreate;
                 GameObject.OnDelete += OnDelete;
 
+                Messages.RegisterEventHandler<Messages.MouseMove>(OnMouseMove);
+
                 Drawing.OnDraw += delegate
                 {
+                    #region Visualize Game Grid
+
                     if (ShowGrid)
                     {
                         var sourceGrid = Game.CursorPos.ToNavMeshCell();
@@ -228,6 +232,8 @@ namespace TestAddon
                         }
                     }
 
+                    #endregion
+
                     if (ShowMouseLines)
                     {
                         Line.DrawLine(Color.GhostWhite, new Vector2(Game.CursorPos2D.X, 0), new Vector2(Game.CursorPos2D.X, Drawing.Height));
@@ -246,76 +252,80 @@ namespace TestAddon
                         Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 60), Color.NavajoWhite, string.Format("Collision flags: {0}", navMeshCell.CollFlags), 10);
                     }
 
-                    if (ShowBuffs || ShowGeneral)
-                    {
-                        foreach (var hero in EntityManager.Heroes.AllHeroes.Where(o => o.VisibleOnScreen))
-                        {
-                            var i = 0;
-                            const int step = 20;
-
-                            if (ShowGeneral)
-                            {
-                                var data = new Dictionary<string, object>
-                                {
-                                    { "IsValid", hero.IsValid },
-                                    { "IsVisible", hero.IsVisible },
-                                    { "IsTargetable", hero.IsTargetable },
-                                    { "IsDead", hero.IsDead }
-                                };
-
-                                Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "General properties", 10);
-                                i += step;
-                                foreach (var dataEntry in data)
-                                {
-                                    Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite, string.Format("{0}: {1}", dataEntry.Key, dataEntry.Value), 10);
-                                    i += step;
-                                }
-                            }
-
-                            if (ShowBuffs)
-                            {
-                                Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "Buffs", 10);
-                                i += step;
-                                foreach (var buff in hero.Buffs.Where(o => o.IsValid()))
-                                {
-                                    Drawing.DrawText(hero.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
-                                        string.Format("DisplayName: {0} | Caster: {1} | Count: {2}", buff.DisplayName, buff.SourceName, buff.Count), 10);
-                                    i += step;
-                                }
-                            }
-                        }
-                    }
-
-                    if (ShowAaDamage)
-                    {
-                        foreach (
-                            var unit in
-                                EntityManager.MinionsAndMonsters.AllEntities.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget() && unit.IsHPBarRendered).Cast<Obj_AI_Base>()
-                                    .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget() && o.IsHPBarRendered && o.VisibleOnScreen)))
-                        {
-                            var damageWithPassive = Player.Instance.GetAutoAttackDamage(unit, true);
-                            var damageWithoutPassive = Player.Instance.GetAutoAttackDamage(unit);
-                            var difference = Math.Round(damageWithPassive - damageWithoutPassive);
-                            Drawing.DrawText(unit.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0} ({1})", damageWithPassive, string.Concat(difference > 0 ? "+" : "", difference)), 10);
-                        }
-                    }
-
+                    const float analyzeRange = 500;
                     if (ObjectNames)
                     {
-                        const float range = 500;
-                        Circle.Draw(SharpDX.Color.Red, range, Game.CursorPos);
+                        Circle.Draw(SharpDX.Color.Red, analyzeRange, Game.CursorPos);
+                    }
 
-                        foreach (var obj in (OnlyBase ? ObjectManager.Get<Obj_AI_Base>() : ObjectManager.Get<GameObject>()).Where(o => o.IsInRange(Game.CursorPos, range)))
+                    foreach (var obj in ObjectManager.Get<GameObject>().Where(o => o.VisibleOnScreen))
+                    {
+                        var i = 0;
+                        const int step = 20;
+
+                        var baseObject = obj as Obj_AI_Base;
+
+                        if (ObjectNames && obj.IsInRange(Game.CursorPos, analyzeRange))
                         {
-                            Circle.Draw(SharpDX.Color.DarkRed, obj.BoundingRadius, obj.Position);
-                            Drawing.DrawText(obj.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", obj.GetType().Name, obj.Name), 10);
+                            Drawing.DrawText(obj.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "General info", 10);
+                            i += step;
 
-                            var baseObject = obj as Obj_AI_Base;
-                            if (baseObject != null)
+                            var data = new Dictionary<string, object>
                             {
-                                Drawing.DrawText(obj.Position.WorldToScreen() + new Vector2(0, 20), Color.NavajoWhite,
-                                    string.Format("Buffs: {0}", string.Join(" | ", baseObject.Buffs.Select(o => string.Format("{0} ({1}x - {2})", o.DisplayName, o.Count, o.SourceName)))), 10);
+                                { "System.Type", obj.GetType().Name },
+                                { "GameObjectType", obj.Type },
+                                { "Name", obj.Name },
+                                { "Position", obj.Position }
+                            };
+                            foreach (var dataEntry in data)
+                            {
+                                Drawing.DrawText(obj.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite, string.Format("{0}: {1}", dataEntry.Key, dataEntry.Value), 10);
+                                i += step;
                             }
+                            Circle.Draw(SharpDX.Color.DarkRed, obj.BoundingRadius, obj.Position);
+                        }
+
+                        if (ShowGeneral && baseObject != null)
+                        {
+                            var data = new Dictionary<string, object>
+                            {
+                                { "Health", baseObject.Health },
+                                { "Mana", baseObject.Mana },
+                                { "BoundingRadius", baseObject.BoundingRadius },
+                                { "IsValid", baseObject.IsValid },
+                                { "IsVisible", baseObject.IsVisible },
+                                { "IsTargetable", baseObject.IsTargetable },
+                                { "IsDead", baseObject.IsDead }
+                            };
+
+                            Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "General properties", 10);
+                            i += step;
+                            foreach (var dataEntry in data)
+                            {
+                                Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite, string.Format("{0}: {1}", dataEntry.Key, dataEntry.Value), 10);
+                                i += step;
+                            }
+                        }
+
+                        if (ShowBuffs && baseObject != null)
+                        {
+                            Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "Buffs", 10);
+                            i += step;
+                            foreach (var buff in baseObject.Buffs.Where(o => o.IsValid()))
+                            {
+                                Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
+                                    string.Format("DisplayName: {0} | Caster: {1} | Count: {2} | EndTime: {3}", buff.DisplayName, buff.Caster.Name, buff.Count,
+                                        Math.Max(0, Math.Min(1337, buff.EndTime - Game.Time))), 10);
+                                i += step;
+                            }
+                        }
+
+                        if (ShowAaDamage && baseObject != null && baseObject.IsTargetableToTeam && !baseObject.IsAlly)
+                        {
+                            var damageWithPassive = Player.Instance.GetAutoAttackDamage(baseObject, true);
+                            var damageWithoutPassive = Player.Instance.GetAutoAttackDamage(baseObject);
+                            var difference = Math.Round(damageWithPassive - damageWithoutPassive);
+                            Drawing.DrawText(baseObject.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0} ({1})", damageWithPassive, string.Concat(difference > 0 ? "+" : "", difference)), 10);
                         }
                     }
 
@@ -400,6 +410,46 @@ namespace TestAddon
                     }
                 };
             };
+        }
+
+        private static void OnMouseMove(Messages.MouseMove args)
+        {
+            if (!ShowGrid)
+            {
+                return;
+            }
+
+            CalculateGridHeight();
+
+            if (CurrentGridSize != GridSize)
+            {
+                // Recalculate grid size
+            }
+            var grid = Game.CursorPos.ToNavMeshCell();
+            if ((short) CurrentGridPosition.X != grid.GridX || (short) CurrentGridPosition.Y != grid.GridY)
+            {
+                // Recalculate grid position
+                CurrentGridPosition = new Vector2(grid.GridX, grid.GridY);
+            }
+        }
+
+        private static void CalculateGridHeight()
+        {
+            if (GridHeight == null)
+            {
+                GridHeight = new Dictionary<short, Dictionary<short, float>>();
+
+                for (float x = 0; x <= NavMesh.Width; x += NavMesh.CellWidth)
+                {
+                    GridHeight.Add((short) x, new Dictionary<short, float>());
+
+                    for (float y = 0; y <= NavMesh.Height; y += NavMesh.CellHeight)
+                    {
+                        var pos = new Vector2(x, y).GridToWorld();
+                        GridHeight[(short) x].Add((short) y, NavMesh.GetHeightForPosition(pos.X, pos.Y));
+                    }
+                }
+            }
         }
 
         private static void OnBuffGain(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)
