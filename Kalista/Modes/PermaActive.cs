@@ -6,6 +6,7 @@ using EloBuddy.SDK;
 using SharpDX;
 using Settings = Hellsing.Kalista.Config.Misc;
 
+// ReSharper disable CompareOfFloatsByEqualityOperator
 namespace Hellsing.Kalista.Modes
 {
     public class PermaActive : ModeBase
@@ -55,12 +56,11 @@ namespace Hellsing.Kalista.Modes
             { SentinelLocations.Dragon, () => Settings.Sentinel.SendDragon },
             { SentinelLocations.Mid, () => Settings.Sentinel.SendMid },
             { SentinelLocations.Red, () => Settings.Sentinel.SendRed },
-        }; 
+        };
 
+        private static readonly List<Tuple<GameObjectTeam, SentinelLocations>> OpenLocations = new List<Tuple<GameObjectTeam, SentinelLocations>>();
         private static readonly Dictionary<GameObjectTeam, Dictionary<SentinelLocations, Obj_AI_Base>> ActiveSentinels = new Dictionary<GameObjectTeam, Dictionary<SentinelLocations, Obj_AI_Base>>();
         private static Tuple<GameObjectTeam, SentinelLocations> SentLocation { get; set; }
-        private static readonly List<Tuple<GameObjectTeam, SentinelLocations>> OpenLocations = new List<Tuple<GameObjectTeam, SentinelLocations>>();
-        private static readonly List<Tuple<int, Obj_AI_Minion>> AwaitingValidation = new List<Tuple<int, Obj_AI_Minion>>();
 
         public PermaActive()
         {
@@ -68,7 +68,6 @@ namespace Hellsing.Kalista.Modes
             Orbwalker.OnPostAttack += OnPostAttack;
             Orbwalker.OnUnkillableMinion += OnUnkillableMinion;
             GameObject.OnCreate += OnCreate;
-            Obj_AI_Base.OnBuffGain += OnBuffGain;
 
             // Recalculate open sentinel locations
             RecalculateOpenLocations();
@@ -145,16 +144,17 @@ namespace Hellsing.Kalista.Modes
             }
 
             // Validate all sentinels
-            AwaitingValidation.RemoveAll(o => Environment.TickCount - o.Item1 > 2000);
             foreach (var entry in ActiveSentinels.ToArray())
             {
-                // ReSharper disable once CompareOfFloatsByEqualityOperator
                 if (Settings.Sentinel.Alert && entry.Value.Any(o => o.Value.Health == 1))
                 {
-                    // ReSharper disable once CompareOfFloatsByEqualityOperator
                     var activeSentinel = entry.Value.First(o => o.Value.Health == 1);
                     Chat.Print("[Kalista] Sentinel at {0} taking damage! (local ping)",
-                        string.Format((entry.Key == GameObjectTeam.Order ? "Blue-Side" : entry.Key == GameObjectTeam.Chaos ? "Red-Side" : "Jungle") + " ({0})", activeSentinel.Key));
+                        string.Concat((entry.Key == GameObjectTeam.Order
+                            ? "Blue-Jungle"
+                            : entry.Key == GameObjectTeam.Chaos
+                                ? "Red-Jungle"
+                                : "Lake"), " (", activeSentinel.Key, ")"));
                     TacticalMap.ShowPing(PingCategory.Fallback, activeSentinel.Value.Position, true);
                 }
 
@@ -186,6 +186,7 @@ namespace Hellsing.Kalista.Modes
                                 position.Y - MaxRandomRadius / 2 + Random.NextFloat(0, MaxRandomRadius))).To3DWorld();
                             SentLocation = closestLocation;
                             W.Cast(randomized);
+                            Core.DelayAction(() => SentLocation = null, 2000);
                         }
                     }
                 }
@@ -204,8 +205,8 @@ namespace Hellsing.Kalista.Modes
                 else
                 {
                     OpenLocations.AddRange(from loc in location.Value
-                                            where EnabledLocations[loc.Key]() && !ActiveSentinels[location.Key].ContainsKey(loc.Key)
-                                            select new Tuple<GameObjectTeam, SentinelLocations>(location.Key, loc.Key));
+                                           where EnabledLocations[loc.Key]() && !ActiveSentinels[location.Key].ContainsKey(loc.Key)
+                                           select new Tuple<GameObjectTeam, SentinelLocations>(location.Key, loc.Key));
                 }
             }
         }
@@ -243,40 +244,25 @@ namespace Hellsing.Kalista.Modes
             }
 
             var sentinel = sender as Obj_AI_Minion;
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (sentinel != null && sentinel.IsAlly && sentinel.MaxHealth == 2 && sentinel.Name == "RobotBuddy")
             {
-                AwaitingValidation.Add(new Tuple<int, Obj_AI_Minion>(Environment.TickCount, sentinel));
+                Core.DelayAction(() => ValidateSentinel(sentinel), 1000);
             }
         }
 
-        private static void OnBuffGain(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)
+        private static void ValidateSentinel(Obj_AI_Base sentinel)
         {
-            if (SentLocation == null || AwaitingValidation.Count == 0)
+            if (sentinel.Health == 2 && sentinel.GetBuffCount("kalistaw") == 1)
             {
-                return;
-            }
-
-            var sentinel = sender as Obj_AI_Minion;
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (sentinel != null && sentinel.IsAlly && sentinel.MaxHealth == 2 && sentinel.Name == "RobotBuddy" &&
-                args.Buff.Caster.IsMe && args.Buff.DisplayName == "kalistaw")
-            {
-                var entry = AwaitingValidation.FirstOrDefault(o => o.Item2.IdEquals(sentinel));
-                if (entry != null)
+                if (!ActiveSentinels.ContainsKey(SentLocation.Item1))
                 {
-                    AwaitingValidation.Remove(entry);
-
-                    if (!ActiveSentinels.ContainsKey(SentLocation.Item1))
-                    {
-                        ActiveSentinels.Add(SentLocation.Item1, new Dictionary<SentinelLocations, Obj_AI_Base>());
-                    }
-                    ActiveSentinels[SentLocation.Item1].Remove(SentLocation.Item2);
-                    ActiveSentinels[SentLocation.Item1].Add(SentLocation.Item2, sentinel);
-
-                    SentLocation = null;
-                    RecalculateOpenLocations();
+                    ActiveSentinels.Add(SentLocation.Item1, new Dictionary<SentinelLocations, Obj_AI_Base>());
                 }
+                ActiveSentinels[SentLocation.Item1].Remove(SentLocation.Item2);
+                ActiveSentinels[SentLocation.Item1].Add(SentLocation.Item2, sentinel);
+
+                SentLocation = null;
+                RecalculateOpenLocations();
             }
         }
     }
