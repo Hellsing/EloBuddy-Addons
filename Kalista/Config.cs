@@ -377,25 +377,33 @@ namespace Hellsing.Kalista
                 static Sentinel()
                 {
                     Menu.AddGroupLabel("Sentinel (W) usage");
-                    _enabled = Menu.Add("enabled", new CheckBox("Enabled"));
-                    _noMode = Menu.Add("noMode", new CheckBox("Only use when no mode active"));
-                    _alert = Menu.Add("alert", new CheckBox("Alert when sentinel is taking damage"));
-                    _mana = Menu.Add("mana", new Slider("Minimum mana available when casting W ({0}%)", 40));
 
-                    Menu.AddLabel("Send to the following locations (no specific order):");
-                    (_baron = Menu.Add("baron", new CheckBox("Baron (stuck bug usage)"))).OnValueChange += OnValueChange;
-                    (_dragon = Menu.Add("dragon", new CheckBox("Dragon (stuck bug usage)"))).OnValueChange += OnValueChange;
-                    (_mid = Menu.Add("mid", new CheckBox("Mid lane brush"))).OnValueChange += OnValueChange;
-                    (_blue = Menu.Add("blue", new CheckBox("Blue buff"))).OnValueChange += OnValueChange;
-                    (_red = Menu.Add("red", new CheckBox("Red buff"))).OnValueChange += OnValueChange;
-                    SentinelManager.RecalculateOpenLocations();
+                    if (Game.MapId != GameMapId.SummonersRift)
+                    {
+                        Menu.AddLabel("Only on Summoners Rift, sorry.");
+                    }
+                    else
+                    {
+                        _enabled = Menu.Add("enabled", new CheckBox("Enabled"));
+                        _noMode = Menu.Add("noMode", new CheckBox("Only use when no mode active"));
+                        _alert = Menu.Add("alert", new CheckBox("Alert when sentinel is taking damage"));
+                        _mana = Menu.Add("mana", new Slider("Minimum mana available when casting W ({0}%)", 40));
+
+                        Menu.AddLabel("Send to the following locations (no specific order):");
+                        (_baron = Menu.Add("baron", new CheckBox("Baron (stuck bug usage)"))).OnValueChange += OnValueChange;
+                        (_dragon = Menu.Add("dragon", new CheckBox("Dragon (stuck bug usage)"))).OnValueChange += OnValueChange;
+                        (_mid = Menu.Add("mid", new CheckBox("Mid lane brush"))).OnValueChange += OnValueChange;
+                        (_blue = Menu.Add("blue", new CheckBox("Blue buff"))).OnValueChange += OnValueChange;
+                        (_red = Menu.Add("red", new CheckBox("Red buff"))).OnValueChange += OnValueChange;
+                        SentinelManager.RecalculateOpenLocations();
+                    }
                 }
 
                 private static void OnValueChange(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
                 {
                     SentinelManager.RecalculateOpenLocations();
                 }
-
+                
                 public static void Initialize()
                 {
                 }

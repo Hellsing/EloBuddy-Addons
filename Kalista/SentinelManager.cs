@@ -65,12 +65,15 @@ namespace Hellsing.Kalista
 
         static SentinelManager()
         {
-            // Listen to required events
-            Game.OnTick += OnTick;
-            GameObject.OnCreate += OnCreate;
+            if (Game.MapId == GameMapId.SummonersRift)
+            {
+                // Listen to required events
+                Game.OnTick += OnTick;
+                GameObject.OnCreate += OnCreate;
 
-            // Recalculate open sentinel locations
-            RecalculateOpenLocations();
+                // Recalculate open sentinel locations
+                RecalculateOpenLocations();
+            }
         }
 
         public static void Initialize()
