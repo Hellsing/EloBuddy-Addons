@@ -24,7 +24,7 @@ namespace TestAddon
         };
 
         // aka known bugs
-        private static readonly List<string> PropertiesToIgnore = new List<string>
+        public static readonly List<string> PropertiesToIgnore = new List<string>
         {
             "IsVisible", // General
             "OverrideCollisionHeight", // Obj_BarracksDampener

@@ -110,6 +110,27 @@ namespace TestAddon
             Menu.Add("AttackableUnit", new CheckBox("AttackableUnit", false)).CurrentValue = false;
             Menu.Add("GameObject", new CheckBox("GameObject (very laggy)", false)).CurrentValue = false;
 
+            if (GameObjectDiagnosis.PropertiesToIgnore.Count > 0)
+            {
+                Menu.AddSeparator();
+                Menu.AddLabel("Enable the disabled (bugged) properties:");
+                foreach (var property in GameObjectDiagnosis.PropertiesToIgnore)
+                {
+                    Menu.Add(property, new CheckBox(property)).CurrentValue = false;
+                    Menu[property].Cast<CheckBox>().OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
+                    {
+                        if (args.NewValue)
+                        {
+                            GameObjectDiagnosis.PropertiesToIgnore.Remove(sender.DisplayName);
+                        }
+                        else
+                        {
+                            GameObjectDiagnosis.PropertiesToIgnore.Add(sender.DisplayName);
+                        }
+                    };
+                }
+            }
+
             Menu.AddSeparator();
             Menu.AddLabel(string.Format("Note: Some of those tests will create a folder on your Desktop called '{0}'!", Path.GetFileName(Program.ResultPath)));
 
