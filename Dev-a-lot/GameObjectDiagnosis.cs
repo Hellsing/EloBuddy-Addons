@@ -26,8 +26,10 @@ namespace TestAddon
         // aka known bugs
         private static readonly List<string> PropertiesToIgnore = new List<string>
         {
-            "IsVisible",
-            "OverrideCollisionHeight"
+            "IsVisible", // General
+            "OverrideCollisionHeight", // Obj_BarracksDampener
+            "IsBot", // Obj_SpawnPoint
+            "IsRanged" // Obj_Barracks
         }; 
 
         public GameObject Handle { get; set; }
