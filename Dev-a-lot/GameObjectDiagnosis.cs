@@ -23,9 +23,11 @@ namespace TestAddon
             //typeof (Experience)
         };
 
+        // aka known bugs
         private static readonly List<string> PropertiesToIgnore = new List<string>
         {
-            "IsVisible"
+            "IsVisible",
+            "OverrideCollisionHeight"
         }; 
 
         public GameObject Handle { get; set; }
