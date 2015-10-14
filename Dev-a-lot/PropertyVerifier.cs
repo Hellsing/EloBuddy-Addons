@@ -112,7 +112,6 @@ namespace TestAddon
 
             if (GameObjectDiagnosis.PropertiesToIgnore.Count > 0)
             {
-                Menu.AddSeparator();
                 Menu.AddLabel("Enable the disabled (bugged) properties:");
                 foreach (var property in GameObjectDiagnosis.PropertiesToIgnore)
                 {
