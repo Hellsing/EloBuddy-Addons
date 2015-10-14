@@ -17,10 +17,10 @@ namespace TestAddon
 {
     internal class Program
     {
-        private static readonly string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        private static readonly string ResultPath = Path.Combine(DesktopPath, "Test Results");
+        public static readonly string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        public static readonly string ResultPath = Path.Combine(DesktopPath, "Test Results");
 
-        private static Menu Menu { get; set; }
+        public static Menu Menu { get; set; }
 
         private static bool ShowGeneral
         {
@@ -142,6 +142,11 @@ namespace TestAddon
                 Menu.Add("buffGain", new CheckBox("Obj_AI_Base.OnBuffGain", false)).CurrentValue = false;
                 Menu.Add("buffLose", new CheckBox("Obj_AI_Base.OnBuffLose", false)).CurrentValue = false;
 
+                // Initialize other things
+                Verifier.Initialize();
+
+
+                // Listen to all required events
                 Obj_AI_Base.OnBasicAttack += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs eventArgs)
                 {
                     if (BasicAttack)
