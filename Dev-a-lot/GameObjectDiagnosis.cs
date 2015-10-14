@@ -20,7 +20,7 @@ namespace TestAddon
             typeof (InventorySlot),
             typeof (Spellbook),
             typeof (SpellDataInst),
-            typeof (Experience)
+            //typeof (Experience)
         };
 
         private static readonly List<string> PropertiesToIgnore = new List<string>

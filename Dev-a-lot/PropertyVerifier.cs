@@ -8,7 +8,7 @@ using EloBuddy.SDK.Menu.Values;
 
 namespace TestAddon
 {
-    public static class Verifier
+    public static class PropertyVerifier
     {
         private static readonly Dictionary<GameObjectType, Type> TypeDictionary = new Dictionary<GameObjectType, Type>
         {
@@ -64,12 +64,14 @@ namespace TestAddon
             { typeof (GameObject), () => Menu["GameObject"].Cast<CheckBox>().CurrentValue }
         };
 
-        static Verifier()
+        static PropertyVerifier()
         {
-            // Create the menu
-            Menu = Program.Menu.AddSubMenu("Crash tests");
+            #region Menu Creation
 
-            Menu.AddGroupLabel("Core fail tests");
+            // Create the menu
+            Menu = Program.Menu.AddSubMenu("Property verifier");
+
+            Menu.AddGroupLabel("GameObject Type Verifier");
             Menu.Add("correctTypes", new CheckBox("Check if all types match", false)).CurrentValue = false;
             Menu["correctTypes"].Cast<CheckBox>().OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
             {
@@ -86,7 +88,7 @@ namespace TestAddon
                 }
             };
 
-            Menu.AddGroupLabel("Property Diagnosis");
+            Menu.AddGroupLabel("Property Verifier");
             Menu.Add("onUpdate", new CheckBox("Use Game.OnUpdate")).OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
             {
                 if (args.NewValue)
@@ -110,6 +112,8 @@ namespace TestAddon
 
             Menu.AddSeparator();
             Menu.AddLabel(string.Format("Note: Some of those tests will create a folder on your Desktop called '{0}'!", Path.GetFileName(Program.ResultPath)));
+
+            #endregion
 
             // Listen to required events
             Game.OnUpdate += delegate
@@ -153,22 +157,6 @@ namespace TestAddon
 
         public static void Initialize()
         {
-        }
-
-        private static void BlameFinn()
-        {
-            foreach (var obj in ObjectManager.Get<GameObject>())
-            {
-                if (!TypeDictionary.ContainsKey(obj.Type))
-                {
-                    Console.WriteLine("'{0}' was not found in dictionary!", obj.Type);
-                    continue;
-                }
-                if (TypeDictionary[obj.Type] != obj.GetType())
-                {
-                    Console.WriteLine("Blame finn0x, '{0}' is not '{1}' as expected with 'GameObjectType.{2}'!", obj.GetType().Name, TypeDictionary[obj.Type].Name, obj.Type);
-                }
-            }
         }
     }
 }

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
@@ -21,6 +19,8 @@ namespace TestAddon
         public static readonly string ResultPath = Path.Combine(DesktopPath, "Test Results");
 
         public static Menu Menu { get; set; }
+
+        #region Menu Values
 
         private static bool ShowGeneral
         {
@@ -60,46 +60,7 @@ namespace TestAddon
             get { return Menu["gridSize"].Cast<Slider>().CurrentValue; }
         }
 
-        private static bool BasicAttack
-        {
-            get { return Menu["basicAttack"].Cast<CheckBox>().CurrentValue; }
-        }
-        private static bool SpellCast
-        {
-            get { return Menu["spellCast"].Cast<CheckBox>().CurrentValue; }
-        }
-        private static bool ProcessSpell
-        {
-            get { return Menu["processSpell"].Cast<CheckBox>().CurrentValue; }
-        }
-        private static bool NewPath
-        {
-            get { return Menu["newPath"].Cast<CheckBox>().CurrentValue; }
-        }
-        private static bool StopCast
-        {
-            get { return Menu["stopCast"].Cast<CheckBox>().CurrentValue; }
-        }
-        private static bool Create
-        {
-            get { return Menu["create"].Cast<CheckBox>().CurrentValue; }
-        }
-        private static bool Delete
-        {
-            get { return Menu["delete"].Cast<CheckBox>().CurrentValue; }
-        }
-        private static bool Animation
-        {
-            get { return Menu["animation"].Cast<CheckBox>().CurrentValue; }
-        }
-        private static bool BuffGain
-        {
-            get { return Menu["buffGain"].Cast<CheckBox>().CurrentValue; }
-        }
-        private static bool BuffLose
-        {
-            get { return Menu["buffLose"].Cast<CheckBox>().CurrentValue; }
-        }
+        #endregion
 
         private static Vector2 CurrentGridPosition { get; set; }
         private static int CurrentGridSize { get; set; }
@@ -109,6 +70,8 @@ namespace TestAddon
         {
             Loading.OnLoadingComplete += delegate
             {
+                #region Menu Creation
+
                 // Setup a menu
                 Menu = MainMenu.AddMenu("Dev-a-lot", "devalot");
 
@@ -142,43 +105,13 @@ namespace TestAddon
                 Menu.Add("buffGain", new CheckBox("Obj_AI_Base.OnBuffGain", false)).CurrentValue = false;
                 Menu.Add("buffLose", new CheckBox("Obj_AI_Base.OnBuffLose", false)).CurrentValue = false;
 
-                // Initialize other things
-                Verifier.Initialize();
+                #endregion
 
+                // Initialize other things
+                EventVerifier.Initialize();
+                PropertyVerifier.Initialize();
 
                 // Listen to all required events
-                Obj_AI_Base.OnBasicAttack += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs eventArgs)
-                {
-                    if (BasicAttack)
-                    {
-                        OnProcessSpellCast(sender, eventArgs);
-                    }
-                };
-                Obj_AI_Base.OnSpellCast += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs eventArgs)
-                {
-                    if (SpellCast)
-                    {
-                        OnProcessSpellCast(sender, eventArgs);
-                    }
-                };
-                Obj_AI_Base.OnProcessSpellCast += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs eventArgs)
-                {
-                    if (ProcessSpell)
-                    {
-                        OnProcessSpellCast(sender, eventArgs);
-                    }
-                };
-
-                Obj_AI_Base.OnBuffGain += OnBuffGain;
-                Obj_AI_Base.OnBuffLose += OnBuffLose;
-                Obj_AI_Base.OnNewPath += OnNewPath;
-                Obj_AI_Base.OnPlayAnimation += OnPlayAnimation;
-
-                Spellbook.OnStopCast += OnStopCast;
-
-                GameObject.OnCreate += OnCreate;
-                GameObject.OnDelete += OnDelete;
-
                 Messages.RegisterEventHandler<Messages.MouseMove>(OnMouseMove);
 
                 Drawing.OnDraw += delegate
@@ -330,7 +263,8 @@ namespace TestAddon
                             var damageWithPassive = Player.Instance.GetAutoAttackDamage(baseObject, true);
                             var damageWithoutPassive = Player.Instance.GetAutoAttackDamage(baseObject);
                             var difference = Math.Round(damageWithPassive - damageWithoutPassive);
-                            Drawing.DrawText(baseObject.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0} ({1})", damageWithPassive, string.Concat(difference > 0 ? "+" : "", difference)), 10);
+                            Drawing.DrawText(baseObject.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0} ({1})", damageWithPassive, string.Concat(difference > 0 ? "+" : "", difference)),
+                                10);
                         }
                     }
 
@@ -359,62 +293,6 @@ namespace TestAddon
                                 }
                             }
                         }
-                    }
-                };
-
-                return;
-
-                Game.OnUpdate += delegate
-                {
-                    using (var writer = File.CreateText(Path.Combine(ResultPath, "ObjectManager.Obj_AI_Minion.txt")))
-                    {
-                        writer.WriteLine("----------------------------------------------------------------------------------");
-                        writer.WriteLine("OnUpdate, analysing all Obj_AI_Minion properties in ObjectManager...");
-                        writer.WriteLine("----------------------------------------------------------------------------------");
-                        writer.Flush();
-                        foreach (var obj in ObjectManager.Get<Obj_AI_Minion>())
-                        {
-                            writer.WriteLine("Checking if current unit is valid");
-                            writer.Flush();
-                            if (obj.IsValidTarget())
-                            {
-                                writer.Write(" - Object type: ");
-                                writer.Flush();
-                                writer.WriteLine(obj.GetType().Name);
-                                /*
-                                writer.WriteLine("----------------------------------------------------------------------------------");
-                                writer.WriteLine("Analyzing all public properties of " + obj.GetType().Name);
-                                writer.WriteLine("----------------------------------------------------------------------------------");
-                                writer.Flush();
-                                foreach (var propertyInfo in obj.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                                {
-                                    writer.Write(" - " + propertyInfo.Name + ": ");
-                                    writer.Flush();
-                                    writer.WriteLine(propertyInfo.GetValue(obj));
-                                    writer.Flush();
-                                }
-                                */
-                                writer.WriteLine("----------------------------------------------------------------------------------");
-                                writer.WriteLine("Analyzing all buffs of " + obj.GetType().Name);
-                                writer.WriteLine("----------------------------------------------------------------------------------");
-                                writer.Flush();
-                                foreach (var buff in obj.Buffs)
-                                {
-                                    writer.WriteLine("------------------- Analyzing new buff");
-                                    writer.Flush();
-                                    foreach (var propertyInfo in buff.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                                    {
-                                        writer.Write(" - " + propertyInfo.Name + ": ");
-                                        writer.Flush();
-                                        writer.WriteLine(propertyInfo.GetValue(buff));
-                                        writer.Flush();
-                                    }
-                                }
-                            }
-                        }
-                        writer.WriteLine("----------------------------------------------------------------------------------");
-                        writer.WriteLine("Analyzing ObjectManager complete!");
-                        writer.WriteLine("----------------------------------------------------------------------------------");
                     }
                 };
             };
@@ -457,388 +335,6 @@ namespace TestAddon
                         GridHeight[(short) x].Add((short) y, NavMesh.GetHeightForPosition(pos.X, pos.Y));
                     }
                 }
-            }
-        }
-
-        private static void OnBuffGain(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)
-        {
-            if (!BuffGain)
-            {
-                return;
-            }
-
-            if (!Directory.Exists(ResultPath))
-            {
-                Directory.CreateDirectory(ResultPath);
-            }
-
-            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
-            {
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("OnBuffGain, analysing properties...");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                writer.Write(" - Sender type: ");
-                writer.Flush();
-                writer.WriteLine(sender.GetType().Name);
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of sender");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(sender, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing buff");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in args.Buff.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(args.Buff, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing OnBuffGain complete!");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine();
-            }
-        }
-
-        private static void OnBuffLose(Obj_AI_Base sender, Obj_AI_BaseBuffLoseEventArgs args)
-        {
-            if (!BuffLose)
-            {
-                return;
-            }
-
-            if (!Directory.Exists(ResultPath))
-            {
-                Directory.CreateDirectory(ResultPath);
-            }
-
-            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
-            {
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("OnBuffLose, analysing properties...");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                writer.Write(" - Sender type: ");
-                writer.Flush();
-                writer.WriteLine(sender.GetType().Name);
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of sender");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(sender, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing buff");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in args.Buff.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(args.Buff, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing OnBuffLose complete!");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine();
-            }
-        }
-
-        private static void OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
-        {
-            if (!Animation)
-            {
-                return;
-            }
-
-            if (!Directory.Exists(ResultPath))
-            {
-                Directory.CreateDirectory(ResultPath);
-            }
-
-            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
-            {
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("OnPlayAnimation, analysing properties...");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                writer.Write(" - Sender type: ");
-                writer.Flush();
-                writer.WriteLine(sender.GetType().Name);
-                writer.Write(" - Animation: ");
-                writer.Flush();
-                writer.WriteLine(args.Animation);
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of sender");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(sender, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing OnPlayAnimation complete!");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine();
-            }
-        }
-
-        private static void OnDelete(GameObject sender, EventArgs args)
-        {
-            if (!Delete)
-            {
-                return;
-            }
-
-            if (!Directory.Exists(ResultPath))
-            {
-                Directory.CreateDirectory(ResultPath);
-            }
-
-            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
-            {
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("OnDelete, analysing properties...");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                writer.Write(" - Sender type: ");
-                writer.Flush();
-                writer.WriteLine(sender.GetType().Name);
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of sender");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(sender, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing OnDelete complete!");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine();
-            }
-        }
-
-        private static void OnCreate(GameObject sender, EventArgs args)
-        {
-            if (!Create)
-            {
-                return;
-            }
-
-            if (!Directory.Exists(ResultPath))
-            {
-                Directory.CreateDirectory(ResultPath);
-            }
-
-            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
-            {
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("OnCreate, analysing properties...");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                writer.Write(" - Sender type: ");
-                writer.Flush();
-                writer.WriteLine(sender.GetType().Name);
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of sender");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(sender, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing OnCreate complete!");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine();
-            }
-        }
-
-        private static void OnStopCast(Obj_AI_Base sender, SpellbookStopCastEventArgs args)
-        {
-            if (!StopCast)
-            {
-                return;
-            }
-
-            if (!Directory.Exists(ResultPath))
-            {
-                Directory.CreateDirectory(ResultPath);
-            }
-
-            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
-            {
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("OnStopCast, analysing properties...");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                writer.Write(" - Sender type: ");
-                writer.Flush();
-                writer.WriteLine(sender.GetType().Name);
-                writer.Write(" - Sender name: ");
-                writer.Flush();
-                writer.WriteLine(sender.BaseSkinName);
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of sender");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(sender, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of SpellbookStopCastEventArgs");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in args.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(args, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing OnStopCast complete!");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine();
-            }
-        }
-
-        private static void OnNewPath(Obj_AI_Base sender, GameObjectNewPathEventArgs args)
-        {
-            if (!NewPath)
-            {
-                return;
-            }
-
-            if (!Directory.Exists(ResultPath))
-            {
-                Directory.CreateDirectory(ResultPath);
-            }
-
-            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
-            {
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("OnNewPath, analysing properties...");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                writer.Write(" - Sender type: ");
-                writer.Flush();
-                writer.WriteLine(sender.GetType().Name);
-                writer.Write(" - Sender name: ");
-                writer.Flush();
-                writer.WriteLine(sender.BaseSkinName);
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of sender");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(sender, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of GameObjectNewPathEventArgs");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in args.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(args, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing OnNewPath complete!");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine();
-            }
-        }
-
-        private static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (!Directory.Exists(ResultPath))
-            {
-                Directory.CreateDirectory(ResultPath);
-            }
-
-            using (var writer = File.CreateText(Path.Combine(ResultPath, MethodBase.GetCurrentMethod().Name + ".txt")))
-            {
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("OnProcessSpellCast (" + new StackTrace().GetFrame(1).GetMethod().Name + "), analysing properties...");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                writer.Write(" - Sender type: ");
-                writer.Flush();
-                writer.WriteLine(sender.GetType().Name);
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of sender");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in sender.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(sender, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing all public properties of GameObjectProcessSpellCastEventArgs");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in args.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(args, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("All properties analyzed, analyzing underlaying SData");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.Flush();
-                foreach (var propertyInfo in args.SData.GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead && propertyInfo.GetGetMethod() != null))
-                {
-                    writer.Write(" - " + propertyInfo.Name + ": ");
-                    writer.Flush();
-                    writer.WriteLine(propertyInfo.GetValue(args.SData, null));
-                    writer.Flush();
-                }
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine("Analyzing OnProcessSpellCast complete!");
-                writer.WriteLine("----------------------------------------------------------------------------------");
-                writer.WriteLine();
             }
         }
     }
