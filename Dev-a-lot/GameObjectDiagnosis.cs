@@ -44,6 +44,13 @@ namespace TestAddon
             Writer = writer ?? File.CreateText(fileLocation ?? FileLocation);
             DisposeWriter = writer == null;
 
+            if (Handle == null)
+            {
+                WriteLine("Handle is null!");
+                Flush();
+                throw new ArgumentNullException("obj");
+            }
+
             // Create header
             WriteLine("------------------------------------------------------------------------------------------------");
             WriteLine("Analyzing GameObject of System.Type: {0}", Handle.GetType().Name);
@@ -54,7 +61,7 @@ namespace TestAddon
             WriteLine();
         }
 
-        public void Analyze(object toAnalyze = null, bool analyzeHandle = true)
+        public void Analyze(object toAnalyze = null, bool analyzeHandle = true, bool recursiveCheck = true)
         {
             if (toAnalyze != null && !ObjectsToDeeplyAnalyze.Any(o => o.IsInstanceOfType(toAnalyze)))
             {
@@ -129,16 +136,19 @@ namespace TestAddon
                             var gameObject = value as GameObject;
                             if (gameObject == null || !_analyzedObejcts.Contains(gameObject.NetworkId))
                             {
-                                CurrentRecursiveDepth++;
-                                if (CurrentRecursiveDepth < MaxRecursiveDepth && value != null)
+                                if (recursiveCheck)
                                 {
-                                    CurrentIndent++;
-                                    AddIndentString();
-                                    Analyze(value, false);
-                                    CurrentIndent--;
-                                    WriteLine();
+                                    CurrentRecursiveDepth++;
+                                    if (CurrentRecursiveDepth < MaxRecursiveDepth && value != null)
+                                    {
+                                        CurrentIndent++;
+                                        AddIndentString();
+                                        Analyze(value, false);
+                                        CurrentIndent--;
+                                        WriteLine();
+                                    }
+                                    CurrentRecursiveDepth--;
                                 }
-                                CurrentRecursiveDepth--;
                             }
                         }
                     }

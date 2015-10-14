@@ -69,7 +69,7 @@ namespace TestAddon
             Menu.Add("processSpell", new CheckBox("Obj_AI_Base.OnProcessSpellCast", false)).CurrentValue = false;
             Menu.Add("stopCast", new CheckBox("Spellbook.OnStopCast", false)).CurrentValue = false;
             Menu.Add("newPath", new CheckBox("Obj_AI_Base.OnNewPath", false)).CurrentValue = false;
-            Menu.Add("animation", new CheckBox("Obj_AI_Base.OnPlayAnimation", false)).CurrentValue = false;
+            Menu.Add("animation", new CheckBox("Obj_AI_Base.OnPlayAnimation (laggy)", false)).CurrentValue = false;
             Menu.Add("create", new CheckBox("GameObject.OnCreate", false)).CurrentValue = false;
             Menu.Add("delete", new CheckBox("GameObject.OnDelete", false)).CurrentValue = false;
             Menu.Add("buffGain", new CheckBox("Obj_AI_Base.OnBuffGain", false)).CurrentValue = false;
@@ -172,8 +172,8 @@ namespace TestAddon
             {
                 using (var analyzer = new GameObjectDiagnosis(sender, writer))
                 {
-                    analyzer.Analyze();
-                    analyzer.Analyze(args, false);
+                    analyzer.Analyze(sender, true, false);
+                    analyzer.Analyze(args, false, false);
                 }
             }
         }
