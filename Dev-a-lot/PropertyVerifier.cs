@@ -104,11 +104,10 @@ namespace TestAddon
                 }
             };
             Menu.AddLabel("Note: This might cause your game to crash! Only use this if you know what you are doing!");
-            Menu.Add("AIHeroClient", new CheckBox("AIHeroClient", false)).CurrentValue = false;
-            Menu.Add("Obj_AI_Minion", new CheckBox("Obj_AI_Minion", false)).CurrentValue = false;
-            Menu.Add("Obj_AI_Base", new CheckBox("Obj_AI_Base", false)).CurrentValue = false;
-            Menu.Add("AttackableUnit", new CheckBox("AttackableUnit", false)).CurrentValue = false;
-            Menu.Add("GameObject", new CheckBox("GameObject (very laggy)", false)).CurrentValue = false;
+            foreach (var entry in TypeDictionary)
+            {
+                Menu.Add(entry.Value.Name, new CheckBox(entry.Value.Name, false)).CurrentValue = false;
+            }
 
             if (GameObjectDiagnosis.PropertiesToIgnore.Count > 0)
             {
@@ -152,9 +151,15 @@ namespace TestAddon
             };
         }
 
+        private static IEnumerable<Type> GetCurrentlyEnabled()
+        {
+            return TypeDictionary.Values.Where(type => Menu[type.Name].Cast<CheckBox>().CurrentValue);
+        }
+
         private static void VerifyObjects()
         {
-            var objects = (from obj in ObjectManager.Get<GameObject>() from entry in CurrentlyEnabled.Where(entry => entry.Key.IsInstanceOfType(obj) && entry.Value()) select obj).ToList();
+            var currentlyEnabled = GetCurrentlyEnabled();
+            var objects = ObjectManager.Get<GameObject>().Where(o => currentlyEnabled.Any(type => type.IsInstanceOfType(o))).ToList();
             if (objects.Count > 0)
             {
                 if (!Directory.Exists(Program.ResultPath))
