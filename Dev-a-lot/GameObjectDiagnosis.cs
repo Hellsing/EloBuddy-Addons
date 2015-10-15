@@ -146,7 +146,7 @@ namespace TestAddon
                                     if (CurrentRecursiveDepth < MaxRecursiveDepth && value != null)
                                     {
                                         CurrentIndent++;
-                                        AddIndentString();
+                                        Write(IndentString);
                                         Analyze(value, false);
                                         CurrentIndent--;
                                         WriteLine();
