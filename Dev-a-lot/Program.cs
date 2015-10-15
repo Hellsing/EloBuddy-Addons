@@ -20,7 +20,7 @@ namespace TestAddon
         public static readonly string ResultPath = Path.Combine(DesktopPath, "Test Results");
 
         private const string BuffsFormatNormal = "DisplayName: {0} | Caster: {1} | Count: {2}";
-        private const string BuffsFormatAdvanced = "DisplayName: {0} | Name: {1} | Caster {2} | SourceName: {3} | Count: {4} | RemainingTime: {5}";
+        private const string BuffsFormatAdvanced = "DisplayName: {0} | Name: {1} | Caster: {2} | SourceName: {3} | Count: {4} | RemainingTime: {5}";
 
         public static Menu Menu { get; set; }
 
@@ -267,14 +267,12 @@ namespace TestAddon
                                 if (ShowBuffsAdv)
                                 {
                                     var endTime = Math.Max(0, buff.EndTime - Game.Time);
-                                    // DisplayName: {0} | Name: {1} | Caster {2} | SourceName: {3} | Count: {4} | RemainingTime: {5}
                                     Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
                                         string.Format(BuffsFormatAdvanced, buff.DisplayName, buff.Name, buff.Caster.Name, buff.SourceName, buff.Count,
                                         endTime > 1000 ? "Infinite" : Convert.ToString(endTime, CultureInfo.InvariantCulture), buff.Name), 10);
                                 }
                                 else
                                 {
-                                    // DisplayName: {0} | Caster: {1} | Count: {2}
                                     Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
                                         string.Format(BuffsFormatNormal, buff.DisplayName, buff.Caster.Name, buff.Count), 10);
                                 }
