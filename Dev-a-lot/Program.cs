@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using EloBuddy;
@@ -18,6 +19,9 @@ namespace TestAddon
         public static readonly string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         public static readonly string ResultPath = Path.Combine(DesktopPath, "Test Results");
 
+        private const string BuffsFormatNormal = "DisplayName: {0} | Caster: {1} | Count: {2}";
+        private const string BuffsFormatAdvanced = "DisplayName: {0} | Name: {1} | Caster {2} | SourceName: {3} | Count: {4} | RemainingTime: {5}";
+
         public static Menu Menu { get; set; }
 
         #region Menu Values
@@ -29,6 +33,10 @@ namespace TestAddon
         private static bool ShowBuffs
         {
             get { return Menu["buffs"].Cast<CheckBox>().CurrentValue; }
+        }
+        private static bool ShowBuffsAdv
+        {
+            get { return Menu["buffs+"].Cast<CheckBox>().CurrentValue; }
         }
         private static bool HeroesOnly
         {
@@ -79,11 +87,12 @@ namespace TestAddon
                 // Setup a menu
                 Menu = MainMenu.AddMenu("Dev-a-lot", "devalot");
 
-                Menu.AddGroupLabel("General Obj_AI_Base analyzing");
-                Menu.Add("general", new CheckBox("General properties", false));
-                Menu.Add("buffs", new CheckBox("Show buffs", false));
-                Menu.Add("heroes", new CheckBox("Heroes only")).CurrentValue = true;
-                Menu.Add("autoAttack", new CheckBox("Show auto attack damage", false));
+                Menu.AddGroupLabel("General GameObject analyzing");
+                Menu.Add("general", new CheckBox("General properties", false)).CurrentValue = false;
+                Menu.Add("heroes", new CheckBox("Heroes only"));
+                Menu.Add("buffs", new CheckBox("Show buffs", false)).CurrentValue = false;
+                Menu.Add("buffs+", new CheckBox("Show more buff info", false));
+                Menu.Add("autoAttack", new CheckBox("Show auto attack damage", false)).CurrentValue = false;
                 if (Player.Instance.Hero == Champion.Azir)
                 {
                     Menu.Add("azir", new CheckBox("Analyze Azir soldiers", false));
@@ -255,9 +264,20 @@ namespace TestAddon
                             i += step;
                             foreach (var buff in baseObject.Buffs.Where(o => o.IsValid()))
                             {
-                                Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
-                                    string.Format("DisplayName: {0} | Caster: {1} | Count: {2} | EndTime: {3}", buff.DisplayName, buff.Caster.Name, buff.Count,
-                                        Math.Max(0, Math.Min(1337, buff.EndTime - Game.Time))), 10);
+                                if (ShowBuffsAdv)
+                                {
+                                    var endTime = Math.Max(0, buff.EndTime - Game.Time);
+                                    // DisplayName: {0} | Name: {1} | Caster {2} | SourceName: {3} | Count: {4} | RemainingTime: {5}
+                                    Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
+                                        string.Format(BuffsFormatAdvanced, buff.DisplayName, buff.Name, buff.Caster.Name, buff.SourceName, buff.Count,
+                                        endTime > 1000 ? "Infinite" : Convert.ToString(endTime, CultureInfo.InvariantCulture), buff.Name), 10);
+                                }
+                                else
+                                {
+                                    // DisplayName: {0} | Caster: {1} | Count: {2}
+                                    Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
+                                        string.Format(BuffsFormatNormal, buff.DisplayName, buff.Caster.Name, buff.Count), 10);
+                                }
                                 i += step;
                             }
                         }
