@@ -89,7 +89,7 @@ namespace TestAddon
             };
 
             Menu.AddGroupLabel("Property Verifier");
-            Menu.Add("onUpdate", new CheckBox("Use Game.OnUpdate")).OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
+            Menu.Add("onUpdate", new CheckBox("Use Game.OnUpdate", false)).OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
             {
                 if (args.NewValue)
                 {
@@ -169,6 +169,10 @@ namespace TestAddon
 
                 using (var writer = File.CreateText(Path.Combine(Program.ResultPath, "PropertyDiagnosis.txt")))
                 {
+                    writer.WriteLine("Verifying a total of {0} GameObjects!", objects.Count);
+                    writer.WriteLine();
+                    writer.Flush();
+
                     foreach (var obj in objects)
                     {
                         using (var analyzer = new GameObjectDiagnosis(obj, writer))
