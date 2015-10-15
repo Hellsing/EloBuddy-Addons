@@ -187,7 +187,21 @@ namespace TestAddon
 
         private void WriteLine(string format, params object[] args)
         {
-            Write(format, args);
+            try
+            {
+                if (args == null)
+                {
+                    Write(format, "Null");
+                }
+                else
+                {
+                    Write(format, args);
+                }
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Wrong format: {0}\nArgs: {1}", format, args == null ? "Null" : string.Join(", ", args));
+            }
             WriteLine();
         }
 
@@ -208,7 +222,7 @@ namespace TestAddon
                 // Create footer
                 WriteLine();
                 WriteLine();
-                WriteLine("Recursive diagnosis of {0} complete!", Handle.GetType().Name);
+                WriteLine("Recursive diagnosis of {0} complete!", Handle != null ? Handle.GetType().Name : "Null");
                 WriteLine("------------------------------------------------------------------------------------------------");
                 Flush();
             }
