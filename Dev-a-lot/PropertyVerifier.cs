@@ -55,14 +55,7 @@ namespace TestAddon
             get { return Menu["onTick"].Cast<CheckBox>().CurrentValue; }
         }
 
-        public static readonly Dictionary<Type, Func<bool>> CurrentlyEnabled = new Dictionary<Type, Func<bool>>
-        {
-            { typeof (Obj_AI_Base), () => Menu["Obj_AI_Base"].Cast<CheckBox>().CurrentValue },
-            { typeof (Obj_AI_Minion), () => Menu["Obj_AI_Minion"].Cast<CheckBox>().CurrentValue },
-            { typeof (AIHeroClient), () => Menu["AIHeroClient"].Cast<CheckBox>().CurrentValue },
-            { typeof (AttackableUnit), () => Menu["AttackableUnit"].Cast<CheckBox>().CurrentValue },
-            { typeof (GameObject), () => Menu["GameObject"].Cast<CheckBox>().CurrentValue }
-        };
+        public static readonly Dictionary<GameObjectType, CheckBox> CurrentlyEnabled = new Dictionary<GameObjectType, CheckBox>();
 
         static PropertyVerifier()
         {
@@ -89,13 +82,14 @@ namespace TestAddon
             };
 
             Menu.AddGroupLabel("Property Verifier");
-            Menu.Add("onUpdate", new CheckBox("Use Game.OnUpdate", false)).OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
+            Menu.Add("onUpdate", new CheckBox("Use Game.OnUpdate (more checks)", false)).OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
             {
                 if (args.NewValue)
                 {
                     Menu["onTick"].Cast<CheckBox>().CurrentValue = false;
                 }
             };
+            Menu["onUpdate"].Cast<CheckBox>().CurrentValue = false;
             Menu.Add("onTick", new CheckBox("Use Game.OnTick", false)).OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
             {
                 if (args.NewValue)
@@ -103,10 +97,13 @@ namespace TestAddon
                     Menu["onUpdate"].Cast<CheckBox>().CurrentValue = false;
                 }
             };
+            Menu["onTick"].Cast<CheckBox>().CurrentValue = false;
             Menu.AddLabel("Note: This might cause your game to crash! Only use this if you know what you are doing!");
+            Menu.AddLabel("Note: Only direct matches are being checked, inherited types are ingored");
             foreach (var entry in TypeDictionary)
             {
-                Menu.Add(entry.Value.Name, new CheckBox(entry.Value.Name, false)).CurrentValue = false;
+                CurrentlyEnabled.Add(entry.Key, Menu.Add(entry.Value.Name, new CheckBox(entry.Value.Name, false)));
+                CurrentlyEnabled[entry.Key].CurrentValue = false;
             }
 
             if (GameObjectDiagnosis.PropertiesToIgnore.Count > 0)
@@ -151,16 +148,16 @@ namespace TestAddon
             };
         }
 
-        private static IEnumerable<Type> GetCurrentlyEnabled()
+        private static IEnumerable<GameObjectType> GetCurrentlyEnabled()
         {
-            return TypeDictionary.Values.Where(type => Menu[type.Name].Cast<CheckBox>().CurrentValue);
+            return CurrentlyEnabled.Where(o => o.Value.CurrentValue).Select(o => o.Key).ToArray();
         }
 
         private static void VerifyObjects()
         {
             var currentlyEnabled = GetCurrentlyEnabled();
-            var objects = ObjectManager.Get<GameObject>().Where(o => currentlyEnabled.Any(type => type.IsInstanceOfType(o))).ToList();
-            if (objects.Count > 0)
+            var objects = ObjectManager.Get<GameObject>().Where(o => currentlyEnabled.Contains(o.Type)).ToArray();
+            if (objects.Length > 0)
             {
                 if (!Directory.Exists(Program.ResultPath))
                 {
@@ -169,7 +166,7 @@ namespace TestAddon
 
                 using (var writer = File.CreateText(Path.Combine(Program.ResultPath, "PropertyDiagnosis.txt")))
                 {
-                    writer.WriteLine("Verifying a total of {0} GameObjects!", objects.Count);
+                    writer.WriteLine("Verifying a total of {0} GameObjects!", objects.Length);
                     writer.WriteLine();
                     writer.Flush();
 
