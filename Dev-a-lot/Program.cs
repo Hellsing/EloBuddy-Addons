@@ -30,6 +30,10 @@ namespace TestAddon
         {
             get { return Menu["buffs"].Cast<CheckBox>().CurrentValue; }
         }
+        private static bool HeroesOnly
+        {
+            get { return Menu["heroes"].Cast<CheckBox>().CurrentValue; }
+        }
         private static bool ShowAaDamage
         {
             get { return Menu["autoAttack"].Cast<CheckBox>().CurrentValue; }
@@ -196,7 +200,7 @@ namespace TestAddon
                         Circle.Draw(SharpDX.Color.Red, analyzeRange, Game.CursorPos);
                     }
 
-                    foreach (var obj in ObjectManager.Get<GameObject>().Where(o => o.VisibleOnScreen))
+                    foreach (var obj in (HeroesOnly ? ObjectManager.Get<AIHeroClient>() : ObjectManager.Get<GameObject>()).Where(o => o.VisibleOnScreen))
                     {
                         var i = 0;
                         const int step = 20;
