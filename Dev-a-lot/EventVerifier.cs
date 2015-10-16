@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using EloBuddy;
 using EloBuddy.SDK.Menu;
@@ -58,6 +57,10 @@ namespace TestAddon
         {
             get { return Menu["buffLose"].Cast<CheckBox>().CurrentValue; }
         }
+        private static bool IssueOrder
+        {
+            get { return Menu["issueOrder"].Cast<CheckBox>().CurrentValue; }
+        }
 
         #endregion
 
@@ -81,6 +84,7 @@ namespace TestAddon
             Menu.Add("delete", new CheckBox("GameObject.OnDelete", false)).CurrentValue = false;
             Menu.Add("buffGain", new CheckBox("Obj_AI_Base.OnBuffGain", false)).CurrentValue = false;
             Menu.Add("buffLose", new CheckBox("Obj_AI_Base.OnBuffLose", false)).CurrentValue = false;
+            Menu.Add("issueOrder", new CheckBox("Player.OnIssueOrder", false)).CurrentValue = false;
 
             Menu.AddSeparator();
             Menu.AddLabel(string.Format("Note: All of those tests will create a folder on your Desktop called '{0}'!", Path.GetFileName(Program.ResultPath)));
@@ -158,6 +162,13 @@ namespace TestAddon
                 if (Delete)
                 {
                     Verify(sender, args, "OnDelete", true); // Forced recursive check
+                }
+            };
+            Player.OnIssueOrder += delegate(Obj_AI_Base sender, PlayerIssueOrderEventArgs args)
+            {
+                if (IssueOrder)
+                {
+                    Verify(sender, args, "OnIssueOrder", RecursiveCheck);
                 }
             };
 

@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EloBuddy;
+using SharpDX;
 
 namespace TestAddon
 {
     public class GameObjectDiagnosis : IDisposable
     {
         public const string IndentString = "    ";
-        public const int MaxRecursiveDepth = 5;
+        public const int MaxRecursiveDepth = 4;
         public static int SingleDiagnosisCount { get; set; }
 
         private static readonly List<Type> ObjectsToDeeplyAnalyze = new List<Type>
@@ -20,7 +21,8 @@ namespace TestAddon
             typeof (InventorySlot),
             typeof (Spellbook),
             typeof (SpellDataInst),
-            //typeof (Experience)
+            typeof (Experience),
+            typeof (Vector3)
         };
 
         // aka known bugs
@@ -29,8 +31,16 @@ namespace TestAddon
             "IsVisible", // General
             "OverrideCollisionHeight", // Obj_BarracksDampener
             "IsBot", // Obj_SpawnPoint
-            "IsRanged" // Obj_Barracks
-        }; 
+            "IsRanged", // Obj_Barracks
+            "ResourceName"
+        };
+
+        public static readonly List<string> PreferredProperties = new List<string>
+        {
+            "ChampionName",
+            "BaseSkinName",
+            "Name"
+        };
 
         public GameObject Handle { get; set; }
         public StreamWriter Writer { get; set; }
@@ -39,7 +49,8 @@ namespace TestAddon
 
         private int CurrentIndent { get; set; }
         private readonly List<int> _analyzedObejcts = new List<int>();
-        private int CurrentRecursiveDepth { get; set; }
+        public int CurrentRecursiveDepth { get; set; }
+        public string CurrentProperty { get; set; }
 
         public GameObjectDiagnosis(GameObject obj, StreamWriter writer = null, string fileLocation = null)
         {
@@ -86,10 +97,15 @@ namespace TestAddon
 
             WriteLine("Properties of {0}:", (toAnalyze ?? Handle).GetType().Name);
             WriteLine("------------------------");
-            foreach (var propertyInfo in (toAnalyze ?? Handle).GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead))
+
+            var properties = (toAnalyze ?? Handle).GetType().GetProperties().Where(propertyInfo => propertyInfo.CanRead).ToList();
+            var preferredProperties = properties.Where(o => PreferredProperties.Contains(o.Name)).ToList();
+
+            foreach (var propertyInfo in preferredProperties.Concat(properties.Where(o => !preferredProperties.Contains(o))))
             {
                 Write(" - " + propertyInfo.Name + ": ");
                 Flush();
+                CurrentProperty = propertyInfo.Name;
 
                 if (PropertiesToIgnore.Contains(propertyInfo.Name))
                 {
@@ -100,7 +116,7 @@ namespace TestAddon
                     var value = propertyInfo.GetValue((toAnalyze ?? Handle), null);
 
                     // Collections
-                    if ((propertyInfo.PropertyType.IsArray || typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType)) && !typeof(string).IsAssignableFrom(propertyInfo.PropertyType))
+                    if ((propertyInfo.PropertyType.IsArray || typeof (IEnumerable).IsAssignableFrom(propertyInfo.PropertyType)) && !typeof (string).IsAssignableFrom(propertyInfo.PropertyType))
                     {
                         var contentType = propertyInfo.PropertyType.GetElementType() ?? propertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
                         if (contentType != null)
@@ -142,16 +158,16 @@ namespace TestAddon
                             {
                                 if (recursiveCheck)
                                 {
-                                    CurrentRecursiveDepth++;
                                     if (CurrentRecursiveDepth < MaxRecursiveDepth && value != null)
                                     {
+                                        CurrentRecursiveDepth++;
                                         CurrentIndent++;
                                         Write(IndentString);
                                         Analyze(value, false);
                                         CurrentIndent--;
                                         WriteLine();
+                                        CurrentRecursiveDepth--;
                                     }
-                                    CurrentRecursiveDepth--;
                                 }
                             }
                         }
@@ -198,9 +214,11 @@ namespace TestAddon
                     Write(format, args);
                 }
             }
-            catch (FormatException)
+            catch (FormatException e)
             {
-                Console.WriteLine("Wrong format: {0}\nArgs: {1}", format, args == null ? "Null" : string.Join(", ", args));
+                Console.WriteLine("Wrong property value format!");
+                Console.WriteLine("Original handle: {0}", Handle != null ? Handle.Type.ToString() : "Null");
+                Console.WriteLine("Current Property: {0}", CurrentProperty);
             }
             WriteLine();
         }
