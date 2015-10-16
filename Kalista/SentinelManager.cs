@@ -109,7 +109,7 @@ namespace Hellsing.Kalista
             }
 
             // Auto sentinel management
-            if (Settings.Enabled && SpellManager.W.IsReady() && Player.Instance.ManaPercent() >= Settings.Mana && !Player.Instance.IsRecalling)
+            if (Settings.Enabled && SpellManager.W.IsReady() && Player.Instance.ManaPercent() >= Settings.Mana && !Player.Instance.IsRecalling())
             {
                 if (!Settings.NoModeOnly || Orbwalker.ActiveModesFlags == Orbwalker.ActiveModes.None)
                 {

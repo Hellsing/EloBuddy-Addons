@@ -125,7 +125,7 @@ namespace TestAddon
 
                             if (ObjectsToDeeplyAnalyze.Any(o => o.IsAssignableFrom(contentType)))
                             {
-                                var array = propertyInfo.PropertyType.IsArray ? ((object[]) value) : ((IEnumerable) value).Cast<object>().ToArray();
+                                var array = ((IEnumerable) value).Cast<object>().ToArray();
                                 if (array.Length > 0)
                                 {
                                     Flush();
