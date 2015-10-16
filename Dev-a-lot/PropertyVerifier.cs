@@ -170,15 +170,76 @@ namespace TestAddon
                     writer.WriteLine();
                     writer.Flush();
 
+                    var times = new Dictionary<double, string>();
+
                     foreach (var obj in objects)
                     {
                         using (var analyzer = new GameObjectDiagnosis(obj, writer))
                         {
                             analyzer.Analyze();
+                            foreach (var time in analyzer.ComputeTimes)
+                            {
+                                times[time.Key] = time.Value;
+                            }
+                        }
+                    }
+
+                    var computeResults = new List<AnalyzeComputeResult>();
+                    foreach (var time in times)
+                    {
+                        if (computeResults.All(o => o.Property != time.Value))
+                        {
+                            computeResults.Add(new AnalyzeComputeResult
+                            {
+                                Property = time.Value,
+                                All = new List<double> { time.Key }
+                            });
+                        }
+                        else
+                        {
+                            computeResults.First(o => o.Property == time.Value).All.Add(time.Key);
+                        }
+                    }
+
+                    var orderedTimes = computeResults.OrderByDescending(o => o.Average).ToArray();
+                    if (orderedTimes.Length > 0)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine();
+                        writer.WriteLine("Top {0} compute times:", Math.Min(100, orderedTimes.Length));
+                        for (var i = 0; i < Math.Min(100, orderedTimes.Length); i++)
+                        {
+                            writer.WriteLine(" - {0}:", orderedTimes[i].Property);
+                            writer.WriteLine("     - Average: {0}", orderedTimes[i].Average);
+                            writer.WriteLine("     - Min:     {0}", orderedTimes[i].Min);
+                            writer.WriteLine("     - Max:     {0}", orderedTimes[i].Max);
+                            writer.WriteLine("     - Amount:  {0}", orderedTimes[i].Amount);
                         }
                     }
                 }
             }
+        }
+
+        public class AnalyzeComputeResult
+        {
+            public string Property { get; set; }
+            public int Amount
+            {
+                get { return All.Count; }
+            }
+            public double Min
+            {
+                get { return All.Min(); }
+            }
+            public double Max
+            {
+                get { return All.Max(); }
+            }
+            public double Average
+            {
+                get { return All.Sum() / All.Count; }
+            }
+            public List<double> All { get; set; } 
         }
 
         public static void Initialize()

@@ -105,19 +105,6 @@ namespace TestAddon
                 Menu.Add("grid", new CheckBox("Visualize game grid", false));
                 Menu.Add("gridSize", new Slider("Grid size {0} x {0}", 11, 1, 55)).OnValueChange += delegate { OnMouseMove(null); };
 
-                Menu.AddGroupLabel("Core event property stress tests, no use for addon devs");
-                Menu.AddLabel("This will create a folder on your desktop called 'Test Results'");
-                Menu.Add("basicAttack", new CheckBox("Obj_AI_Base.OnBasicAttack", false)).CurrentValue = false;
-                Menu.Add("spellCast", new CheckBox("Obj_AI_Base.OnSpellCast", false)).CurrentValue = false;
-                Menu.Add("processSpell", new CheckBox("Obj_AI_Base.OnProcessSpellCast", false)).CurrentValue = false;
-                Menu.Add("stopCast", new CheckBox("Spellbook.OnStopCast", false)).CurrentValue = false;
-                Menu.Add("newPath", new CheckBox("Obj_AI_Base.OnNewPath", false)).CurrentValue = false;
-                Menu.Add("animation", new CheckBox("Obj_AI_Base.OnPlayAnimation", false)).CurrentValue = false;
-                Menu.Add("create", new CheckBox("GameObject.OnCreate", false)).CurrentValue = false;
-                Menu.Add("delete", new CheckBox("GameObject.OnDelete", false)).CurrentValue = false;
-                Menu.Add("buffGain", new CheckBox("Obj_AI_Base.OnBuffGain", false)).CurrentValue = false;
-                Menu.Add("buffLose", new CheckBox("Obj_AI_Base.OnBuffLose", false)).CurrentValue = false;
-
                 #endregion
 
                 // Initialize other things

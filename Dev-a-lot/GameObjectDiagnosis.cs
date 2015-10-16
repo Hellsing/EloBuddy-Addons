@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using EloBuddy;
@@ -39,7 +40,8 @@ namespace TestAddon
         {
             "ChampionName",
             "BaseSkinName",
-            "Name"
+            "Name",
+            "NetworkId"
         };
 
         public GameObject Handle { get; set; }
@@ -51,6 +53,7 @@ namespace TestAddon
         private readonly List<int> _analyzedObejcts = new List<int>();
         public int CurrentRecursiveDepth { get; set; }
         public string CurrentProperty { get; set; }
+        public readonly Dictionary<double, string> ComputeTimes = new Dictionary<double, string>();
 
         public GameObjectDiagnosis(GameObject obj, StreamWriter writer = null, string fileLocation = null)
         {
@@ -89,6 +92,8 @@ namespace TestAddon
                 return;
             }
 
+            var stopwatch = new Stopwatch();
+
             var gameObjectAnalyze = (toAnalyze ?? Handle) as GameObject;
             if (gameObjectAnalyze != null)
             {
@@ -113,7 +118,10 @@ namespace TestAddon
                 }
                 else
                 {
+                    stopwatch.Start();
                     var value = propertyInfo.GetValue((toAnalyze ?? Handle), null);
+                    stopwatch.Stop();
+                    ComputeTimes[stopwatch.ElapsedTicks / (double) TimeSpan.TicksPerMillisecond] = (toAnalyze ?? Handle).GetType().Name + "." + propertyInfo.Name;
 
                     // Collections
                     if ((propertyInfo.PropertyType.IsArray || typeof (IEnumerable).IsAssignableFrom(propertyInfo.PropertyType)) && !typeof (string).IsAssignableFrom(propertyInfo.PropertyType))
@@ -121,7 +129,7 @@ namespace TestAddon
                         var contentType = propertyInfo.PropertyType.GetElementType() ?? propertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
                         if (contentType != null)
                         {
-                            WriteLine("Collection<{0}>", contentType.Name);
+                            WriteLine("Collection<{0}>    ({1}ms)", contentType.Name, stopwatch.ElapsedTicks / (double) TimeSpan.TicksPerMillisecond);
 
                             if (ObjectsToDeeplyAnalyze.Any(o => o.IsAssignableFrom(contentType)))
                             {
@@ -131,12 +139,19 @@ namespace TestAddon
                                     Flush();
                                     CurrentIndent++;
                                     Write(IndentString);
+                                    stopwatch.Reset();
                                     for (var i = 0; i < array.Length - 1; i++)
                                     {
+                                        stopwatch.Start();
                                         Analyze(array[i], false);
+                                        stopwatch.Stop();
                                         WriteLine();
                                     }
+                                    stopwatch.Start();
                                     Analyze(array[array.Length - 1], false);
+                                    stopwatch.Stop();
+                                    WriteLine();
+                                    Write("Total analyze time: {0}ms", stopwatch.ElapsedTicks / (double) TimeSpan.TicksPerMillisecond);
                                     CurrentIndent--;
                                     WriteLine();
                                 }
@@ -144,12 +159,12 @@ namespace TestAddon
                         }
                         else
                         {
-                            WriteLine(value);
+                            WriteLine("{0}    ({1}ms)", value, stopwatch.ElapsedTicks / (double) TimeSpan.TicksPerMillisecond);
                         }
                     }
                     else
                     {
-                        WriteLine(value);
+                        WriteLine("{0}    ({1}ms)", value, stopwatch.ElapsedTicks / (double) TimeSpan.TicksPerMillisecond);
 
                         if (ObjectsToDeeplyAnalyze.Any(o => o.IsAssignableFrom(propertyInfo.PropertyType)))
                         {
@@ -163,7 +178,12 @@ namespace TestAddon
                                         CurrentRecursiveDepth++;
                                         CurrentIndent++;
                                         Write(IndentString);
+                                        stopwatch.Reset();
+                                        stopwatch.Start();
                                         Analyze(value, false);
+                                        stopwatch.Stop();
+                                        WriteLine();
+                                        Write("Total analyze time: {0}ms", stopwatch.ElapsedTicks / (double) TimeSpan.TicksPerMillisecond);
                                         CurrentIndent--;
                                         WriteLine();
                                         CurrentRecursiveDepth--;

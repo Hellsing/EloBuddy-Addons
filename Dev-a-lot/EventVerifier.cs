@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using EloBuddy;
+using EloBuddy.SDK.Enumerations;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
+using EloBuddy.SDK.Utils;
 
 namespace TestAddon
 {
@@ -190,8 +194,24 @@ namespace TestAddon
             {
                 using (var analyzer = new GameObjectDiagnosis(sender, writer))
                 {
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
                     analyzer.Analyze(sender, true, recursiveSender);
                     analyzer.Analyze(args, false, recursiveArgs);
+                    stopwatch.Stop();
+                    Logger.Log(LogLevel.Debug, "Total analyze time of {0}<{2}> (including disk IO): {1}ms", eventName, stopwatch.ElapsedTicks / (double) TimeSpan.TicksPerMillisecond, sender.GetType().Name);
+
+                    var times = analyzer.ComputeTimes.OrderByDescending(o => o.Key).ToArray();
+                    if (times.Length > 0)
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine();
+                        writer.WriteLine("Top {0} compute times:", Math.Min(10, times.Length));
+                        for (var i = 0; i < Math.Min(10, times.Length); i++)
+                        {
+                            writer.WriteLine(" - {0}: {1}ms", times[i].Value, times[i].Key);
+                        }
+                    }
                 }
             }
         }
