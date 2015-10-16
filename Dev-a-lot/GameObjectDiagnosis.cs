@@ -22,7 +22,7 @@ namespace TestAddon
             typeof (Spellbook),
             typeof (SpellDataInst),
             typeof (Experience),
-            typeof (Vector3)
+            typeof (EventArgs)
         };
 
         // aka known bugs
