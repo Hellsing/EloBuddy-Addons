@@ -32,7 +32,7 @@ namespace Hellsing.Kalista.Modes
             {
                 // Q usage
                 if (Q.IsReady() && Settings.UseQ && (!Settings.UseQAA || (Player.GetSpellDamage(target, SpellSlot.Q) > target.TotalShieldHealth() && !target.HasBuffOfType(BuffType.SpellShield))) &&
-                    Player.ManaPercent() >= Settings.ManaQ && Q.Cast(target))
+                    Player.ManaPercent >= Settings.ManaQ && Q.Cast(target))
                 {
                     return;
                 }

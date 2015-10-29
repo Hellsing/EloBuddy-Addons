@@ -77,7 +77,7 @@ namespace Hellsing.Kalista.Modes
 
                 #region E before death
 
-                if (Player.HealthPercent() < Settings.AutoEBelowHealth && EntityManager.Heroes.Enemies.Any(o => o.IsValidTarget() && o.HasRendBuff() && E.IsInRange(o)) && E.Cast())
+                if (Player.HealthPercent < Settings.AutoEBelowHealth && EntityManager.Heroes.Enemies.Any(o => o.IsValidTarget() && o.HasRendBuff() && E.IsInRange(o)) && E.Cast())
                 {
                     return;
                 }
@@ -90,7 +90,7 @@ namespace Hellsing.Kalista.Modes
         {
             if (Config.Modes.Combo.UseQAA &&
                 Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) &&
-                Player.ManaPercent() > Config.Modes.Combo.ManaQ &&
+                Player.ManaPercent > Config.Modes.Combo.ManaQ &&
                 Q.IsReady())
             {
                 var hero = target as AIHeroClient;
