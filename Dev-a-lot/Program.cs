@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
@@ -113,6 +114,8 @@ namespace TestAddon
 
                 // Listen to all required events
                 Messages.RegisterEventHandler<Messages.MouseMove>(OnMouseMove);
+
+                #region Drawing
 
                 Drawing.OnDraw += delegate
                 {
@@ -256,7 +259,7 @@ namespace TestAddon
                                     var endTime = Math.Max(0, buff.EndTime - Game.Time);
                                     Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.NavajoWhite,
                                         string.Format(BuffsFormatAdvanced, buff.DisplayName, buff.Name, buff.Caster.Name, buff.SourceName, buff.Count,
-                                        endTime > 1000 ? "Infinite" : Convert.ToString(endTime, CultureInfo.InvariantCulture), buff.Name), 10);
+                                            endTime > 1000 ? "Infinite" : Convert.ToString(endTime, CultureInfo.InvariantCulture), buff.Name), 10);
                                 }
                                 else
                                 {
@@ -304,6 +307,8 @@ namespace TestAddon
                         }
                     }
                 };
+
+                #endregion
             };
         }
 
