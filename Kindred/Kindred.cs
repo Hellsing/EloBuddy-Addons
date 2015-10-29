@@ -1,14 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using EloBuddy;
+using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
+using Kindred.Modes;
 
 namespace Kindred
 {
     public static class Kindred
     {
+        public static readonly Random Random = new Random(DateTime.Now.Millisecond);
+
         static Kindred()
         {
             Loading.OnLoadingComplete += OnLoadingComplete;
@@ -20,7 +22,27 @@ namespace Kindred
 
         private static void OnLoadingComplete(EventArgs args)
         {
+            if (Player.Instance.Hero != Champion.Kindred)
+            {
+                return;
+            }
 
+            // Initialize classes
+            Config.Initialize();
+            SpellManager.Initialize();
+            ModeManager.Initialize();
+
+            // Listen to required events
+            // TODO
+        }
+
+        public static AIHeroClient GetTarget(float range)
+        {
+            var validEnemies = EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget(range + Player.Instance.BoundingRadius + o.BoundingRadius)).ToArray();
+            var preferredTarget = validEnemies.FirstOrDefault(o => o.HasBuff(SpellManager.PassiveBuffName) || o.HasBuff(SpellManager.EBuffName));
+
+            // Return preferred target with either the passive debuff or the E debuff
+            return preferredTarget ?? TargetSelector.GetTarget(validEnemies, DamageType.Physical);
         }
     }
 }

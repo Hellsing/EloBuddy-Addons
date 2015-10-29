@@ -26,11 +26,11 @@ namespace Hellsing.Kalista
         public static void Initialize()
         {
             // Listen to related events
-            Game.OnUpdate += OnUpdate;
+            Game.OnTick += OnTick;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
         }
 
-        private static void OnUpdate(EventArgs args)
+        private static void OnTick(EventArgs args)
         {
             // SoulBound is not found yet!
             if (SoulBound == null)

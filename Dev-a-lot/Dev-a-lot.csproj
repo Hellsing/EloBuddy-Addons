@@ -64,6 +64,7 @@
     <Compile Include="EventVerifier.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GameObjectDiagnosis.cs" />
+    <Compile Include="MethodVerifier.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyVerifier.cs" />

@@ -37,12 +37,12 @@ namespace Blitzcrank
                 slider.OnValueChange += delegate(ValueBase<int> sender, ValueBase<int>.ValueChangeArgs changeArgs) { slider.DisplayName = hitchances[changeArgs.NewValue].ToString(); };
                 menu.Add("hitchance", slider);
 
-                if (HeroManager.Enemies.Count > 0)
+                if (EntityManager.Heroes.Enemies.Count > 0)
                 {
                     menu.AddSeparator();
                     menu.AddGroupLabel("Enabled targets");
                     var addedChamps = new List<string>();
-                    foreach (var enemy in HeroManager.Enemies.Where(enemy => !addedChamps.Contains(enemy.ChampionName)))
+                    foreach (var enemy in EntityManager.Heroes.Enemies.Where(enemy => !addedChamps.Contains(enemy.ChampionName)))
                     {
                         addedChamps.Add(enemy.ChampionName);
                         menu.Add(enemy.ChampionName, new CheckBox(string.Format("{0} ({1})", enemy.ChampionName, enemy.Name)));
@@ -104,7 +104,7 @@ namespace Blitzcrank
 
                         Circle.Draw(Color.Red, 75, prediction.Value.Item2.CastPosition);
                         Line.DrawLine(System.Drawing.Color.GreenYellow, Player.Instance.Position, prediction.Value.Item2.CastPosition);
-                        Line.DrawLine(System.Drawing.Color.CornflowerBlue, HeroManager.Enemies.Find(o => o.NetworkId == prediction.Key).Position, prediction.Value.Item2.CastPosition);
+                        Line.DrawLine(System.Drawing.Color.CornflowerBlue, EntityManager.Heroes.Enemies.Find(o => o.NetworkId == prediction.Key).Position, prediction.Value.Item2.CastPosition);
                         Drawing.DrawText(prediction.Value.Item2.CastPosition.WorldToScreen() + new Vector2(0, -20), System.Drawing.Color.LimeGreen,
                             string.Format("Hitchance: {0}%", Math.Ceiling(prediction.Value.Item2.HitChancePercent)), 10);
                     }
