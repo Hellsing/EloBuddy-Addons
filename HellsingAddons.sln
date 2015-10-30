@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dev-a-lot", "Dev-a-lot\Dev-
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerath", "Xerath\Xerath.csproj", "{60AE766F-4FFD-4DC5-AD4A-07835420C5E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gnaaar", "Gnaaar\Gnaaar.csproj", "{75ED8215-1DB7-4DC6-B08E-392A574DCD46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{60AE766F-4FFD-4DC5-AD4A-07835420C5E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60AE766F-4FFD-4DC5-AD4A-07835420C5E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60AE766F-4FFD-4DC5-AD4A-07835420C5E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75ED8215-1DB7-4DC6-B08E-392A574DCD46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75ED8215-1DB7-4DC6-B08E-392A574DCD46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75ED8215-1DB7-4DC6-B08E-392A574DCD46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75ED8215-1DB7-4DC6-B08E-392A574DCD46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

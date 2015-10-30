@@ -230,6 +230,8 @@ namespace TestAddon
                         {
                             var data = new Dictionary<string, object>
                             {
+                                { "BaseSkinName", baseObject.BaseSkinName },
+                                { "Model", baseObject.Model },
                                 { "Health", baseObject.Health },
                                 { "Mana", baseObject.Mana },
                                 { "BoundingRadius", baseObject.BoundingRadius },
