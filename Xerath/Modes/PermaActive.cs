@@ -26,7 +26,7 @@ namespace Xerath.Modes
             if (Config.Misc.Alerter && (SpellManager.IsCastingUlt || R.IsReady()) && Environment.TickCount - _lastAltert > 5000)
             {
                 // Get targets that can die with R
-                var killableTargets = ObjectManager.Get<AIHeroClient>()
+                var killableTargets = EntityManager.Heroes.Enemies
                     .Where(h => h.IsValidTarget(R.Range) && h.Health < (SpellManager.IsCastingUlt ? SpellManager.ChargesRemaining : 3) * R.GetRealDamage(h))
                     .OrderByDescending(h => R.GetRealDamage(h)).ToArray();
 
@@ -135,7 +135,7 @@ namespace Xerath.Modes
                             break;
 
                         // Get all enemy heroes in a distance of 500 from the mouse
-                        var targets = ObjectManager.Get<AIHeroClient>().Where(h => h.IsValidTarget(R.Range) && h.IsInRange(Game.CursorPos, 500)).ToArray();
+                        var targets = EntityManager.Heroes.Enemies.Where(h => h.IsValidTarget(R.Range) && h.IsInRange(Game.CursorPos, 500)).ToArray();
                         if (targets.Length > 0)
                         {
                             // Get a killable target
