@@ -28,7 +28,7 @@ namespace Xerath.Modes
 
             if (Q.IsEnabledAndReady(Orbwalker.ActiveModes.JungleClear))
             {
-                var farmLocation = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minions, Q.Width, (int) Q.Range);
+                var farmLocation = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minions, Q.Width, (int) (Q.IsCharging ? Q.Range : Q.MaximumRange));
                 if (farmLocation.HitNumber > 0)
                 {
                     if (!Q.IsCharging)

@@ -48,7 +48,7 @@ namespace Xerath.Modes
                 if (minions.Length >= Settings.HitNumberQ)
                 {
                     // Check if we would hit enough minions
-                    if (EntityManager.MinionsAndMonsters.GetLineFarmLocation(minions, Q.Width, (int) Q.Range).HitNumber >= Settings.HitNumberQ)
+                    if (EntityManager.MinionsAndMonsters.GetLineFarmLocation(minions, Q.Width, (int) Q.MaximumRange).HitNumber >= Settings.HitNumberQ)
                     {
                         // Start charging
                         Q.StartCharging();
