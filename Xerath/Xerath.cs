@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.AccessControl;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Enumerations;
@@ -22,6 +23,15 @@ namespace Xerath
             // Validate champ
             if (Player.Instance.Hero != Champion.Xerath)
             {
+                return;
+            }
+
+            // Validate version
+            if (new System.Version(Game.Version) < new System.Version("5.21.0.297"))
+            {
+                Chat.Print("[Xerath] Your game version does not support Xerath");
+                Chat.Print("[Xerath] Please wait till your region updates to 5.21");
+                Chat.Print("[Xerath] Do not reply in the thread because of this message!");
                 return;
             }
 
