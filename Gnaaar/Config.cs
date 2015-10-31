@@ -9,12 +9,13 @@ namespace Gnaaar
     public static class Config
     {
         public const string MenuName = "Gnaaar";
+        public const string LongMenuName = MenuName + " - The Hamster of Doom";
         private static readonly Menu Menu;
 
         static Config()
         {
             // Initialize menu
-            Menu = MainMenu.AddMenu(MenuName, MenuName + "_hellsing");
+            Menu = MainMenu.AddMenu(MenuName, MenuName + "_hellsing", LongMenuName);
 
             // Initialize sub menus
             Modes.Initialize();
