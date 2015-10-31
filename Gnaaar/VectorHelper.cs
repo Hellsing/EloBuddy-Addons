@@ -23,9 +23,10 @@ namespace Gnaaar
 
             for (float d = 0; d < from.Distance(to); d = d + step)
             {
-                var testPoint = from + d * direction;
-                if (NavMesh.GetCollisionFlags(testPoint.X, testPoint.Y).HasFlag(CollisionFlags.Wall) ||
-                    NavMesh.GetCollisionFlags(testPoint.X, testPoint.Y).HasFlag(CollisionFlags.Building))
+                //var cell = (from + d * direction).WorldToGrid().ToNavMeshCell(); // TODO: Replace with this once CollFlags are fixed again and no -2 is needed
+                var cell = ((from + d * direction).WorldToGrid() - 2).ToNavMeshCell();
+                if (cell.CollFlags.HasFlag(CollisionFlags.Wall) ||
+                    cell.CollFlags.HasFlag(CollisionFlags.Building))
                 {
                     return from + d * direction;
                 }
