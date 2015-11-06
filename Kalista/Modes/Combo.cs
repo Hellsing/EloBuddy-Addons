@@ -9,12 +9,12 @@ namespace Hellsing.Kalista.Modes
     {
         public override bool ShouldBeExecuted()
         {
-            if (new GameObject().Type == GameObjectType.obj_AI_Minion)
-            {
-                if (!string.IsNullOrWhiteSpace(new GameObject().Name))
-                {
-                }
-            }
+            //if (new GameObject().Type == GameObjectType.obj_AI_Minion)
+            //{
+                //if (!string.IsNullOrWhiteSpace(new GameObject().Name))
+                //{
+                //}
+            //}
             return Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo);
         }
 
