@@ -62,8 +62,7 @@ namespace Hellsing.Kalista
         public static float GetRendDamage(Obj_AI_Base target, int customStacks = -1)
         {
             // Calculate the damage and return
-            return Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, GetRawRendDamage(target, customStacks) - Config.Misc.DamageReductionE) *
-                   (Player.Instance.HasBuff("SummonerExhaustSlow") ? 0.6f : 1); // Take into account Exhaust, migh just add that to the SDK
+            return Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, GetRawRendDamage(target, customStacks) - Config.Misc.DamageReductionE); 
         }
 
         public static float GetRawRendDamage(Obj_AI_Base target, int customStacks = -1)

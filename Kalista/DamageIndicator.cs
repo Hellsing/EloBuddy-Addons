@@ -16,7 +16,7 @@ namespace Hellsing.Kalista
 
         private static DamageToUnitDelegate DamageToUnit { get; set; }
 
-        private static readonly Vector2 BarOffset = new Vector2(-9, 11);
+        private static readonly Vector2 BarOffset = new Vector2(0, -6);
 
         private static Color _drawingColor;
         public static Color DrawingColor
@@ -62,8 +62,8 @@ namespace Hellsing.Kalista
                         var currentHealthPercentage = unit.TotalShieldHealth() / (unit.MaxHealth + unit.AllShield + unit.AttackShield + unit.MagicShield);
 
                         // Calculate start and end point of the bar indicator
-                        var startPoint = new Vector2((int) (unit.HPBarPosition.X + BarOffset.X + damagePercentage * BarWidth), (int) (unit.HPBarPosition.Y + BarOffset.Y) - 5);
-                        var endPoint = new Vector2((int) (unit.HPBarPosition.X + BarOffset.X + currentHealthPercentage * BarWidth) + 1, (int) (unit.HPBarPosition.Y + BarOffset.Y) - 5);
+                        var startPoint = new Vector2((unit.HPBarPosition.X + BarOffset.X + unit.HPBarXOffset + damagePercentage * BarWidth), (unit.HPBarPosition.Y + BarOffset.Y + unit.HPBarYOffset));
+                        var endPoint = new Vector2((unit.HPBarPosition.X + BarOffset.X + unit.HPBarXOffset + currentHealthPercentage * BarWidth), (unit.HPBarPosition.Y + BarOffset.Y + unit.HPBarYOffset));
 
                         // Draw the line
                         Drawing.DrawLine(startPoint, endPoint, LineThickness, DrawingColor);
@@ -72,7 +72,7 @@ namespace Hellsing.Kalista
                     if (PercentEnabled)
                     {
                         // Get damage in percent and draw next to the health bar
-                        Drawing.DrawText(unit.HPBarPosition, Color.MediumVioletRed, string.Concat(Math.Ceiling((damage / unit.TotalShieldHealth()) * 100), "%"), 10);
+                        Drawing.DrawText(unit.HPBarPosition - new Vector2(0, 15), Color.MediumVioletRed, string.Concat(Math.Ceiling((damage / unit.TotalShieldHealth()) * 100), "%"), 10);
                     }
                 }
             }
