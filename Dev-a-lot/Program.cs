@@ -117,7 +117,7 @@ namespace TestAddon
 
                 #region Drawing
 
-                Drawing.OnDraw += delegate
+                Drawing.OnEndScene += delegate
                 {
                     #region Visualize Game Grid
 
@@ -145,9 +145,10 @@ namespace TestAddon
                                 }
                             }
                         }
-
+                        
                         foreach (var cell in cells.OrderBy(o => o.CollFlags))
                         {
+  
                             var color = Color.AntiqueWhite;
                             if (cell.CollFlags.HasFlag(CollisionFlags.Wall))
                             {
@@ -161,15 +162,16 @@ namespace TestAddon
                             {
                                 color = Color.Yellow;
                             }
-
-                            var world2D = cell.WorldPosition.To2D();
-
+                            //hotfix
+                            var world2D = new Vector2(cell.GridX * (int)NavMesh.CellWidth, cell.GridY * (int)NavMesh.CellHeight);
+                            //var world2D = cell.WorldPosition.To2D();
                             Line.DrawLine(color,
-                                cell.WorldPosition,
+                                world2D.To3DWorld(),
                                 (world2D + new Vector2(NavMesh.CellWidth, 0)).To3DWorld(),
                                 (world2D + new Vector2(NavMesh.CellWidth, NavMesh.CellHeight)).To3DWorld(),
                                 (world2D + new Vector2(0, NavMesh.CellHeight)).To3DWorld(),
-                                cell.WorldPosition);
+                                world2D.To3DWorld());
+            
                         }
                     }
 
@@ -191,6 +193,8 @@ namespace TestAddon
                             navMeshCell.GridX, navMeshCell.GridY), 10);
 
                         Drawing.DrawText(Game.CursorPos2D + new Vector2(40, 60), Color.NavajoWhite, string.Format("Collision flags: {0}", navMeshCell.CollFlags), 10);
+                        
+                
                     }
 
                     const float analyzeRange = 500;
