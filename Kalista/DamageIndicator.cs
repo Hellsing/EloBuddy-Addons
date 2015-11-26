@@ -16,7 +16,7 @@ namespace Hellsing.Kalista
 
         private static DamageToUnitDelegate DamageToUnit { get; set; }
 
-        private static readonly Vector2 BarOffset = new Vector2(-9, 11);
+        private static readonly Vector2 BarOffset = new Vector2(1, 0); // -9, 11
 
         private static Color _drawingColor;
         public static Color DrawingColor
