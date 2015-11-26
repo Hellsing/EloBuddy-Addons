@@ -109,7 +109,7 @@ namespace Gnaaar
                     }
                 }
 
-                Circle.Draw(spell.GetColor(), spell.Range, Player.Instance.Position);
+                Circle.Draw(spell.GetColor(), spell.Range, Player.Instance);
             }
 
             // E damage on healthbar

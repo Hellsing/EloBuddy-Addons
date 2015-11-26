@@ -101,7 +101,7 @@ namespace Hellsing.Kalista
                     case SpellSlot.E:
                         if (Config.Drawing.DrawELeaving)
                         {
-                            Circle.Draw(spell.GetColor(), spell.Range * 0.8f, Player.Instance.Position);
+                            Circle.Draw(spell.GetColor(), spell.Range * 0.8f, Player.Instance);
                         }
                         if (!Config.Drawing.DrawE)
                         {
@@ -116,7 +116,7 @@ namespace Hellsing.Kalista
                         break;
                 }
 
-                Circle.Draw(spell.GetColor(), spell.Range, Player.Instance.Position);
+                Circle.Draw(spell.GetColor(), spell.Range, Player.Instance);
             }
 
             // E damage on healthbar

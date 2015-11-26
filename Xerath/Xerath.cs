@@ -86,13 +86,13 @@ namespace Xerath
                         break;
                 }
 
-                Circle.Draw(spell.GetColor(), spell.Range, Player.Instance.Position);
+                Circle.Draw(spell.GetColor(), spell.Range, Player.Instance);
             }
 
             // Q max range
             if (Config.Drawing.DrawQ)
             {
-                Circle.Draw(SpellManager.Q.GetColor(), SpellManager.Q.MaximumRange, Player.Instance.Position);
+                Circle.Draw(SpellManager.Q.GetColor(), SpellManager.Q.MaximumRange, Player.Instance);
             }
 
             // E damage on healthbar

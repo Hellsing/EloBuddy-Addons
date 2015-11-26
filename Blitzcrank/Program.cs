@@ -86,7 +86,7 @@ namespace Blitzcrank
                 {
                     if (qRange.CurrentValue && Q.IsLearned)
                     {
-                        Circle.Draw(Q.IsReady() ? Color.Blue : Color.Red, Q.Range, Player.Instance.Position);
+                        Circle.Draw(Q.IsReady() ? Color.Blue : Color.Red, Q.Range, Player.Instance);
                     }
 
                     if (!predictions.CurrentValue)
