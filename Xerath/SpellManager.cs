@@ -35,9 +35,9 @@ namespace Xerath
         public static void Initialize()
         {
             // Initialize spells
-            Q = new Spell.Chargeable(SpellSlot.Q, 750, 1550, 1500, 500, int.MaxValue, 100);
-            W = new Spell.Skillshot(SpellSlot.W, 1100, SkillShotType.Circular, 750, int.MaxValue, 150);
-            E = new Spell.Skillshot(SpellSlot.E, 1050, SkillShotType.Linear, 250, 1400, 60);
+            Q = new Spell.Chargeable(SpellSlot.Q, 750, 1500, 1500, 500, int.MaxValue, 100);
+            W = new Spell.Skillshot(SpellSlot.W, 1100, SkillShotType.Circular, 250, int.MaxValue, 100);
+            E = new Spell.Skillshot(SpellSlot.E, 1050, SkillShotType.Linear, 250, 1600, 70);
             R = new Spell.Skillshot(SpellSlot.R, 3200, SkillShotType.Circular, 500, int.MaxValue, 120);
 
             // Finetune spells
