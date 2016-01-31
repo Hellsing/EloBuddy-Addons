@@ -4,7 +4,6 @@ using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
-using Hellsing.Kalista.Modes;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable MemberHidesStaticFromOuterClass
@@ -403,7 +402,7 @@ namespace Hellsing.Kalista
                 {
                     SentinelManager.RecalculateOpenLocations();
                 }
-                
+
                 public static void Initialize()
                 {
                 }

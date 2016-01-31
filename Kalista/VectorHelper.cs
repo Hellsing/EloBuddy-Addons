@@ -11,6 +11,7 @@ namespace Hellsing.Kalista
     {
         // Credits to furikuretsu from Stackoverflow (http://stackoverflow.com/a/10772759)
         // Modified for my needs
+
         #region ConeCalculations
 
         public static bool IsLyingInCone(Vector2 position, Vector2 apexPoint, Vector2 circleCenter, double aperture)
@@ -30,9 +31,9 @@ namespace Hellsing.Kalista
             // We'll use dotProd() to 
             // determine angle between apexToXVect and axis.
             var isInInfiniteCone = DotProd(apexToXVect, axisVect) / Magn(apexToXVect) / Magn(axisVect) >
-                // We can safely compare cos() of angles 
-                // between vectors instead of bare angles.
-            Math.Cos(halfAperture);
+                                   // We can safely compare cos() of angles 
+                                   // between vectors instead of bare angles.
+                                   Math.Cos(halfAperture);
 
             if (!isInInfiniteCone)
                 return false;
@@ -52,7 +53,7 @@ namespace Hellsing.Kalista
 
         private static float Magn(Vector2 a)
         {
-            return (float)(Math.Sqrt(a.X * a.X + a.Y * a.Y));
+            return (float) (Math.Sqrt(a.X * a.X + a.Y * a.Y));
         }
 
         #endregion

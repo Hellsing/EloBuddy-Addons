@@ -7,10 +7,22 @@ namespace Hellsing.Kalista.Modes
     {
         protected static readonly AIHeroClient Player = EloBuddy.Player.Instance;
 
-        protected Spell.Skillshot Q { get { return SpellManager.Q; } }
-        protected Spell.Targeted W { get { return SpellManager.W; } }
-        protected Spell.Active E { get { return SpellManager.E; } }
-        protected Spell.Active R { get { return SpellManager.R; } }
+        protected Spell.Skillshot Q
+        {
+            get { return SpellManager.Q; }
+        }
+        protected Spell.Targeted W
+        {
+            get { return SpellManager.W; }
+        }
+        protected Spell.Active E
+        {
+            get { return SpellManager.E; }
+        }
+        protected Spell.Active R
+        {
+            get { return SpellManager.R; }
+        }
 
         public abstract bool ShouldBeExecuted();
         public abstract void Execute();

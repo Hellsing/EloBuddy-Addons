@@ -239,7 +239,7 @@ namespace TestAddon
             {
                 get { return All.Sum() / All.Count; }
             }
-            public List<double> All { get; set; } 
+            public List<double> All { get; set; }
         }
 
         public static void Initialize()

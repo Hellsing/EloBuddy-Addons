@@ -3,9 +3,9 @@ using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
+using EloBuddy.SDK.Rendering;
 using SharpDX;
 using Settings = Hellsing.Kalista.Config.Modes.Flee;
-using EloBuddy.SDK.Rendering;
 
 namespace Hellsing.Kalista.Modes
 {
@@ -70,15 +70,15 @@ namespace Hellsing.Kalista.Modes
                 // Be more precise
                 if (wallCheck != null)
                 {
-                    wallCheck = VectorHelper.GetFirstWallPoint((Vector3)wallCheck, Game.CursorPos, 5);
+                    wallCheck = VectorHelper.GetFirstWallPoint((Vector3) wallCheck, Game.CursorPos, 5);
                 }
 
                 // Define more position point
-                var movePosition = wallCheck != null ? (Vector3)wallCheck : Game.CursorPos;
+                var movePosition = wallCheck != null ? (Vector3) wallCheck : Game.CursorPos;
 
                 // Update fleeTargetPosition
                 var tempGrid = NavMesh.WorldToGrid(movePosition.X, movePosition.Y);
-                FleePosition = NavMesh.GridToWorld((short)tempGrid.X, (short)tempGrid.Y);
+                FleePosition = NavMesh.GridToWorld((short) tempGrid.X, (short) tempGrid.Y);
 
                 // Also check if we want to AA aswell
                 Obj_AI_Base target = null;
@@ -118,7 +118,7 @@ namespace Hellsing.Kalista.Modes
                         // Check next angle
                         if ((currentAngle == 0 || currentAngle < 0) && currentStep != 0)
                         {
-                            currentAngle = (currentStep) * (float)Math.PI / 180;
+                            currentAngle = (currentStep) * (float) Math.PI / 180;
                             currentStep += step;
                         }
                         else if (currentAngle > 0)
@@ -149,7 +149,7 @@ namespace Hellsing.Kalista.Modes
                             if (wallCheck != null)
                             {
                                 // There is a wall inbetween, get the closes point to the wall, as precise as possible
-                                var wallPositionOpposite = (Vector3) VectorHelper.GetFirstWallPoint((Vector3)wallCheck, wallPosition, 5);
+                                var wallPositionOpposite = (Vector3) VectorHelper.GetFirstWallPoint((Vector3) wallCheck, wallPosition, 5);
 
                                 // Check if it's worth to jump considering the path length
                                 if (Player.GetPath(wallPositionOpposite).Sum(o => o.To2D().LengthSquared()).Sqrt() - Player.Distance(wallPositionOpposite) > 200)

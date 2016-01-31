@@ -45,11 +45,11 @@ namespace Xerath
         public static int GetStunDuration(this Obj_AI_Base target)
         {
             return (int) (target.Buffs.Where(b => b.IsActive && Game.Time < b.EndTime &&
-                                           (b.Type == BuffType.Charm ||
-                                            b.Type == BuffType.Knockback ||
-                                            b.Type == BuffType.Stun ||
-                                            b.Type == BuffType.Suppression ||
-                                            b.Type == BuffType.Snare)).Aggregate(0f, (current, buff) => Math.Max(current, buff.EndTime)) - Game.Time) * 1000;
+                                                  (b.Type == BuffType.Charm ||
+                                                   b.Type == BuffType.Knockback ||
+                                                   b.Type == BuffType.Stun ||
+                                                   b.Type == BuffType.Suppression ||
+                                                   b.Type == BuffType.Snare)).Aggregate(0f, (current, buff) => Math.Max(current, buff.EndTime)) - Game.Time) * 1000;
         }
 
         public static bool IsPassiveReady(this AIHeroClient target)

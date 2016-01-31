@@ -8,6 +8,7 @@ using Settings = Hellsing.Kalista.Config.Misc.Sentinel;
 
 // ReSharper disable CompareOfFloatsByEqualityOperator
 // ReSharper disable PossibleMultipleEnumeration
+
 namespace Hellsing.Kalista
 {
     public static class SentinelManager

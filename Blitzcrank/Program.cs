@@ -18,7 +18,7 @@ namespace Blitzcrank
         {
             Loading.OnLoadingComplete += delegate
             {
-                if (Player.Instance.ChampionName != "Blitzcrank")
+                if (Player.Instance.Hero != Champion.Blitzcrank)
                 {
                     return;
                 }
@@ -63,9 +63,12 @@ namespace Blitzcrank
                 {
                     if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Q.IsReady())
                     {
-                        foreach (var enemy in EntityManager.Heroes.Enemies.Where(enemy => menu[enemy.ChampionName].Cast<CheckBox>().CurrentValue &&
-                                                                                 enemy.IsValidTarget(Q.Range + 150) &&
-                                                                                 !enemy.HasBuffOfType(BuffType.SpellShield)))
+                        foreach (
+                            var enemy in
+                                EntityManager.Heroes.Enemies.Where(
+                                    enemy => ((TargetSelector.SeletedEnabled && TargetSelector.SelectedTarget == enemy) || menu[enemy.ChampionName].Cast<CheckBox>().CurrentValue) &&
+                                             enemy.IsValidTarget(Q.Range + 150) &&
+                                             !enemy.HasBuffOfType(BuffType.SpellShield)))
                         {
                             var prediction = Q.GetPrediction(enemy);
                             if (prediction.HitChance >= hitchances[0])
