@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerath", "Xerath\Xerath.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gnaaar", "Gnaaar\Gnaaar.csproj", "{75ED8215-1DB7-4DC6-B08E-392A574DCD46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterMind", "MasterMind\MasterMind.csproj", "{7B55B961-5B6A-4971-BFA7-F6863A113E1E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,16 @@ Global
 		{75ED8215-1DB7-4DC6-B08E-392A574DCD46}.Release|Mixed Platforms.Build.0 = Release|x86
 		{75ED8215-1DB7-4DC6-B08E-392A574DCD46}.Release|x86.ActiveCfg = Release|x86
 		{75ED8215-1DB7-4DC6-B08E-392A574DCD46}.Release|x86.Build.0 = Release|x86
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
