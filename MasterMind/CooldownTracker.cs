@@ -164,7 +164,7 @@ namespace MasterMind
 
         public static Color GetSpellColor(this SpellDataInst spellData, float percent = 0)
         {
-            if (!spellData.IsLearned)
+            if (spellData.Level == 0)
             {
                 return CooldownTracker.SpellNotLearned;
             }
