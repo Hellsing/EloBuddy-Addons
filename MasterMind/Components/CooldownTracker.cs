@@ -89,7 +89,7 @@ namespace MasterMind.Components
 
         private void OnDraw(EventArgs args)
         {
-            foreach (var hero in EntityManager.Heroes.AllHeroes.Where(o => (MasterMind.IsSpectatorMode || !o.IsMe) && o.IsHPBarRendered))
+            foreach (var hero in EntityManager.Heroes.AllHeroes.Where(o => (MasterMind.IsSpectatorMode || !o.IsMe) && o.IsHPBarRendered && o.IsVisible))
             {
                 // Validate team
                 if (hero.Team == AlliedTeam)
