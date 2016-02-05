@@ -63,9 +63,69 @@ namespace MasterMind.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap BlueTrinket {
+            get {
+                object obj = ResourceManager.GetObject("BlueTrinket", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CooldownTracker {
             get {
                 object obj = ResourceManager.GetObject("CooldownTracker", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap VisionWard {
+            get {
+                object obj = ResourceManager.GetObject("VisionWard", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap VisionWard_Enemy {
+            get {
+                object obj = ResourceManager.GetObject("VisionWard_Enemy", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap VisionWard_Friendly {
+            get {
+                object obj = ResourceManager.GetObject("VisionWard_Friendly", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap YellowTrinket_Enemy {
+            get {
+                object obj = ResourceManager.GetObject("YellowTrinket_Enemy", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap YellowTrinket_Friendly {
+            get {
+                object obj = ResourceManager.GetObject("YellowTrinket_Friendly", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
