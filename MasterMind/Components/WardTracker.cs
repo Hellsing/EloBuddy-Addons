@@ -89,6 +89,7 @@ namespace MasterMind.Components
             ObjectManager.Get<Obj_AI_Minion>().ToList().ForEach(o => OnCreate(o, EventArgs.Empty));
 
             // Listen to required events
+            Game.OnTick += OnTick;
             Drawing.OnDraw += OnDraw;
             Drawing.OnEndScene += OnEndScene;
             GameObject.OnCreate += OnCreate;
@@ -98,12 +99,22 @@ namespace MasterMind.Components
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
         }
 
-        private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        private void OnTick(EventArgs args)
         {
-            if (sender.Type == GameObjectType.AIHeroClient && SpellToWardDictionary.ContainsKey(args.SData.Name))
+            foreach (var fakeWard in ActiveWards.Where(o => o.IsFakeWard).ToArray())
             {
-                // Create a fake ward at that position
-                ActiveWards.Add(Ward.FromSpellCast((AIHeroClient) sender, SpellToWardDictionary[args.SData.Name], args.End));
+                switch (fakeWard.WardType)
+                {
+                    case Ward.Type.SightWard:
+                    case Ward.Type.YellowTrinket:
+
+                        if (fakeWard.RemainingTime <= 0)
+                        {
+                            // Remove timed up fake wards
+                            ActiveWards.Remove(fakeWard);
+                        }
+                        break;
+                }
             }
         }
 
@@ -213,8 +224,12 @@ namespace MasterMind.Components
                 // Check if there is already a fake ward at that position
                 var fakeWard = ActiveWards.Where(o => o.IsFakeWard && o.Team == sender.Team)
                     .Where(
-                        o => o.Position.IsInRange(sender, 500) && (args.Buff.EndTime - Game.Time > 1000 ? o.RemainingTime < 0 : Math.Abs(o.RemainingTime - (args.Buff.EndTime - Game.Time) / 1000) < 1))
-                    .OrderBy(o => o.Position.Distance(sender, true))
+                        o => o.Position.IsInRange(sender, 500) &&
+                             (args.Buff.EndTime - Game.Time > 1000
+                                 ? o.RemainingTime < 0
+                                 : Math.Abs(o.RemainingTime - (args.Buff.EndTime - Game.Time)) < 3))
+                    .OrderBy(o => Math.Abs(o.RemainingTime - (args.Buff.EndTime - Game.Time)))
+                    .ThenBy(o => o.Position.Distance(sender, true))
                     .FirstOrDefault();
                 if (fakeWard != null)
                 {
@@ -252,6 +267,15 @@ namespace MasterMind.Components
             {
                 // Check for active buffs
                 CheckBuffs(activeWard);
+            }
+        }
+
+        private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.Type == GameObjectType.AIHeroClient && SpellToWardDictionary.ContainsKey(args.SData.Name))
+            {
+                // Create a fake ward at that position
+                ActiveWards.Add(Ward.FromSpellCast((AIHeroClient) sender, SpellToWardDictionary[args.SData.Name], args.End));
             }
         }
 
@@ -455,7 +479,7 @@ namespace MasterMind.Components
                 // Initialize properties
                 Handle = handle;
                 WardType = wardType;
-                Duration = duration;
+                Duration = duration * 1000;
                 CreationTime = Core.GameTickCount;
 
                 // Initialize rendering
@@ -585,7 +609,7 @@ namespace MasterMind.Components
                     case Type.SightWard:
                         return 150;
                     case Type.YellowTrinket:
-                        return (int) Math.Ceiling(60 + 3.5 * caster.Level);
+                        return (int) Math.Ceiling(60 + 3.5 * (caster.Level - 1));
                 }
 
                 return -1;
