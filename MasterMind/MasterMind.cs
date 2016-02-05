@@ -19,6 +19,7 @@ namespace MasterMind
         private static readonly IComponent[] Components =
         {
             new CooldownTracker(),
+            new WardTracker()
         };
 
         public static void Main(string[] args)

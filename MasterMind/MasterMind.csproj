@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\CooldownTracker.cs" />
+    <Compile Include="Components\WardTracker.cs" />
     <Compile Include="IComponent.cs" />
     <Compile Include="MasterMind.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
