@@ -60,7 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CooldownTracker.cs" />
+    <Compile Include="Components\CooldownTracker.cs" />
     <Compile Include="IComponent.cs" />
     <Compile Include="MasterMind.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -82,6 +82,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\CooldownTracker.png" />
+    <Content Include="Resources\WardTracker\BlueTrinket.png" />
+    <Content Include="Resources\WardTracker\VisionWard.png" />
+    <Content Include="Resources\WardTracker\VisionWard_Enemy.png" />
+    <Content Include="Resources\WardTracker\VisionWard_Friendly.png" />
+    <Content Include="Resources\WardTracker\YellowTrinket_Enemy.png" />
+    <Content Include="Resources\WardTracker\YellowTrinket_Friendly.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
