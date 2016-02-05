@@ -4,6 +4,7 @@ using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Rendering;
+using MasterMind.Components;
 
 namespace MasterMind
 {
@@ -17,7 +18,7 @@ namespace MasterMind
 
         private static readonly IComponent[] Components =
         {
-            new CooldownTracker()
+            new CooldownTracker(),
         };
 
         public static void Main(string[] args)

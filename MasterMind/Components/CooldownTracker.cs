@@ -12,9 +12,9 @@ using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 using Line = EloBuddy.SDK.Rendering.Line;
 
-namespace MasterMind
+namespace MasterMind.Components
 {
-    public class CooldownTracker : IComponent
+    public sealed class CooldownTracker : IComponent
     {
         public static readonly Vector2 OverlayOffset = new Vector2(1, 19);
 
@@ -24,7 +24,7 @@ namespace MasterMind
         public static readonly int CooldownTextOffset = (int) SpellSize.Y;
 
         public static readonly Color SpellBackground = Color.SlateGray;
-        public static readonly Color SpellNotLearned = Color.DarkRed;
+        public static readonly Color SpellNotLearned = Color.DimGray;
         public static readonly Color SpellReady = Color.LawnGreen;
         public static readonly Color SpellNotReady = Color.Red;
 
@@ -68,7 +68,7 @@ namespace MasterMind
 
             TrackAllies = Menu.Add("allies", new CheckBox(string.Format("Track {0}", MasterMind.IsSpectatorMode ? "blue team" : "allies")));
             TrackEnemies = Menu.Add("enemies", new CheckBox(string.Format("Track {0}", MasterMind.IsSpectatorMode ? "red team" : "enemies")));
-            DrawText = Menu.Add("cooldownText", new CheckBox("Draw cooldown text below spell indicator"));
+            DrawText = Menu.Add("cooldownText", new CheckBox("Draw cooldown time below spell indicator"));
 
             // Initialize properties
             OverlaySprite = new EloBuddy.SDK.Rendering.Sprite(() => OverlayTextre);
@@ -108,7 +108,7 @@ namespace MasterMind
                 }
 
                 // Get the HP bar position
-                var pos = hero.HPBarPosition.Floor();
+                var pos = hero.HPBarPosition.Round();
 
                 // Draw the spell lines and numbers
                 for (var i = 0; i < 4; i ++)
@@ -123,7 +123,7 @@ namespace MasterMind
                     var cooldown = Math.Max(0, spell.CooldownExpires - Game.Time);
 
                     // Check if the spell is ready
-                    if (Math.Abs(cooldown) < float.Epsilon)
+                    if (spell.IsLearned && cooldown <= 0)
                     {
                         Line.DrawLine(SpellReady, SpellSize.Y, start, start + new Vector2(SpellSize.X, 0));
                     }
@@ -136,16 +136,19 @@ namespace MasterMind
                         var end = start + new Vector2(SpellSize.X * percent, 0);
 
                         // Draw the lines
-                        Line.DrawLine(SpellBackground, SpellSize.Y, start, start + new Vector2(SpellSize.X, 0));
-                        Line.DrawLine(spell.GetSpellColor(percent), SpellSize.Y, start, end);
-                    }
+                        Line.DrawLine(spell.IsLearned ? SpellBackground : SpellNotLearned, SpellSize.Y, start, start + new Vector2(SpellSize.X, 0));
+                        if (spell.IsLearned)
+                        {
+                            Line.DrawLine(spell.GetSpellColor(percent), SpellSize.Y, start, end);
 
-                    // Draw the remaining time as text
-                    if (cooldown > 0 && DrawText.CurrentValue)
-                    {
-                        SpellCooldownText.TextValue = ((int) Math.Ceiling(cooldown)).ToString();
-                        SpellCooldownText.Position = new Vector2(start.X + SpellSize.X / 2 - SpellCooldownText.Bounding.Width / 2f, start.Y + CooldownTextOffset);
-                        SpellCooldownText.Draw();
+                            // Draw the remaining time as text
+                            if (DrawText.CurrentValue)
+                            {
+                                SpellCooldownText.TextValue = ((int) Math.Ceiling(cooldown)).ToString();
+                                SpellCooldownText.Position = new Vector2(start.X + SpellSize.X / 2 - SpellCooldownText.Bounding.Width / 2f, start.Y + CooldownTextOffset);
+                                SpellCooldownText.Draw();
+                            }
+                        }
                     }
                 }
 
@@ -157,14 +160,14 @@ namespace MasterMind
 
     public static partial class Extensions
     {
-        public static Vector2 Floor(this Vector2 vector)
+        public static Vector2 Round(this Vector2 vector)
         {
-            return new Vector2((int) (vector.X + 0.5f), (int) (vector.Y + 0.5f));
+            return new Vector2((int) Math.Round(vector.X), (int) Math.Round(vector.Y));
         }
 
         public static Color GetSpellColor(this SpellDataInst spellData, float percent = 0)
         {
-            if (spellData.Level == 0)
+            if (!spellData.IsLearned)
             {
                 return CooldownTracker.SpellNotLearned;
             }
