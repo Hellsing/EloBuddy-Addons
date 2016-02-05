@@ -167,11 +167,6 @@ namespace MasterMind.Components
 
         public static Color GetSpellColor(this SpellDataInst spellData, float percent = 0)
         {
-            if (!spellData.IsLearned)
-            {
-                return CooldownTracker.SpellNotLearned;
-            }
-
             // Calculate new color between the ready and not ready colors based on the percent
             return Color.FromArgb((byte) (CooldownTracker.SpellNotReady.R + (CooldownTracker.SpellReady.R - CooldownTracker.SpellNotReady.R) * percent),
                 (byte) (CooldownTracker.SpellNotReady.G + (CooldownTracker.SpellReady.G - CooldownTracker.SpellNotReady.G) * percent),
