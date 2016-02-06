@@ -97,84 +97,112 @@ namespace TestAddon
 
             #region Event Handling
 
-            // Listen to required events
-            Obj_AI_Base.OnBasicAttack += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+            var registered = false;
+            var registerEvents = new Action(() =>
             {
-                if (BasicAttack)
+                // Only register events once
+                if (registered)
                 {
-                    Verify(sender, args, "OnBasicAttack", RecursiveCheck);
+                    return;
                 }
-            };
-            Obj_AI_Base.OnSpellCast += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-            {
-                if (SpellCast)
+                registered = true;
+
+                // Listen to required events
+                Obj_AI_Base.OnBasicAttack += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
                 {
-                    Verify(sender, args, "OnSpellCast", RecursiveCheck);
-                }
-            };
-            Obj_AI_Base.OnProcessSpellCast += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-            {
-                if (ProcessSpell)
+                    if (BasicAttack)
+                    {
+                        Verify(sender, args, "OnBasicAttack", RecursiveCheck);
+                    }
+                };
+                Obj_AI_Base.OnSpellCast += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
                 {
-                    Verify(sender, args, "OnProcessSpellCast", RecursiveCheck);
-                }
-            };
-            Spellbook.OnStopCast += delegate(Obj_AI_Base sender, SpellbookStopCastEventArgs args)
-            {
-                if (StopCast)
+                    if (SpellCast)
+                    {
+                        Verify(sender, args, "OnSpellCast", RecursiveCheck);
+                    }
+                };
+                Obj_AI_Base.OnProcessSpellCast += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
                 {
-                    Verify(sender, args, "OnStopCast", RecursiveCheck);
-                }
-            };
-            Obj_AI_Base.OnBuffGain += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)
-            {
-                if (BuffGain)
+                    if (ProcessSpell)
+                    {
+                        Verify(sender, args, "OnProcessSpellCast", RecursiveCheck);
+                    }
+                };
+                Spellbook.OnStopCast += delegate(Obj_AI_Base sender, SpellbookStopCastEventArgs args)
                 {
-                    Verify(sender, args, "OnProcessSpellCast", RecursiveCheck);
-                }
-            };
-            Obj_AI_Base.OnBuffLose += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffLoseEventArgs args)
-            {
-                if (BuffLose)
+                    if (StopCast)
+                    {
+                        Verify(sender, args, "OnStopCast", RecursiveCheck);
+                    }
+                };
+                Obj_AI_Base.OnBuffGain += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)
                 {
-                    Verify(sender, args, "OnBuffLose", RecursiveCheck);
-                }
-            };
-            Obj_AI_Base.OnNewPath += delegate(Obj_AI_Base sender, GameObjectNewPathEventArgs args)
-            {
-                if (NewPath)
+                    if (BuffGain)
+                    {
+                        Verify(sender, args, "OnProcessSpellCast", RecursiveCheck);
+                    }
+                };
+                Obj_AI_Base.OnBuffLose += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffLoseEventArgs args)
                 {
-                    Verify(sender, args, "OnNewPath", RecursiveCheck);
-                }
-            };
-            Obj_AI_Base.OnPlayAnimation += delegate(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
-            {
-                if (Animation)
+                    if (BuffLose)
+                    {
+                        Verify(sender, args, "OnBuffLose", RecursiveCheck);
+                    }
+                };
+                Obj_AI_Base.OnNewPath += delegate(Obj_AI_Base sender, GameObjectNewPathEventArgs args)
                 {
-                    Verify(sender, args, "OnPlayAnimation"); // No recursive check on sender here, cuz too much objects
-                }
-            };
-            GameObject.OnCreate += delegate(GameObject sender, EventArgs args)
-            {
-                if (Create)
+                    if (NewPath)
+                    {
+                        Verify(sender, args, "OnNewPath", RecursiveCheck);
+                    }
+                };
+                Obj_AI_Base.OnPlayAnimation += delegate(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
                 {
-                    Verify(sender, args, "OnCreate", true); // Forced recursive check
-                }
-            };
-            GameObject.OnDelete += delegate(GameObject sender, EventArgs args)
-            {
-                if (Delete)
+                    if (Animation)
+                    {
+                        Verify(sender, args, "OnPlayAnimation"); // No recursive check on sender here, cuz too much objects
+                    }
+                };
+                GameObject.OnCreate += delegate(GameObject sender, EventArgs args)
                 {
-                    Verify(sender, args, "OnDelete", true); // Forced recursive check
-                }
-            };
-            Player.OnIssueOrder += delegate(Obj_AI_Base sender, PlayerIssueOrderEventArgs args)
-            {
-                if (IssueOrder)
+                    if (Create)
+                    {
+                        Verify(sender, args, "OnCreate", true); // Forced recursive check
+                    }
+                };
+                GameObject.OnDelete += delegate(GameObject sender, EventArgs args)
                 {
-                    Verify(sender, args, "OnIssueOrder", RecursiveCheck);
-                }
-            };
+                    if (Delete)
+                    {
+                        Verify(sender, args, "OnDelete", true); // Forced recursive check
+                    }
+                };
+                Player.OnIssueOrder += delegate(Obj_AI_Base sender, PlayerIssueOrderEventArgs args)
+                {
+                    if (IssueOrder)
+                    {
+                        Verify(sender, args, "OnIssueOrder", RecursiveCheck);
+                    }
+                };
+            });
+
+            #endregion
+
+            #region Event Registering
+
+            Menu.Get<CheckBox>("recursive").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("basicAttack").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("spellCast").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("processSpell").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("stopCast").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("newPath").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("animation").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("create").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("delete").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("buffGain").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("buffLose").OnValueChange += delegate { registerEvents(); };
+            Menu.Get<CheckBox>("issueOrder").OnValueChange += delegate { registerEvents(); };
 
             #endregion
         }
