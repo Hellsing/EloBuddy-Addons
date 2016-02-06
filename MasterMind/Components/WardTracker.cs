@@ -514,7 +514,7 @@ namespace MasterMind.Components
                 var time = RemainingTimeText;
                 if (time != null)
                 {
-                    TextHandle.TextValue = "Remaining: " + time;
+                    TextHandle.TextValue = "Ward: " + time;
                     TextHandle.Position = new Vector2(ScreenPosition.X - TextHandle.Bounding.Width / 2f, ScreenPosition.Y + HealthBar.Height);
                     TextHandle.Draw();
                 }
@@ -582,7 +582,7 @@ namespace MasterMind.Components
 
             public static Ward FromSpellCast(AIHeroClient caster, Type wardType, Vector3 position)
             {
-                return new Ward(position, wardType, GetWardDuration(caster, wardType), caster.Team);
+                return new Ward(position.GetClosestWardSpot(), wardType, GetWardDuration(caster, wardType), caster.Team);
             }
 
             public static bool IsWard(Obj_AI_Base obj, out Type wardType)
@@ -623,9 +623,66 @@ namespace MasterMind.Components
         {
             return new ColorBGRA(color.R, color.G, color.B, alpha);
         }
+
         public static ColorBGRA ToBgra(this Color color)
         {
             return new ColorBGRA(color.R, color.G, color.B, color.A);
+        }
+
+        public static Vector3 GetClosestWardSpot(this Vector3 wallPosition)
+        {
+            // If the position is not a wall then return the input position
+            var flags = wallPosition.ToNavMeshCell().CollFlags;
+            if (!flags.HasFlag(CollisionFlags.Wall) && !flags.HasFlag(CollisionFlags.Building))
+            {
+                return wallPosition;
+            }
+
+            const int maxRange = 10;
+            const double step = 2 * Math.PI / 20;
+
+            var start = new Vector2(wallPosition.ToNavMeshCell().GridX, wallPosition.ToNavMeshCell().GridY);
+            var checkedCells = new HashSet<Vector2>();
+
+            // Get all directions
+            var directions = new List<Vector2>();
+            for (var theta = 0d; theta <= 2 * Math.PI + step; theta += step)
+            {
+                directions.Add((new Vector2((short) (start.X + Math.Cos(theta)), (short) (start.Y - Math.Sin(theta))) - start).Normalized());
+            }
+
+            var validPositions = new HashSet<Vector3>();
+            for (var range = 1; range < maxRange; range++)
+            {
+                foreach (var direction in directions)
+                {
+                    // Get the position to check
+                    var end = start + range * direction;
+                    var testPoint = new Vector2((short) end.X, (short) end.Y);
+                    if (checkedCells.Contains(testPoint))
+                    {
+                        continue;
+                    }
+                    checkedCells.Add(testPoint);
+
+                    // Check the position for wall flags
+                    flags = new NavMeshCell((short) testPoint.X, (short) testPoint.Y).CollFlags;
+                    if (!flags.HasFlag(CollisionFlags.Wall) && !flags.HasFlag(CollisionFlags.Building))
+                    {
+                        // Add the position to the valid positions set
+                        validPositions.Add(NavMesh.GridToWorld((short) testPoint.X, (short) testPoint.Y));
+                    }
+                }
+
+                if (validPositions.Count > 0)
+                {
+                    // Return the closest position to the initial wall position
+                    return validPositions.OrderBy(o => o.Distance(start, true)).First();
+                }
+            }
+
+            // Nothing found return input
+            return wallPosition;
         }
     }
 }
