@@ -535,7 +535,7 @@ namespace MasterMind.Components
                 var percent = (Handle == null ? MaxHealth : Handle.Health) / MaxHealth;
 
                 // Draw the percent lines
-                var colors = HealthBarColors[Team];
+                var colors = HealthBarColors[MasterMind.IsSpectatorMode ? Team : (Team.IsAlly() ? GameObjectTeam.Order : GameObjectTeam.Chaos)];
                 var max = rect.Height - HealthBarBorderWidth * 2;
                 for (var i = 0; i < max; i++)
                 {
