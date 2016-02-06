@@ -497,7 +497,7 @@ namespace MasterMind.Components
             public void RenderWard()
             {
                 // TODO: Replace with fake object rendering once it's added by finn
-                Circle.Draw(Color.ToBgra(), Radius, 3, Position);
+                Circle.Draw(Color.ToBgra(150), Radius, 3, Position);
             }
 
             public void DrawMinimap()
@@ -619,6 +619,10 @@ namespace MasterMind.Components
 
     public static partial class Extensions
     {
+        public static ColorBGRA ToBgra(this Color color, byte alpha)
+        {
+            return new ColorBGRA(color.R, color.G, color.B, alpha);
+        }
         public static ColorBGRA ToBgra(this Color color)
         {
             return new ColorBGRA(color.R, color.G, color.B, color.A);
