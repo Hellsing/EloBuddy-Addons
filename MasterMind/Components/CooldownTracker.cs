@@ -246,7 +246,7 @@ namespace MasterMind.Components
                         // Draw the remaining time as text
                         if (DrawText.CurrentValue && cooldown > 0)
                         {
-                            var text = Math.Ceiling(cooldown).ToString(CultureInfo.InvariantCulture);
+                            var text = TimeSpan.FromSeconds((int) Math.Ceiling(cooldown)).ToString("ss");
                             if (cooldown > 60)
                             {
                                 text = TimeSpan.FromSeconds((int) Math.Ceiling(cooldown)).Minutes.ToString();
