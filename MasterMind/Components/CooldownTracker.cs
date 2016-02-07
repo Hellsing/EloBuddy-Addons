@@ -36,6 +36,7 @@ namespace MasterMind.Components
         public const int SummonerPadding = 0;
         public static readonly int SummonerCooldownTextOffset = (int) SummonerSize.Y + 3;
         public static readonly int SummonerCooldownTextPadding = 4;
+        public static readonly Vector3 CooldownCenter = new Vector3(SummonerSize.X / 2, SummonerSize.Y / 2, 0);
 
         public static SummonerAtlas SummonerAtlas { get; private set; }
 
@@ -139,7 +140,7 @@ namespace MasterMind.Components
             // Initialize properties
             SpellOverlaySprite = new EloBuddy.SDK.Rendering.Sprite(() => SpellOverlayTexture);
             SummonerOverlaySprite = new EloBuddy.SDK.Rendering.Sprite(() => SummonerOverlayTexture);
-            SummonersSprite = new EloBuddy.SDK.Rendering.Sprite(() => SummonersTexture);
+            SummonersSprite = new EloBuddy.SDK.Rendering.Sprite(SummonersTexture);
             CooldownText = new Text(string.Empty, new System.Drawing.Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular))
             {
                 Color = Color.GhostWhite
@@ -157,7 +158,7 @@ namespace MasterMind.Components
 
         private void OnDraw(EventArgs args)
         {
-            foreach (var hero in EntityManager.Heroes.AllHeroes.Where(o => (MasterMind.IsSpectatorMode || !o.IsMe) && o.IsHPBarRendered && o.IsVisible))
+            foreach (var hero in EntityManager.Heroes.AllHeroes.Where(o => (MasterMind.IsSpectatorMode || o.IsMe) && o.IsHPBarRendered && o.IsVisible))
             {
                 // Validate team
                 if (hero.Team == AlliedTeam)
@@ -240,14 +241,55 @@ namespace MasterMind.Components
                         var summoner = SummonerAtlas[spell.Name];
                         if (summoner != null)
                         {
-                            SummonersSprite.Draw(start, summoner.Rectangle);
+                            if (cooldown <= 0)
+                            {
+                                // Draw the regular summoner image
+                                SummonersSprite.Draw(start, summoner.Rectangle);
+                            }
+                            else
+                            {
+                                // Calculate percent cooldown
+                                var percent = 1 - Math.Min(1, cooldown / spell.Cooldown);
+
+                                // Calculate radian
+                                var radian = (float) (2 * Math.PI * percent);
+
+                                if (percent < 0.5f)
+                                {
+                                    // Draw right side of the summoner image
+                                    SummonersSprite.Draw(start + new Vector2((int) (SummonerAtlas.SpriteAtlas.Width / 2f), 0), summoner.RightHalf);
+                                    
+                                    // Draw rotated cooldown circle
+                                    SummonersSprite.Draw(start, SummonerAtlas.GetCooldownRectangle(SummonerAtlas.CooldownType.Circle), CooldownCenter, radian);
+
+                                    // Draw left side of the summoner image
+                                    SummonersSprite.Draw(start, summoner.LeftHalf);
+
+                                    // Draw cooldown overlay
+                                    SummonersSprite.Draw(start, SummonerAtlas.GetCooldownRectangle(SummonerAtlas.CooldownType.Overlay));
+                                }
+                                else
+                                {
+                                    // Draw left side of the summoner image
+                                    SummonersSprite.Draw(start, summoner.LeftHalf);
+
+                                    // Draw rotated cooldown circle
+                                    SummonersSprite.Draw(start, SummonerAtlas.GetCooldownRectangle(SummonerAtlas.CooldownType.Circle), CooldownCenter, radian);
+
+                                    // Draw right side of the summoner image
+                                    SummonersSprite.Draw(start + new Vector2((int) (SummonerAtlas.SpriteAtlas.Width / 2f), 0), summoner.RightHalf);
+                                }
+
+                                // Draw the cooldown border
+                                SummonersSprite.Draw(start, SummonerAtlas.GetCooldownRectangle(SummonerAtlas.CooldownType.Border));
+                            }
                         }
 
                         // Draw the remaining time as text
                         if (DrawText.CurrentValue && cooldown > 0)
                         {
                             var text = TimeSpan.FromSeconds((int) Math.Ceiling(cooldown)).ToString("ss");
-                            if (cooldown > 60)
+                            if (cooldown > 59)
                             {
                                 text = TimeSpan.FromSeconds((int) Math.Ceiling(cooldown)).Minutes.ToString();
                             }
