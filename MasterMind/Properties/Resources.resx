@@ -121,8 +121,14 @@
   <data name="BlueTrinket" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\wardtracker\bluetrinket.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="CooldownTracker" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\cooldowntracker.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="MainFrame" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\cooldowntracker\mainframe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Summoners" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\cooldowntracker\summoners.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SummonerSlots" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\cooldowntracker\summonerslots.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="VisionWard" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\wardtracker\visionward.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -138,5 +144,8 @@
   </data>
   <data name="YellowTrinket_Friendly" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\wardtracker\yellowtrinket_friendly.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SummonerAtlas" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\cooldowntracker\summoneratlas.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
 </root>

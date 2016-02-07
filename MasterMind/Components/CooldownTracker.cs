@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.Serialization;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
 using MasterMind.Properties;
+using Newtonsoft.Json;
 using SharpDX;
 using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
@@ -16,32 +21,89 @@ namespace MasterMind.Components
 {
     public sealed class CooldownTracker : IComponent
     {
+        #region Offsets
+
         public static readonly Vector2 OverlayOffset = new Vector2(1, 19);
+        public static readonly Vector2 OverlaySummonerOffset = OverlayOffset + new Vector2(106, 4);
 
         public static readonly Vector2 SpellOffset = OverlayOffset + new Vector2(30, 5);
         public static readonly Vector2 SpellSize = new Vector2(18, 5);
         public const int SpellLinePadding = 1;
-        public static readonly int CooldownTextOffset = (int) SpellSize.Y;
+        public static readonly int SpellCooldownTextOffset = (int) SpellSize.Y;
+
+        private static readonly Vector2 SummonerOffset = OverlaySummonerOffset + new Vector2(3, 5);
+        private static readonly Vector2 SummonerSize = new Vector2(10);
+        public const int SummonerPadding = 0;
+        public static readonly int SummonerCooldownTextOffset = (int) SummonerSize.Y + 3;
+        public static readonly int SummonerCooldownTextPadding = 4;
+
+        public static SummonerAtlas SummonerAtlas { get; private set; }
+
+        #endregion
 
         public static readonly Color SpellBackground = Color.SlateGray;
         public static readonly Color SpellNotLearned = Color.DimGray;
         public static readonly Color SpellReady = Color.LawnGreen;
         public static readonly Color SpellNotReady = Color.Red;
 
-        private static string _overlayRef;
-        private static Texture OverlayTextre
+        #region Textures
+
+        private static string _spellOverlayRef;
+        private static Texture SpellOverlayTexture
         {
-            get { return MasterMind.TextureLoader[_overlayRef]; }
+            get { return MasterMind.TextureLoader[_spellOverlayRef]; }
         }
 
-        private EloBuddy.SDK.Rendering.Sprite OverlaySprite { get; set; }
-        private Text SpellCooldownText { get; set; }
+        private static string _summonerOverlayRef;
+        private static Texture SummonerOverlayTexture
+        {
+            get { return MasterMind.TextureLoader[_summonerOverlayRef]; }
+        }
+
+        private static string _summonersRef;
+        private static Texture SummonersTexture
+        {
+            get { return MasterMind.TextureLoader[_summonersRef]; }
+        }
+
+        private static Bitmap SummonerSpells
+        {
+            get
+            {
+                var result = new Bitmap(100, 40);
+                using (var g = Graphics.FromImage(result))
+                {
+                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                    g.DrawImage(Resources.Summoners, 0, 0, result.Width, result.Height);
+                }
+
+                return result;
+            }
+        }
+
+        #endregion
+
+        #region Rendering
+
+        private EloBuddy.SDK.Rendering.Sprite SpellOverlaySprite { get; set; }
+        private EloBuddy.SDK.Rendering.Sprite SummonerOverlaySprite { get; set; }
+        private EloBuddy.SDK.Rendering.Sprite SummonersSprite { get; set; }
+        private Text CooldownText { get; set; }
+
+        #endregion
+
+        #region Menu
 
         public Menu Menu { get; private set; }
 
         public CheckBox TrackAllies { get; private set; }
         public CheckBox TrackEnemies { get; private set; }
+        public CheckBox DrawSummoners { get; private set; }
         public CheckBox DrawText { get; private set; }
+
+        #endregion
 
         public GameObjectTeam AlliedTeam { get; set; }
 
@@ -54,7 +116,10 @@ namespace MasterMind.Components
         public void InitializeComponent()
         {
             // Initialize texture references
-            MasterMind.TextureLoader.Load(Resources.CooldownTracker, out _overlayRef);
+            MasterMind.TextureLoader.Load(Resources.MainFrame, out _spellOverlayRef);
+            MasterMind.TextureLoader.Load(Resources.SummonerSlots, out _summonerOverlayRef);
+            MasterMind.TextureLoader.Load(SummonerSpells, out _summonersRef);
+            SummonerAtlas = JsonConvert.DeserializeObject<SummonerAtlas>(Resources.SummonerAtlas);
 
             // Initialize menu
             Menu = MasterMind.Menu.AddSubMenu("Cooldown Tracker", longTitle: "Spell Cooldown Tracker");
@@ -68,11 +133,14 @@ namespace MasterMind.Components
 
             TrackAllies = Menu.Add("allies", new CheckBox(string.Format("Track {0}", MasterMind.IsSpectatorMode ? "blue team" : "allies")));
             TrackEnemies = Menu.Add("enemies", new CheckBox(string.Format("Track {0}", MasterMind.IsSpectatorMode ? "red team" : "enemies")));
+            DrawSummoners = Menu.Add("summoners", new CheckBox("Draw summoner spells"));
             DrawText = Menu.Add("cooldownText", new CheckBox("Draw cooldown time below spell indicator"));
 
             // Initialize properties
-            OverlaySprite = new EloBuddy.SDK.Rendering.Sprite(() => OverlayTextre);
-            SpellCooldownText = new Text(string.Empty, new System.Drawing.Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular))
+            SpellOverlaySprite = new EloBuddy.SDK.Rendering.Sprite(() => SpellOverlayTexture);
+            SummonerOverlaySprite = new EloBuddy.SDK.Rendering.Sprite(() => SummonerOverlayTexture);
+            SummonersSprite = new EloBuddy.SDK.Rendering.Sprite(() => SummonersTexture);
+            CooldownText = new Text(string.Empty, new System.Drawing.Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular))
             {
                 Color = Color.GhostWhite
             };
@@ -144,18 +212,143 @@ namespace MasterMind.Components
                             // Draw the remaining time as text
                             if (DrawText.CurrentValue)
                             {
-                                SpellCooldownText.TextValue = ((int) Math.Ceiling(cooldown)).ToString();
-                                SpellCooldownText.Position = new Vector2(start.X + SpellSize.X / 2 - SpellCooldownText.Bounding.Width / 2f, start.Y + CooldownTextOffset);
-                                SpellCooldownText.Draw();
+                                CooldownText.TextValue = ((int) Math.Ceiling(cooldown)).ToString();
+                                CooldownText.Position = new Vector2(start.X + SpellSize.X / 2 - CooldownText.Bounding.Width / 2f, start.Y + SpellCooldownTextOffset);
+                                CooldownText.Draw();
                             }
                         }
                     }
                 }
 
                 // Draw the overlay
-                OverlaySprite.Draw(pos + OverlayOffset);
+                SpellOverlaySprite.Draw(pos + OverlayOffset);
+
+                if (DrawSummoners.CurrentValue)
+                {
+                    for (var i = 0; i < 2; i++)
+                    {
+                        // Get the spell
+                        var spell = hero.Spellbook.GetSpell(i + SpellSlot.Summoner1);
+
+                        // Start position of the line
+                        var start = pos + SummonerOffset + new Vector2(i * (SummonerSize.X + SummonerPadding), 0);
+
+                        // Get the current cooldown
+                        var cooldown = Math.Max(0, spell.CooldownExpires - Game.Time);
+
+                        // Draw the summoner spell image
+                        var summoner = SummonerAtlas[spell.Name];
+                        if (summoner != null)
+                        {
+                            SummonersSprite.Draw(start, summoner.Rectangle);
+                        }
+
+                        // Draw the remaining time as text
+                        if (DrawText.CurrentValue && cooldown > 0)
+                        {
+                            var text = Math.Ceiling(cooldown).ToString(CultureInfo.InvariantCulture);
+                            if (cooldown > 60)
+                            {
+                                text = TimeSpan.FromSeconds((int) Math.Ceiling(cooldown)).Minutes.ToString();
+                            }
+                            CooldownText.TextValue = text;
+                            CooldownText.Position = new Vector2(start.X + SummonerSize.X / 2 - CooldownText.Bounding.Width / 2f + ((SummonerCooldownTextPadding / 2) * (i % 2 == 0 ? -1 : 1)),
+                                start.Y + SummonerCooldownTextOffset);
+                            CooldownText.Draw();
+                        }
+                    }
+
+                    // Draw the overlay
+                    SummonerOverlaySprite.Draw(pos + OverlaySummonerOffset);
+                }
             }
         }
+    }
+
+    [DataContract]
+    public class SummonerAtlas
+    {
+        public enum CooldownType
+        {
+            Overlay,
+            Circle,
+            Border
+        }
+
+        [DataMember]
+        public SpriteAtlas SpriteAtlas { get; private set; }
+
+        public SummonerOffset this[string summonerName]
+        {
+            get
+            {
+                var lowerName = summonerName.ToLower();
+                return SpriteAtlas.Summoners.Where(entry => lowerName.Contains(entry.Key.ToLower()) ||
+                                                            (entry.Value.AlternativeNames != null
+                                                             && entry.Value.AlternativeNames.Any(o => lowerName.Contains(o.ToLower())))).Select(entry => entry.Value).FirstOrDefault();
+            }
+        }
+
+        public SharpDX.Rectangle GetCooldownRectangle(CooldownType type)
+        {
+            return SpriteAtlas.Cooldowns[type.ToString()].Rectangle;
+        }
+    }
+
+    [DataContract]
+    public class SpriteAtlas
+    {
+        [DataMember(IsRequired = true)]
+        public int Width { get; private set; }
+        [DataMember(IsRequired = true)]
+        public int Height { get; private set; }
+        [DataMember(IsRequired = true)]
+        public Dictionary<string, SummonerOffset> Summoners { get; private set; }
+        [DataMember(IsRequired = true)]
+        public Dictionary<string, CooldownOffset> Cooldowns { get; private set; }
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            // Initialize rectangles
+            foreach (var summoner in Summoners.Values)
+            {
+                summoner.Rectangle = new SharpDX.Rectangle(summoner.X, summoner.Y, Width, Height);
+                summoner.LeftHalf = new SharpDX.Rectangle(summoner.X, summoner.Y, Width / 2, Height);
+                summoner.RightHalf = new SharpDX.Rectangle(summoner.X + Width / 2, summoner.Y, Width / 2, Height);
+            }
+            foreach (var summoner in Cooldowns.Values)
+            {
+                summoner.Rectangle = new SharpDX.Rectangle(summoner.X, summoner.Y, Width, Height);
+            }
+        }
+    }
+
+    [DataContract]
+    public class SummonerOffset
+    {
+        [DataMember(IsRequired = true)]
+        public int X { get; private set; }
+        [DataMember(IsRequired = true)]
+        public int Y { get; private set; }
+
+        [DataMember]
+        public List<string> AlternativeNames { get; private set; }
+
+        public SharpDX.Rectangle Rectangle { get; set; }
+        public SharpDX.Rectangle LeftHalf { get; set; }
+        public SharpDX.Rectangle RightHalf { get; set; }
+    }
+
+    [DataContract]
+    public class CooldownOffset
+    {
+        [DataMember(IsRequired = true)]
+        public int X { get; private set; }
+        [DataMember(IsRequired = true)]
+        public int Y { get; private set; }
+
+        public SharpDX.Rectangle Rectangle { get; set; }
     }
 
     public static partial class Extensions

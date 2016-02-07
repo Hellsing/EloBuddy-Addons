@@ -42,6 +42,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Loader\System\EloBuddy.SDK.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Loader\System\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Loader\System\SharpDX.dll</HintPath>
@@ -53,6 +57,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -73,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Resources\CooldownTracker\SummonerAtlas.json" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -82,7 +88,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\CooldownTracker.png" />
+    <Content Include="Resources\CooldownTracker\MainFrame.png" />
+    <Content Include="Resources\CooldownTracker\Summoners.png" />
+    <Content Include="Resources\CooldownTracker\SummonerSlots.png" />
     <Content Include="Resources\WardTracker\BlueTrinket.png" />
     <Content Include="Resources\WardTracker\VisionWard.png" />
     <Content Include="Resources\WardTracker\VisionWard_Enemy.png" />
@@ -90,6 +98,7 @@
     <Content Include="Resources\WardTracker\YellowTrinket_Enemy.png" />
     <Content Include="Resources\WardTracker\YellowTrinket_Friendly.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

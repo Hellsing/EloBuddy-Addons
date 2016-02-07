@@ -73,9 +73,62 @@ namespace MasterMind.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap CooldownTracker {
+        internal static System.Drawing.Bitmap MainFrame {
             get {
-                object obj = ResourceManager.GetObject("CooldownTracker", resourceCulture);
+                object obj = ResourceManager.GetObject("MainFrame", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///    &quot;SpriteAtlas&quot;:
+        ///    {
+        ///        &quot;Width&quot;: 10,
+        ///        &quot;Height&quot;: 10,
+        ///        &quot;Summoners&quot;:
+        ///        {
+        ///            &quot;SummonerBarrier&quot;:
+        ///            {
+        ///                &quot;X&quot;: 0,
+        ///                &quot;Y&quot;: 0
+        ///            },
+        ///            &quot;SummonerBoost&quot;:
+        ///            {
+        ///                &quot;X&quot;: 10,
+        ///                &quot;Y&quot;: 0
+        ///            },
+        ///            &quot;SummonerClairvoyance&quot;:
+        ///            {
+        ///                &quot;X&quot;: 20,
+        ///                &quot;Y&quot;: 0
+        ///            },
+        ///            &quot;SummonerDot&quot;:
+        ///            {
+        ///                &quot;X&quot;: [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SummonerAtlas {
+            get {
+                return ResourceManager.GetString("SummonerAtlas", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Summoners {
+            get {
+                object obj = ResourceManager.GetObject("Summoners", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SummonerSlots {
+            get {
+                object obj = ResourceManager.GetObject("SummonerSlots", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
