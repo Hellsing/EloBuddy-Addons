@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
 using EloBuddy;
@@ -258,7 +257,7 @@ namespace MasterMind.Components
                                 {
                                     // Draw right side of the summoner image
                                     SummonersSprite.Draw(start + new Vector2((int) (SummonerAtlas.SpriteAtlas.Width / 2f), 0), summoner.RightHalf);
-                                    
+
                                     // Draw rotated cooldown circle
                                     SummonersSprite.Draw(start, SummonerAtlas.GetCooldownRectangle(SummonerAtlas.CooldownType.Circle), CooldownCenter, radian);
 
