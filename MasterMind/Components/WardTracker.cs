@@ -6,6 +6,7 @@ using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
+using EloBuddy.SDK.Notifications;
 using EloBuddy.SDK.Rendering;
 using MasterMind.Properties;
 using SharpDX;
@@ -36,6 +37,10 @@ namespace MasterMind.Components
         public CheckBox DrawMinimap { get; private set; }
         public CheckBox DrawHealth { get; private set; }
         public CheckBox DrawTime { get; private set; }
+
+        public static CheckBox NotifyPlace { get; private set; }
+        public static CheckBox NotifyPlacePing { get; private set; }
+        public static Slider NotifyRange { get; private set; }
 
         private List<Ward> ActiveWards { get; set; }
 
@@ -80,6 +85,16 @@ namespace MasterMind.Components
                 var pinkColor = new ComboBox("Pink ward color", Enum.GetValues(typeof (Ward.PinkColors)).Cast<Ward.PinkColors>().Select(o => o.ToString()));
                 pinkColor.OnValueChange += delegate(ValueBase<int> sender, ValueBase<int>.ValueChangeArgs args) { PinkColor = (Ward.PinkColors) args.NewValue; };
                 Menu.Add("pinkColor", pinkColor);
+            }
+
+            if (!MasterMind.IsSpectatorMode)
+            {
+                // Notification options
+                Menu.AddSeparator();
+                Menu.AddLabel("Notification options:");
+                NotifyPlace = Menu.Add("notifyPlaceNear", new CheckBox("Notify when enemy nearby places a ward"));
+                NotifyPlacePing = Menu.Add("notifyPlaceNearPing", new CheckBox("Notify with local ping", false));
+                NotifyRange = Menu.Add("notifyPlaceNearRange", new Slider("Notification altert range", 2000, 500, 5000));
             }
 
             // Initialize properties
@@ -339,6 +354,7 @@ namespace MasterMind.Components
 
             #region Constructor Properties
 
+            public AIHeroClient Caster { get; private set; }
             public Obj_AI_Base Handle { get; set; }
             public Vector3 FakePosition { get; private set; }
             public Type WardType { get; private set; }
@@ -474,10 +490,13 @@ namespace MasterMind.Components
                 }
             }
 
-            public Ward(Obj_AI_Base handle, Type wardType, int duration)
+            public Ward(AIHeroClient caster, Obj_AI_Base handle, Vector3 position, Type wardType, int duration, GameObjectTeam team)
             {
                 // Initialize properties
+                Caster = caster;
                 Handle = handle;
+                FakePosition = position;
+                Team = team;
                 WardType = wardType;
                 Duration = duration * 1000;
                 CreationTime = Core.GameTickCount;
@@ -485,13 +504,20 @@ namespace MasterMind.Components
                 // Initialize rendering
                 MinimapSprite = new EloBuddy.SDK.Rendering.Sprite(() => MinimapIconTexture);
                 TextHandle = new Text(string.Empty, new System.Drawing.Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular));
-            }
 
-            public Ward(Vector3 position, Type wardType, int duration, GameObjectTeam team) : this(null, wardType, duration)
-            {
-                // Initialize properties
-                FakePosition = position;
-                Team = team;
+                // Notify player about placement
+                if (!MasterMind.IsSpectatorMode && Team.IsEnemy() &&
+                    (Player.Instance.IsInRange(Position, NotifyRange.CurrentValue) || Player.Instance.IsInRange(caster, NotifyRange.CurrentValue)))
+                {
+                    if (NotifyPlace.CurrentValue)
+                    {
+                        Notifications.Show(new SimpleNotification("A ward has been placed!", string.Format("{0} has placed a ward of type '{1}'", caster.ChampionName, WardType)));
+                    }
+                    if (NotifyPlacePing.CurrentValue)
+                    {
+                        TacticalMap.ShowPing(PingCategory.Normal, Position, true);
+                    }
+                }
             }
 
             public void RenderWard()
@@ -572,7 +598,7 @@ namespace MasterMind.Components
                         if (Enum.TryParse(obj.BaseSkinName, out wardType))
                         {
                             // Return the ward object
-                            return new Ward(obj, wardType, GetWardDuration(caster, wardType));
+                            return new Ward(caster, obj, obj.Position, wardType, GetWardDuration(caster, wardType), caster.Team);
                         }
                     }
                 }
@@ -582,7 +608,7 @@ namespace MasterMind.Components
 
             public static Ward FromSpellCast(AIHeroClient caster, Type wardType, Vector3 position)
             {
-                return new Ward(position.GetClosestWardSpot(), wardType, GetWardDuration(caster, wardType), caster.Team);
+                return new Ward(caster, null, position.GetClosestWardSpot(), wardType, GetWardDuration(caster, wardType), caster.Team);
             }
 
             public static bool IsWard(Obj_AI_Base obj, out Type wardType)

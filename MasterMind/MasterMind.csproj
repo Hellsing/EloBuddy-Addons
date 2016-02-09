@@ -78,6 +78,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Resources\CooldownTracker\CooldownSummoners.psd" />
+    <None Include="Resources\CooldownTracker\CooldownTracker.psd" />
     <None Include="Resources\CooldownTracker\SummonerAtlas.json" />
   </ItemGroup>
   <ItemGroup>
