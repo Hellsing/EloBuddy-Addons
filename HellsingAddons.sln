@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gnaaar", "Gnaaar\Gnaaar.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterMind", "MasterMind\MasterMind.csproj", "{7B55B961-5B6A-4971-BFA7-F6863A113E1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheSupport", "TheSupport\TheSupport.csproj", "{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -109,6 +111,16 @@ Global
 		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7B55B961-5B6A-4971-BFA7-F6863A113E1E}.Release|x86.ActiveCfg = Release|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
