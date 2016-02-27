@@ -2,10 +2,8 @@
 using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
-using EloBuddy.SDK.Enumerations;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Rendering;
-using EloBuddy.SDK.Utils;
 
 namespace Hellsing.Kalista
 {
@@ -17,7 +15,6 @@ namespace Hellsing.Kalista
         static Kalista()
         {
             Loading.OnLoadingComplete += OnLoadingComplete;
-            AppDomain.CurrentDomain.UnhandledException += delegate(object sender, UnhandledExceptionEventArgs args) { Logger.Log(LogLevel.Error, args.ExceptionObject.ToString()); };
         }
 
         public static void Main(string[] args)
