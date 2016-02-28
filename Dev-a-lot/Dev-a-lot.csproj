@@ -7,7 +7,7 @@
     <ProjectGuid>{150D9E4D-56D6-4E8E-B2BE-26195F4295FD}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestAddon</RootNamespace>
+    <RootNamespace>DevALot</RootNamespace>
     <AssemblyName>Dev-a-lot</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -13,7 +13,7 @@ using EloBuddy.SDK.Rendering;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-namespace TestAddon
+namespace DevALot
 {
     internal class Program
     {

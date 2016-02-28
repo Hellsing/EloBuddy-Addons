@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TestAddon
+namespace DevALot
 {
     public static partial class Extensions
     {

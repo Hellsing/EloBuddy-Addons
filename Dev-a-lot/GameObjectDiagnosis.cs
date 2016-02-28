@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using EloBuddy;
 
-namespace TestAddon
+namespace DevALot
 {
     public class GameObjectDiagnosis : IDisposable
     {

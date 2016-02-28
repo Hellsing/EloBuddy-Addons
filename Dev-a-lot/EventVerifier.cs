@@ -8,7 +8,7 @@ using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Utils;
 
-namespace TestAddon
+namespace DevALot
 {
     public static class EventVerifier
     {

@@ -6,7 +6,7 @@ using EloBuddy;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 
-namespace TestAddon
+namespace DevALot
 {
     public static class PropertyVerifier
     {
