@@ -25,7 +25,7 @@ namespace EmoteSpammer
                 menu.AddGroupLabel("Settings");
                 var spamKey = new KeyBind("Spam key", false, KeyBind.BindTypes.HoldActive, 'A', 'U');
                 menu.Add("key", spamKey);
-                var emoteTypeBox = new ComboBox("Emote type", Enum.GetValues(typeof(Emote)).Cast<Emote>().Select(o => o.ToString()), 2);
+                var emoteTypeBox = new ComboBox("Emote type", 2, Emote.Dance.ToString(), Emote.Joke.ToString(), Emote.Laugh.ToString(), Emote.Taunt.ToString());
                 menu.Add("type", emoteTypeBox);
                 var delaySlider = new Slider("Spam delay", 75, 50, 150);
                 menu.Add("delay", delaySlider);
