@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using EloBuddy;
+using EloBuddy.Sandbox;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
@@ -16,8 +17,7 @@ namespace TestAddon
 {
     internal class Program
     {
-        public static readonly string DesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        public static readonly string ResultPath = Path.Combine(DesktopPath, "Test Results");
+        public static readonly string ResultPath = Path.Combine(SandboxConfig.DataDirectory, "Dev-a-lot");
 
         private const string BuffsFormatNormal = "DisplayName: {0} | Caster: {1} | Count: {2}";
         private const string BuffsFormatAdvanced = "DisplayName: {0} | Name: {1} | Caster: {2} | SourceName: {3} | Count: {4} | RemainingTime: {5}";
