@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterMind", "MasterMind\Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheSupport", "TheSupport\TheSupport.csproj", "{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmoteSpammer", "EmoteSpammer\EmoteSpammer.csproj", "{F5C4E27A-6DC4-40F2-8684-88DE48E29F40}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
