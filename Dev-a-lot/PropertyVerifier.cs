@@ -127,7 +127,7 @@ namespace TestAddon
             }
 
             Menu.AddSeparator();
-            Menu.AddLabel(string.Format("Note: Some of those tests will create a folder on your Desktop called '{0}'!", Path.GetFileName(Program.ResultPath)));
+            Menu.AddLabel(string.Format("Note: Some of those tests will create a folder in EB AppData called '{0}'!", Path.GetFileName(Program.ResultPath)));
 
             #endregion
 

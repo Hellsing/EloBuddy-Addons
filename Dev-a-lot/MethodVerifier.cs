@@ -33,7 +33,7 @@ namespace TestAddon
             Menu.Add("issueOrder", new CheckBox("Player.OnIssueOrder", false)).CurrentValue = false;
 
             Menu.AddSeparator();
-            Menu.AddLabel(string.Format("Note: All of those tests will create a folder on your Desktop called '{0}'!", Path.GetFileName(Program.ResultPath)));
+            Menu.AddLabel(string.Format("Note: All of those tests will create a folder in EB AppData called '{0}'!", Path.GetFileName(Program.ResultPath)));
 
             #endregion
 
