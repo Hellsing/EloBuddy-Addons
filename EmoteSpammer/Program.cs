@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
@@ -25,7 +24,7 @@ namespace EmoteSpammer
                 menu.AddGroupLabel("Settings");
                 var spamKey = new KeyBind("Spam key", false, KeyBind.BindTypes.HoldActive, 'A', 'U');
                 menu.Add("key", spamKey);
-                var emoteTypeBox = new ComboBox("Emote type", 2, Emote.Dance.ToString(), Emote.Joke.ToString(), Emote.Laugh.ToString(), Emote.Taunt.ToString());
+                var emoteTypeBox = new ComboBox("Emote type", 3, Emote.Joke.ToString(), Emote.Taunt.ToString(), Emote.Dance.ToString(), Emote.Laugh.ToString());
                 menu.Add("type", emoteTypeBox);
                 var delaySlider = new Slider("Spam delay", 75, 50, 150);
                 menu.Add("delay", delaySlider);
@@ -44,7 +43,7 @@ namespace EmoteSpammer
                             lastSpam = Core.GameTickCount;
 
                             // Do the spamming
-                            Player.DoEmote((Emote) Enum.Parse(typeof(Emote), emoteTypeBox.SelectedText));
+                            Player.DoEmote((Emote) Enum.Parse(typeof (Emote), emoteTypeBox.SelectedText));
 
                             // Instantly move after
                             Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos, false);
