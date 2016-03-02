@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterMind", "MasterMind\Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheSupport", "TheSupport\TheSupport.csproj", "{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Karthus", "Karthus\Karthus.csproj", "{C3478018-D371-4284-945D-5C8E364F0D12}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmoteSpammer", "EmoteSpammer\EmoteSpammer.csproj", "{F5C4E27A-6DC4-40F2-8684-88DE48E29F40}"
 EndProject
 Global
@@ -59,6 +61,10 @@ Global
 		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Debug|x86.Build.0 = Debug|Any CPU
 		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Release|x86.ActiveCfg = Release|Any CPU
 		{8C5C6251-1B35-4966-8FFE-A8FA8F0DA72A}.Release|x86.Build.0 = Release|Any CPU
+		{C3478018-D371-4284-945D-5C8E364F0D12}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C3478018-D371-4284-945D-5C8E364F0D12}.Debug|x86.Build.0 = Debug|Any CPU
+		{C3478018-D371-4284-945D-5C8E364F0D12}.Release|x86.ActiveCfg = Release|Any CPU
+		{C3478018-D371-4284-945D-5C8E364F0D12}.Release|x86.Build.0 = Release|Any CPU
 		{F5C4E27A-6DC4-40F2-8684-88DE48E29F40}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{F5C4E27A-6DC4-40F2-8684-88DE48E29F40}.Debug|x86.Build.0 = Debug|Any CPU
 		{F5C4E27A-6DC4-40F2-8684-88DE48E29F40}.Release|x86.ActiveCfg = Release|Any CPU

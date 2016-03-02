@@ -1,0 +1,144 @@
+﻿using System;
+using System.Linq;
+using EloBuddy;
+using EloBuddy.SDK;
+using EloBuddy.SDK.Enumerations;
+using EloBuddy.SDK.Events;
+using EloBuddy.SDK.Menu;
+using EloBuddy.SDK.Menu.Values;
+using EloBuddy.SDK.Rendering;
+using SharpDX;
+using Color = System.Drawing.Color;
+
+namespace Karthus
+{
+    public class Karthus
+    {
+        private static Karthus _instance;
+        public static Karthus Instance
+        {
+            get { return _instance ?? (_instance = new Karthus()); }
+        }
+
+        internal static void Main(string[] args)
+        {
+            // Wait till the game has fully loaded
+            Loading.OnLoadingComplete += OnLoadingComplete;
+        }
+
+        private static void OnLoadingComplete(EventArgs args)
+        {
+            // Check for the correct champion
+            if (Player.Instance.Hero != Champion.Karthus)
+            {
+                return;
+            }
+
+            // Initialize the addons
+            Instance.Initialize();
+        }
+
+        public Menu Menu { get; private set; }
+        public Menu DrawingMenu { get; private set; }
+        public SpellHandler SpellHandler { get; private set; }
+        public ModeHandler ModeHandler { get; private set; }
+        public bool Initialized { get; private set; }
+
+        public bool IsDead
+        {
+            get { return Player.Instance.Buffs.Any(o => o.DisplayName == "KarthusDefile"); }
+        }
+
+        private Karthus()
+        {
+            // Initialize properties
+            Menu = MainMenu.AddMenu("Karthus", "karthus", "Karthus - King Killsteal");
+            SpellHandler = new SpellHandler(this,
+                new Spell.Skillshot(SpellSlot.Q, 875, SkillShotType.Circular, spellSpeed: int.MaxValue, spellWidth: 160 * 2, castDelay: 750),
+                new Spell.Skillshot(SpellSlot.W, 1000, SkillShotType.Circular, spellWidth: 100),
+                new Spell.Active(SpellSlot.E, 550),
+                new Spell.Active(SpellSlot.R));
+
+            // Setup global menu
+            Menu.AddGroupLabel("Welcome Karthus 3K!");
+            Menu.AddLabel("You can configure the addon on the left by navigating through the menu entries.");
+            Menu.AddLabel("Below you can find a list of global configurations.");
+
+            Menu.AddSeparator();
+            Menu.AddGroupLabel("Global configurations");
+            Menu.Add("ComboWhileDead", new CheckBox("Combo while dead"));
+
+            // Setup mode handler
+            ModeHandler = new ModeHandler(this);
+
+            // Setup drawing menu
+            DrawingMenu = Menu.AddSubMenu("Drawings");
+            DrawingMenu.AddGroupLabel("Info");
+            DrawingMenu.AddLabel("You can enable and disable spell range drawings in here.");
+            DrawingMenu.AddSeparator();
+            DrawingMenu.AddGroupLabel("Spell ranges");
+            DrawingMenu.Add("Q", new CheckBox("Draw Q range"));
+            DrawingMenu.Add("E", new CheckBox("Draw E range", false));
+            DrawingMenu.Add("W", new CheckBox("Draw W range"));
+            DrawingMenu.Add("W2", new CheckBox("Draw W max range"));
+
+            // Listen to required events
+            Game.OnTick += OnTick;
+            Drawing.OnDraw += OnDraw;
+        }
+
+        private void OnDraw(EventArgs args)
+        {
+            // Draw the spell ranges
+            if (SpellHandler.Q.IsLearned && DrawingMenu.Get<CheckBox>("Q").CurrentValue)
+            {
+                Circle.Draw(SharpDX.Color.Red, SpellHandler.Q.Range, Player.Instance);
+            }
+            if (SpellHandler.W.IsLearned && DrawingMenu.Get<CheckBox>("W").CurrentValue)
+            {
+                Circle.Draw(SharpDX.Color.PaleVioletRed, SpellHandler.W.Range, Player.Instance);
+            }
+            if (SpellHandler.W.IsLearned && DrawingMenu.Get<CheckBox>("W2").CurrentValue)
+            {
+                Circle.Draw(SharpDX.Color.PaleVioletRed, SpellHandler.WallOfPainMaxRange, Player.Instance);
+            }
+            if (SpellHandler.E.IsLearned && DrawingMenu.Get<CheckBox>("E").CurrentValue)
+            {
+                Circle.Draw(SharpDX.Color.OrangeRed, SpellHandler.E.Range, Player.Instance);
+            }
+        }
+
+        private void OnTick(EventArgs args)
+        {
+            if (!Player.Instance.IsDead)
+            {
+                // Execute modes
+                ModeHandler.OnTick();
+            }
+        }
+
+        public T GetGlobal<T>(string indentifier) where T : ValueBase
+        {
+            T global = null;
+            foreach (var menu in new [] { Menu }.Concat(ModeHandler.Modes.Select(o => o.Menu)))
+            {
+                global = menu.Get<T>(indentifier);
+                if (global != null)
+                {
+                    break;
+                }
+            }
+            return global;
+        }
+
+        public void Initialize()
+        {
+            // Only initialize once
+            if (Initialized)
+            {
+                return;
+            }
+            Initialized = true;
+        }
+    }
+}
