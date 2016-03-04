@@ -1,4 +1,5 @@
-﻿using EloBuddy;
+﻿using System;
+using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu.Values;
 
@@ -13,6 +14,7 @@ namespace Karthus.Modes
             // Setup menu
             Menu.AddGroupLabel("Spell usage");
             UnkillableE = Menu.Add("unkillableE", new CheckBox("Cast E if minion is not lasthittable"));
+            Menu.AddLabel("Note: This will only trigger when in LaneClear or JungleClear mode!");
 
             // Listen to required events
             Orbwalker.OnUnkillableMinion += OnUnkillableMinion;
@@ -20,24 +22,28 @@ namespace Karthus.Modes
 
         private void OnUnkillableMinion(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args)
         {
-            if (UnkillableE.CurrentValue)
+            if (UnkillableE.CurrentValue && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
             {
                 // Check if target is in E range and killable with E
                 if (E.IsReady() && E.IsInRange(target) && !Instance.SpellHandler.IsDefileActive() && target.TotalShieldHealth() < Player.Instance.GetSpellDamage(target, E.Slot))
                 {
                     // Cast E
-                    E.OnSpellCasted += OnDefileCasted;
+                    E.OnSpellCasted += delegate { Game.OnTick += DeactivateDefile; };
                     E.Cast();
                     return;
                 }
             }
         }
 
-        private void OnDefileCasted(Spell.SpellBase spell, GameObjectProcessSpellCastEventArgs args)
+        private void DeactivateDefile(EventArgs args)
         {
-            // Recast and remove this handler
-            E.OnSpellCasted -= OnDefileCasted;
-            E.Cast();
+            // Check if Defile is ready and active
+            if (E.IsReady() && Instance.SpellHandler.IsDefileActive())
+            {
+                // Recast E and remove the tick listener
+                Game.OnTick -= DeactivateDefile;
+                E.Cast();
+            }
         }
 
         public override bool ShouldBeExecuted(Orbwalker.ActiveModes activeModes)
