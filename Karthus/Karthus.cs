@@ -49,6 +49,14 @@ namespace Karthus
             get { return Player.Instance.Buffs.Any(o => o.DisplayName == "KarthusDefile"); }
         }
 
+        private HitChance[] _hitchances =
+        {
+            HitChance.Low,
+            HitChance.AveragePoint,
+            HitChance.Medium,
+            HitChance.High
+        };
+
         private Karthus()
         {
             // Initialize properties
@@ -68,6 +76,11 @@ namespace Karthus
             Menu.AddGroupLabel("Global configurations");
             Menu.Add("ComboWhileDead", new CheckBox("Combo while dead"));
 
+            Menu.AddSeparator();
+            Menu.AddGroupLabel("Hitchances for spells");
+            Menu.AddLabel("Here you can define your desired minimum hitchances for each spell. Default is Medium.");
+            RegisterHitchances(Menu);
+
             // Setup mode handler
             ModeHandler = new ModeHandler(this);
 
@@ -85,6 +98,41 @@ namespace Karthus
             // Listen to required events
             Game.OnTick += OnTick;
             Drawing.OnDraw += OnDraw;
+        }
+
+        private void RegisterHitchances(Menu menu)
+        {
+            for (var i = 0; i < 4; i++)
+            {
+                Spell.SpellBase spellBase = null;
+                var slot = (SpellSlot) i;
+                switch (slot)
+                {
+                    case SpellSlot.Q:
+                        spellBase = SpellHandler.Q;
+                        break;
+                    case SpellSlot.W:
+                        spellBase = SpellHandler.W;
+                        break;
+                    case SpellSlot.E:
+                        spellBase = SpellHandler.E;
+                        break;
+                    case SpellSlot.R:
+                        spellBase = SpellHandler.R;
+                        break;
+                }
+
+                Spell.Skillshot skillshot;
+                if ((skillshot = spellBase as Spell.Skillshot) != null)
+                {
+                    var spellEntry = new ComboBox(skillshot.Slot + " hitchance", _hitchances.Select(o => o.ToString()), 2);
+                    spellEntry.OnValueChange += delegate(ValueBase<int> sender, ValueBase<int>.ValueChangeArgs args)
+                    {
+                        skillshot.MinimumHitChance = _hitchances[args.NewValue];
+                    };
+                    menu.Add("hitchance" + skillshot.Slot, spellEntry);
+                }
+            }
         }
 
         private void OnDraw(EventArgs args)
