@@ -28,11 +28,17 @@ namespace Karthus.Modes
                 if (E.IsReady() && E.IsInRange(target) && !Instance.SpellHandler.IsDefileActive() && target.TotalShieldHealth() < Player.Instance.GetSpellDamage(target, E.Slot))
                 {
                     // Cast E
-                    E.OnSpellCasted += delegate { Game.OnTick += DeactivateDefile; };
+                    E.OnSpellCasted += OnDefileCasted;
                     E.Cast();
                     return;
                 }
             }
+        }
+
+        private void OnDefileCasted(Spell.SpellBase spell, GameObjectProcessSpellCastEventArgs args)
+        {
+            E.OnSpellCasted -= OnDefileCasted;
+            Game.OnTick += DeactivateDefile;
         }
 
         private void DeactivateDefile(EventArgs args)
