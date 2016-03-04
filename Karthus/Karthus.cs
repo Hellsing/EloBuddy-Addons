@@ -7,8 +7,6 @@ using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
-using SharpDX;
-using Color = System.Drawing.Color;
 
 namespace Karthus
 {
@@ -49,7 +47,7 @@ namespace Karthus
             get { return Player.Instance.Buffs.Any(o => o.DisplayName == "KarthusDefile"); }
         }
 
-        private HitChance[] _hitchances =
+        private readonly HitChance[] _hitchances =
         {
             HitChance.Low,
             HitChance.AveragePoint,
@@ -126,10 +124,7 @@ namespace Karthus
                 if ((skillshot = spellBase as Spell.Skillshot) != null)
                 {
                     var spellEntry = new ComboBox(skillshot.Slot + " hitchance", _hitchances.Select(o => o.ToString()), 2);
-                    spellEntry.OnValueChange += delegate(ValueBase<int> sender, ValueBase<int>.ValueChangeArgs args)
-                    {
-                        skillshot.MinimumHitChance = _hitchances[args.NewValue];
-                    };
+                    spellEntry.OnValueChange += delegate(ValueBase<int> sender, ValueBase<int>.ValueChangeArgs args) { skillshot.MinimumHitChance = _hitchances[args.NewValue]; };
                     menu.Add("hitchance" + skillshot.Slot, spellEntry);
                 }
             }
@@ -168,7 +163,7 @@ namespace Karthus
         public T GetGlobal<T>(string indentifier) where T : ValueBase
         {
             T global = null;
-            foreach (var menu in new [] { Menu }.Concat(ModeHandler.Modes.Select(o => o.Menu)))
+            foreach (var menu in new[] { Menu }.Concat(ModeHandler.Modes.Select(o => o.Menu)))
             {
                 global = menu.Get<T>(indentifier);
                 if (global != null)

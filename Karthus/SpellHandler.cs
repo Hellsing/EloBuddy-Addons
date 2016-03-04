@@ -53,46 +53,46 @@ namespace Karthus
             switch (slot)
             {
                 case SpellSlot.Q:
+                {
+                    if (Q.Cast(target))
                     {
-                        if (Q.Cast(target))
-                        {
-                            // Q was casted
-                            return true;
-                        }
-                        break;
+                        // Q was casted
+                        return true;
                     }
+                    break;
+                }
                 case SpellSlot.W:
+                {
+                    if (CastWallOfPain(target))
                     {
-                        if (CastWallOfPain(target))
-                        {
-                            // W was casted
-                            return true;
-                        }
-                        break;
+                        // W was casted
+                        return true;
                     }
+                    break;
+                }
                 case SpellSlot.E:
+                {
+                    if (!IsDefileActive() && E.IsInRange(target) && E.Cast())
                     {
-                        if (!IsDefileActive() && E.IsInRange(target) && E.Cast())
-                        {
-                            // E was casted
-                            return true;
-                        }
-                        if (IsDefileActive() && !E.IsInRange(target) && E.Cast())
-                        {
-                            // E was casted
-                            return true;
-                        }
-                        break;
+                        // E was casted
+                        return true;
                     }
+                    if (IsDefileActive() && !E.IsInRange(target) && E.Cast())
+                    {
+                        // E was casted
+                        return true;
+                    }
+                    break;
+                }
                 case SpellSlot.R:
+                {
+                    if (Player.Instance.GetSpellDamage(target, R.Slot) > target.TotalShieldHealth() + 100 && R.Cast())
                     {
-                        if (Player.Instance.GetSpellDamage(target, R.Slot) > target.TotalShieldHealth() + 100 && R.Cast())
-                        {
-                            // R was casted
-                            return true;
-                        }
-                        break;
+                        // R was casted
+                        return true;
                     }
+                    break;
+                }
             }
 
             return false;
