@@ -30,7 +30,7 @@ namespace Karthus.Modes
                 return true;
             }
             var deadCombo = Instance.GetGlobal<CheckBox>("ComboWhileDead");
-            return !Player.Instance.IsDead && deadCombo != null && deadCombo.CurrentValue && Instance.IsDead;
+            return deadCombo != null && deadCombo.CurrentValue && Instance.IsDead;
         }
 
         public override bool Execute()
