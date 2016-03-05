@@ -47,7 +47,7 @@ namespace Karthus
             // Validate target
             if (target == null)
             {
-                return false;
+                return slot == SpellSlot.E && IsDefileActive() && E.Cast();
             }
 
             switch (slot)
@@ -73,11 +73,6 @@ namespace Karthus
                 case SpellSlot.E:
                 {
                     if (!IsDefileActive() && E.IsInRange(target) && E.Cast())
-                    {
-                        // E was casted
-                        return true;
-                    }
-                    if (IsDefileActive() && !E.IsInRange(target) && E.Cast())
                     {
                         // E was casted
                         return true;
