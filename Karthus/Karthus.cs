@@ -110,6 +110,10 @@ namespace Karthus
             // Listen to required events
             Game.OnTick += OnTick;
             Drawing.OnDraw += OnDraw;
+
+#if DEVELOPMENT
+            Chat.Print("[Karthus] Playing on development build.");
+#endif
         }
 
         private void RegisterHitchances(Menu menu)
