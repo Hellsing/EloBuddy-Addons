@@ -23,18 +23,13 @@ namespace Karthus.Modes
             SpellUsage[SpellSlot.E] = Menu.Add("E", new CheckBox("Use E"));
 
             Menu.AddSeparator();
-            Menu.AddGroupLabel("Spell options");
-            Menu.Add("", new CheckBox("Use E "));
-            Menu.Add("countE", new Slider("Minimum kill count for E to trigger", 2, 1, 5));
-
-            Menu.AddSeparator();
             Menu.AddGroupLabel("Mana usage");
             ManaUsage = Menu.Add("mana", new Slider("Only cast if mana is above {0}%", 50, 0, 99));
         }
-        
+
         public override bool ShouldBeExecuted(Orbwalker.ActiveModes activeModes)
         {
-            return activeModes.HasFlag(Orbwalker.ActiveModes.LaneClear);
+            return activeModes.HasFlag(Orbwalker.ActiveModes.Harass);
         }
 
         public override bool Execute()
