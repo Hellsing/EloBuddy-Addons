@@ -1,5 +1,4 @@
-﻿using System;
-using EloBuddy;
+﻿using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu.Values;
 
@@ -25,30 +24,11 @@ namespace Karthus.Modes
             if (UnkillableE.CurrentValue && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
             {
                 // Check if target is in E range and killable with E
-                if (E.IsReady() && E.IsInRange(target) && !Instance.SpellHandler.IsDefileActive() && target.TotalShieldHealth() < Player.Instance.GetSpellDamage(target, E.Slot))
+                if (E.IsReady() && E.IsInRange(target) && !IsDefileActive && target.TotalShieldHealth() < Player.Instance.GetSpellDamage(target, E.Slot))
                 {
                     // Cast E
-                    E.OnSpellCasted += OnDefileCasted;
-                    E.Cast();
-                    return;
+                    CastDefilePulse();
                 }
-            }
-        }
-
-        private void OnDefileCasted(Spell.SpellBase spell, GameObjectProcessSpellCastEventArgs args)
-        {
-            E.OnSpellCasted -= OnDefileCasted;
-            Game.OnTick += DeactivateDefile;
-        }
-
-        private void DeactivateDefile(EventArgs args)
-        {
-            // Check if Defile is ready and active
-            if (E.IsReady() && Instance.SpellHandler.IsDefileActive())
-            {
-                // Recast E and remove the tick listener
-                Game.OnTick -= DeactivateDefile;
-                E.Cast();
             }
         }
 

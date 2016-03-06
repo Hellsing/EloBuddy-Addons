@@ -10,6 +10,9 @@ namespace Karthus.Modes
     public sealed class LaneClear : ModeBase
     {
         private Dictionary<SpellSlot, CheckBox> SpellUsage { get; set; }
+
+        private Slider KillcountE { get; set; }
+
         private Slider ManaUsage { get; set; }
 
         public LaneClear(Karthus instance) : base(instance)
@@ -19,8 +22,12 @@ namespace Karthus.Modes
 
             // Setup menu
             Menu.AddGroupLabel("Spell usage");
-            SpellUsage[SpellSlot.Q] = Menu.Add("Q", new CheckBox("Use Q"));
+            //SpellUsage[SpellSlot.Q] = Menu.Add("Q", new CheckBox("Use Q"));
             SpellUsage[SpellSlot.E] = Menu.Add("E", new CheckBox("Use E"));
+
+            Menu.AddSeparator();
+            Menu.AddGroupLabel("Spell options");
+            KillcountE = Menu.Add("countE", new Slider("Minimum kill count for E to trigger", 2, 1, 5));
 
             Menu.AddSeparator();
             Menu.AddGroupLabel("Mana usage");
@@ -29,7 +36,7 @@ namespace Karthus.Modes
 
         public override bool ShouldBeExecuted(Orbwalker.ActiveModes activeModes)
         {
-            return activeModes.HasFlag(Orbwalker.ActiveModes.Harass);
+            return activeModes.HasFlag(Orbwalker.ActiveModes.LaneClear);
         }
 
         public override bool Execute()
@@ -37,15 +44,31 @@ namespace Karthus.Modes
             // Check for mana
             if (ManaUsage.CurrentValue < Player.Instance.ManaPercent)
             {
-                if (Instance.SpellHandler.IsDefileActive())
+                if (IsDefileActive)
                 {
                     return Instance.SpellHandler.E.Cast();
                 }
                 return false;
             }
 
-            // Cast active spells
-            return SpellUsage.Keys.Any(slot => SpellUsage[slot].CurrentValue && Player.GetSpell(slot).IsReady && Instance.SpellHandler.CastOnBestTarget(slot));
+            // E usage
+            if (SpellUsage[E.Slot].CurrentValue && E.IsReady() && !IsDefileActive)
+            {
+                // Get minions in E range
+                var minions = EntityManager.MinionsAndMonsters.GetLaneMinions(radius: E.Range, addBoundingRadius: false).ToArray();
+                if (minions.Length >= KillcountE.CurrentValue)
+                {
+                    var killable = minions.Count(minion => Player.Instance.GetSpellDamage(minion, E.Slot) > minion.TotalShieldHealth());
+                    if (killable >= KillcountE.CurrentValue && CastDefilePulse())
+                    {
+                        // E was casted
+                        return true;
+                    }
+                }
+            }
+
+            // Nothing was casted
+            return false;
         }
     }
 }
