@@ -47,7 +47,7 @@ namespace Karthus
 
         public bool IsDead
         {
-            get { return Player.Instance.Buffs.Any(o => o.DisplayName == "KarthusDefile"); }
+            get { return Player.Instance.Buffs.Any(o => o.Name == "KarthusDeathDefiedBuff"); }
         }
 
         private readonly HitChance[] _hitchances =
@@ -61,7 +61,7 @@ namespace Karthus
         private Karthus()
         {
             // Initialize properties
-            Menu = MainMenu.AddMenu("Karthus", "karthus", "Karthus - King Killsteal");
+            Menu = MainMenu.AddMenu("Karthus 3K", "karthus", "Karthus - King Killsteal");
             SpellHandler = new SpellHandler(this,
                 new Spell.Skillshot(SpellSlot.Q, 875, SkillShotType.Circular, spellSpeed: int.MaxValue, spellWidth: 160 * 2, castDelay: 750),
                 new Spell.Skillshot(SpellSlot.W, 1000, SkillShotType.Circular, spellWidth: 100),
