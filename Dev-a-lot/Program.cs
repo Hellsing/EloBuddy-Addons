@@ -80,41 +80,47 @@ namespace DevALot
 
         private static void Main(string[] args)
         {
-            Loading.OnLoadingComplete += delegate
+            Loading.OnLoadingComplete += OnLoadingComplete;
+            Loading.OnLoadingCompleteSpectatorMode += OnLoadingComplete;
+        }
+
+        private static void OnLoadingComplete(EventArgs args)
+        {
+            #region Menu Creation
+
+            // Setup a menu
+            Menu = MainMenu.AddMenu("Dev-a-lot", "devalot");
+
+            Menu.AddGroupLabel("General GameObject analyzing");
+            Menu.Add("general", new CheckBox("General properties", false)).CurrentValue = false;
+            Menu.Add("heroes", new CheckBox("Heroes only"));
+            Menu.Add("buffs", new CheckBox("Show buffs", false)).CurrentValue = false;
+            Menu.Add("buffs+", new CheckBox("Show more buff info", false));
+            if (!Bootstrap.IsSpectatorMode)
             {
-                #region Menu Creation
-
-                // Setup a menu
-                Menu = MainMenu.AddMenu("Dev-a-lot", "devalot");
-
-                Menu.AddGroupLabel("General GameObject analyzing");
-                Menu.Add("general", new CheckBox("General properties", false)).CurrentValue = false;
-                Menu.Add("heroes", new CheckBox("Heroes only"));
-                Menu.Add("buffs", new CheckBox("Show buffs", false)).CurrentValue = false;
-                Menu.Add("buffs+", new CheckBox("Show more buff info", false));
                 Menu.Add("autoAttack", new CheckBox("Show auto attack damage", false)).CurrentValue = false;
                 if (Player.Instance.Hero == Champion.Azir)
                 {
                     Menu.Add("azir", new CheckBox("Analyze Azir soldiers", false));
                 }
+            }
 
-                Menu.AddGroupLabel("Near mouse analyzing");
-                Menu.Add("objectNames", new CheckBox("General info about object", false));
-                Menu.Add("mouse", new CheckBox("Show info about mouse position", false));
-                Menu.Add("mouseLines", new CheckBox("Show mouse coordinate lines", false));
-                Menu.Add("grid", new CheckBox("Visualize game grid", false));
-                Menu.Add("gridSize", new Slider("Grid size {0} x {0}", 11, 1, 55)).OnValueChange += delegate { OnMouseMove(null); };
+            Menu.AddGroupLabel("Near mouse analyzing");
+            Menu.Add("objectNames", new CheckBox("General info about object", false));
+            Menu.Add("mouse", new CheckBox("Show info about mouse position", false));
+            Menu.Add("mouseLines", new CheckBox("Show mouse coordinate lines", false));
+            Menu.Add("grid", new CheckBox("Visualize game grid", false));
+            Menu.Add("gridSize", new Slider("Grid size {0} x {0}", 11, 1, 55)).OnValueChange += delegate { OnMouseMove(null); };
 
-                #endregion
+            #endregion
 
-                // Initialize other things
-                EventVerifier.Initialize();
-                PropertyVerifier.Initialize();
+            // Initialize other things
+            EventVerifier.Initialize();
+            PropertyVerifier.Initialize();
 
-                // Listen to all required events
-                Messages.RegisterEventHandler<Messages.MouseMove>(OnMouseMove);
-                Drawing.OnDraw += OnDraw;
-            };
+            // Listen to all required events
+            Messages.RegisterEventHandler<Messages.MouseMove>(OnMouseMove);
+            Drawing.OnDraw += OnDraw;
         }
 
         private static void OnDraw(EventArgs args)
@@ -251,7 +257,8 @@ namespace DevALot
                         { "IsValid", baseObject.IsValid },
                         { "IsVisible", baseObject.IsVisible },
                         { "IsTargetable", baseObject.IsTargetable },
-                        { "IsDead", baseObject.IsDead }
+                        { "IsDead", baseObject.IsDead },
+                        { "IsHPBarRendered", baseObject.IsHPBarRendered }
                     };
 
                     Drawing.DrawText(baseObject.Position.WorldToScreen() + new Vector2(0, i), Color.Orange, "General properties", 10);
@@ -293,41 +300,47 @@ namespace DevALot
 
                 #region Auto Attack Damage
 
-                if (ShowAaDamage && baseObject != null && baseObject.IsTargetableToTeam && !baseObject.IsAlly)
+                if (!Bootstrap.IsSpectatorMode)
                 {
-                    var damageWithPassive = Player.Instance.GetAutoAttackDamage(baseObject, true);
-                    var damageWithoutPassive = Player.Instance.GetAutoAttackDamage(baseObject);
-                    var difference = Math.Round(damageWithPassive - damageWithoutPassive);
-                    Drawing.DrawText(baseObject.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0} ({1})", damageWithPassive, string.Concat(difference > 0 ? "+" : "", difference)),
-                        10);
+                    if (ShowAaDamage && baseObject != null && baseObject.IsTargetableToTeam && !baseObject.IsAlly)
+                    {
+                        var damageWithPassive = Player.Instance.GetAutoAttackDamage(baseObject, true);
+                        var damageWithoutPassive = Player.Instance.GetAutoAttackDamage(baseObject);
+                        var difference = Math.Round(damageWithPassive - damageWithoutPassive);
+                        Drawing.DrawText(baseObject.HPBarPosition, Color.NavajoWhite, string.Format("Damage: {0} ({1})", damageWithPassive, string.Concat(difference > 0 ? "+" : "", difference)),
+                            10);
+                    }
                 }
 
                 #endregion
 
                 #region Azir Soldiers
 
-                if (Player.Instance.Hero == Champion.Azir && AnalyzeAzir)
+                if (!Bootstrap.IsSpectatorMode)
                 {
-                    foreach (var soldier in Orbwalker.AzirSoldiers)
+                    if (Player.Instance.Hero == Champion.Azir && AnalyzeAzir)
                     {
-                        Circle.Draw(SharpDX.Color.DarkRed, soldier.BoundingRadius, soldier.Position);
-                        Drawing.DrawText(soldier.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", soldier.GetType().Name, soldier.Name), 10);
-
-                        Drawing.DrawText(soldier.Position.WorldToScreen() + new Vector2(0, 20), Color.NavajoWhite,
-                            string.Format("Buffs: {0}", string.Join(" | ", soldier.Buffs.Select(o => string.Format("{0} ({1}x - {2})", o.DisplayName, o.Count, o.SourceName)))), 10);
-
-                        Circle.Draw(SharpDX.Color.LawnGreen, 275, soldier.Position);
-                        Drawing.DrawLine(Player.Instance.Position.WorldToScreen(), Player.Instance.Position.Extend(soldier, Player.Instance.AttackRange).To3DWorld().WorldToScreen(), 3,
-                            Color.OrangeRed);
-
-                        if (Orbwalker.ValidAzirSoldiers.Any(o => o.IdEquals(soldier)))
+                        foreach (var soldier in Orbwalker.AzirSoldiers)
                         {
-                            Circle.Draw(SharpDX.Color.AliceBlue, 500, soldier.Position);
+                            Circle.Draw(SharpDX.Color.DarkRed, soldier.BoundingRadius, soldier.Position);
+                            Drawing.DrawText(soldier.Position.WorldToScreen(), Color.NavajoWhite, string.Format("Type: {0} | Name: {1}", soldier.GetType().Name, soldier.Name), 10);
 
-                            foreach (var enemy in EntityManager.MinionsAndMonsters.Combined.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget()).Cast<Obj_AI_Base>()
-                                .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget())).Where(enemy => enemy.IsInRange(soldier, 275 + enemy.BoundingRadius)))
+                            Drawing.DrawText(soldier.Position.WorldToScreen() + new Vector2(0, 20), Color.NavajoWhite,
+                                string.Format("Buffs: {0}", string.Join(" | ", soldier.Buffs.Select(o => string.Format("{0} ({1}x - {2})", o.DisplayName, o.Count, o.SourceName)))), 10);
+
+                            Circle.Draw(SharpDX.Color.LawnGreen, 275, soldier.Position);
+                            Drawing.DrawLine(Player.Instance.Position.WorldToScreen(), Player.Instance.Position.Extend(soldier, Player.Instance.AttackRange).To3DWorld().WorldToScreen(), 3,
+                                Color.OrangeRed);
+
+                            if (Orbwalker.ValidAzirSoldiers.Any(o => o.IdEquals(soldier)))
                             {
-                                Circle.Draw(SharpDX.Color.Red, enemy.BoundingRadius, enemy.Position);
+                                Circle.Draw(SharpDX.Color.AliceBlue, 500, soldier.Position);
+
+                                foreach (var enemy in EntityManager.MinionsAndMonsters.Combined.Where(unit => unit.Team != Player.Instance.Team && unit.IsValidTarget()).Cast<Obj_AI_Base>()
+                                    .Concat(EntityManager.Heroes.Enemies.Where(o => o.IsValidTarget())).Where(enemy => enemy.IsInRange(soldier, 275 + enemy.BoundingRadius)))
+                                {
+                                    Circle.Draw(SharpDX.Color.Red, enemy.BoundingRadius, enemy.Position);
+                                }
                             }
                         }
                     }
