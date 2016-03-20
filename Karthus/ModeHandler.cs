@@ -21,7 +21,8 @@ namespace Karthus
                 new PermaActive(instance),
                 new Combo(instance),
                 new Harass(instance),
-                new LaneClear(instance)
+                new LaneClear(instance),
+                new JungleFarming(instance)
             };
         }
 
