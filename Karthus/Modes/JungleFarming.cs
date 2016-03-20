@@ -55,8 +55,16 @@ namespace Karthus.Modes
                     {
                         case SpellSlot.Q:
                         case SpellSlot.W:
+
+                            // Predict the position
+                            var pos = target.ServerPosition;
+                            if (target.MoveSpeed > 0)
+                            {
+                                pos = Prediction.Position.PredictUnitPosition(target, slot == SpellSlot.Q ? Q.CastDelay : W.CastDelay).To3DWorld();
+                            }
+
                             // Cast the spell directly on the target
-                            if (Player.CastSpell(slot, target))
+                            if (Player.CastSpell(slot, pos))
                             {
                                 // Q or W has been casted
                                 return true;
