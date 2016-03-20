@@ -63,6 +63,12 @@ namespace Karthus.Modes
                                 pos = Prediction.Position.PredictUnitPosition(target, slot == SpellSlot.Q ? Q.CastDelay : W.CastDelay).To3DWorld();
                             }
 
+                            // Check if position is in range
+                            if (slot == SpellSlot.Q && !Q.IsInRange(pos))
+                            {
+                                break;
+                            }
+
                             // Cast the spell directly on the target
                             if (Player.CastSpell(slot, pos))
                             {
