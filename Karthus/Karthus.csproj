@@ -61,6 +61,7 @@
     <Compile Include="ModeHandler.cs" />
     <Compile Include="Modes\Combo.cs" />
     <Compile Include="Modes\Harass.cs" />
+    <Compile Include="Modes\JungleFarming.cs" />
     <Compile Include="Modes\LaneClear.cs" />
     <Compile Include="Modes\PermaActive.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

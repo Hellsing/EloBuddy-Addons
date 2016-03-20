@@ -36,6 +36,13 @@ namespace Karthus
                     break;
                 }
             }
+
+            // Check if Defile should be turned off
+            if (ModeBase.ShouldTurnOffDefile)
+            {
+                Instance.SpellHandler.E.Cast();
+                ModeBase.ShouldTurnOffDefile = false;
+            }
         }
     }
 
@@ -69,6 +76,8 @@ namespace Karthus
         {
             get { return Instance.SpellHandler.IsDefileActive(); }
         }
+
+        public static bool ShouldTurnOffDefile { get; set; }
 
         protected ModeBase(Karthus instance)
         {

@@ -200,7 +200,7 @@ namespace Karthus
                         {
                             formatString += " (invisible)";
                         }
-                        else if ((alliesNearby = target.Key.CountAlliesInRange(500)) > 0)
+                        else if ((alliesNearby = target.Key.CountAlliesInRange(1000)) > 0)
                         {
                             formatString += string.Format(" ({0} allies nearby)", alliesNearby);
                         }

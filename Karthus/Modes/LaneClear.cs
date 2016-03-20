@@ -46,7 +46,8 @@ namespace Karthus.Modes
             {
                 if (IsDefileActive)
                 {
-                    return Instance.SpellHandler.E.Cast();
+                    ShouldTurnOffDefile = true;
+                    return true;
                 }
                 return false;
             }
