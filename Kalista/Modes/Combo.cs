@@ -53,9 +53,7 @@ namespace Hellsing.Kalista.Modes
                     }
 
                     // E to slow
-                    if (!Config.Misc.UseHarassPlus && Settings.UseESlow &&
-                        EntityManager.MinionsAndMonsters.CombinedAttackable.Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
-                        E.Cast())
+                    if (!Config.Misc.UseHarassPlus && Settings.UseESlow && Cache.RendMinions.Any(o => E.IsInRange(o) && o.IsRendKillable()) && E.Cast())
                     {
                         return;
                     }

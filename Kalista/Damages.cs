@@ -24,7 +24,7 @@ namespace Hellsing.Kalista
             });
         }
 
-        public static bool IsRendKillable(this Obj_AI_Base target)
+        public static bool IsRendKillable(Obj_AI_Base target, float? damage = null)
         {
             // Validate unit
             if (target == null || !target.IsValidTarget() || !target.HasRendBuff())
@@ -51,7 +51,7 @@ namespace Hellsing.Kalista
                 }
             }
 
-            return GetRendDamage(target) > totalHealth;
+            return (damage ?? GetRendDamage(target)) > totalHealth;
         }
 
         public static float GetRendDamage(AIHeroClient target)
@@ -59,16 +59,17 @@ namespace Hellsing.Kalista
             return GetRendDamage(target, -1);
         }
 
-        public static float GetRendDamage(Obj_AI_Base target, int customStacks = -1)
+        public static float GetRendDamage(Obj_AI_Base target, int customStacks = -1, BuffInstance rendBuff = null)
         {
             // Calculate the damage and return
-            return Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, GetRawRendDamage(target, customStacks) - Config.Misc.DamageReductionE) *
+            return Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, GetRawRendDamage(target, customStacks, rendBuff) - Config.Misc.DamageReductionE) *
                    (Player.Instance.HasBuff("SummonerExhaustSlow") ? 0.6f : 1); // Take into account Exhaust, migh just add that to the SDK
         }
 
-        public static float GetRawRendDamage(Obj_AI_Base target, int customStacks = -1)
+        public static float GetRawRendDamage(Obj_AI_Base target, int customStacks = -1, BuffInstance rendBuff = null)
         {
-            var stacks = (customStacks > -1 ? customStacks : target.HasRendBuff() ? target.GetRendBuff().Count : 0) - 1;
+            rendBuff = rendBuff ?? target.GetRendBuff();
+            var stacks = (customStacks > -1 ? customStacks : rendBuff != null ? rendBuff.Count : 0) - 1;
             if (stacks > -1)
             {
                 var index = SpellManager.E.Level - 1;

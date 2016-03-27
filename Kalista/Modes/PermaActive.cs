@@ -29,7 +29,7 @@ namespace Hellsing.Kalista.Modes
             {
                 #region Killsteal
 
-                if (Settings.UseKillsteal && EntityManager.Heroes.Enemies.Any(h => h.IsValidTarget(E.Range) && h.IsRendKillable()) && E.Cast())
+                if (Settings.UseKillsteal && Cache.RendHeroes.Any(o => o.IsRendKillable()) && E.Cast())
                 {
                     return;
                 }
@@ -40,19 +40,14 @@ namespace Hellsing.Kalista.Modes
 
                 if (Settings.UseEBig)
                 {
-                    if (EntityManager.MinionsAndMonsters.CombinedAttackable.Any(m =>
+                    if (Cache.RendMinions.Where(o => o.IsRendKillable()).Any(m =>
                     {
-                        if (!m.IsAlly && E.IsInRange(m) && m.HasRendBuff())
-                        {
-                            var skinName = m.BaseSkinName.ToLower();
-                            return (skinName.Contains("siege") ||
-                                    skinName.Contains("super") ||
-                                    skinName.Contains("dragon") ||
-                                    skinName.Contains("baron") ||
-                                    skinName.Contains("spiderboss")) &&
-                                   m.IsRendKillable();
-                        }
-                        return false;
+                        var skinName = m.BaseSkinName.ToLower();
+                        return (skinName.Contains("siege") ||
+                                skinName.Contains("super") ||
+                                skinName.Contains("dragon") ||
+                                skinName.Contains("baron") ||
+                                skinName.Contains("spiderboss"));
                     }) && E.Cast())
                     {
                         return;
@@ -65,9 +60,7 @@ namespace Hellsing.Kalista.Modes
 
                 if (Settings.UseHarassPlus)
                 {
-                    if (EntityManager.Heroes.Enemies.Any(o => o.IsValidTarget() && E.IsInRange(o) && o.HasRendBuff()) &&
-                        EntityManager.MinionsAndMonsters.CombinedAttackable.Any(o => E.IsInRange(o) && o.IsRendKillable()) &&
-                        E.Cast())
+                    if (Cache.RendHeroes.Any(o => E.IsInRange(o)) && Cache.RendMinions.Any(o => E.IsInRange(o) && o.IsRendKillable()) && E.Cast())
                     {
                         return;
                     }
@@ -77,7 +70,7 @@ namespace Hellsing.Kalista.Modes
 
                 #region E before death
 
-                if (Player.HealthPercent < Settings.AutoEBelowHealth && EntityManager.Heroes.Enemies.Any(o => o.IsValidTarget() && o.HasRendBuff() && E.IsInRange(o)) && E.Cast())
+                if (Player.HealthPercent < Settings.AutoEBelowHealth && Cache.RendHeroes.Any(o => E.IsInRange(o)) && E.Cast())
                 {
                     return;
                 }

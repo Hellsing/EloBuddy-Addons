@@ -7,16 +7,6 @@ namespace Hellsing.Kalista
 {
     public static class Extensions
     {
-        public static bool HasRendBuff(this Obj_AI_Base target)
-        {
-            return target.GetRendBuff() != null;
-        }
-
-        public static BuffInstance GetRendBuff(this Obj_AI_Base target)
-        {
-            return target.Buffs.Find(b => b.Caster.IsMe && b.IsValid() && b.DisplayName == "KalistaExpungeMarker");
-        }
-
         public static bool HasUndyingBuff(this AIHeroClient target)
         {
             // Various buffs

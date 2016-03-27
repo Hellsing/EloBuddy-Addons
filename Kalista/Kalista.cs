@@ -34,6 +34,7 @@ namespace Hellsing.Kalista
             SoulBoundSaver.Initialize();
             ModeLogic.Initialize();
             SentinelManager.Initialize();
+            Cache.Initialize();
 
             // Enable E damage indicators
             DamageIndicator.Initialize(Damages.GetRendDamage);
