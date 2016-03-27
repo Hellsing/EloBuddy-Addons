@@ -16,7 +16,7 @@ namespace Hellsing.Kalista
 
         private static DamageToUnitDelegate DamageToUnit { get; set; }
 
-        private static readonly Vector2 BarOffset = new Vector2(1, 0); // -9, 11
+        private static readonly Vector2 BarOffset = new Vector2(2, 10 + LineThickness / 2f);
 
         private static Color _drawingColor;
         public static Color DrawingColor
@@ -72,7 +72,7 @@ namespace Hellsing.Kalista
                     if (PercentEnabled)
                     {
                         // Get damage in percent and draw next to the health bar
-                        Drawing.DrawText(unit.HPBarPosition, Color.MediumVioletRed, string.Concat(Math.Ceiling((damage / unit.TotalShieldHealth()) * 100), "%"), 10);
+                        Drawing.DrawText(unit.HPBarPosition - new Vector2(0, 12), unit.TotalShieldHealth() < damage ? Color.LawnGreen : Color.Red, string.Concat(Math.Ceiling((damage / unit.TotalShieldHealth()) * 100), "%"), 10);
                     }
                 }
             }
