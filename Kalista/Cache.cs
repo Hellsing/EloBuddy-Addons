@@ -59,6 +59,7 @@ namespace Hellsing.Kalista
         {
             // Update rend entities
             RendEntities.Clear();
+            RendBuffs.Clear();
             foreach (var entity in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsValidTarget(onlyEnemyTeam: true)))
             {
                 // Get the rend buff
