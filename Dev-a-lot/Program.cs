@@ -117,6 +117,7 @@ namespace DevALot
             // Initialize other things
             EventVerifier.Initialize();
             PropertyVerifier.Initialize();
+            SDKVerifier.Initialize();
 
             // Listen to all required events
             Messages.RegisterEventHandler<Messages.MouseMove>(OnMouseMove);
