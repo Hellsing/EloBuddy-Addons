@@ -35,7 +35,7 @@ namespace Karthus.Modes
         public override bool Execute()
         {
             // Check for mana
-            if (ManaUsage.CurrentValue < Player.Instance.ManaPercent)
+            if (ManaUsage.CurrentValue > Player.Instance.ManaPercent)
             {
                 if (Instance.SpellHandler.IsDefileActive())
                 {

@@ -5,7 +5,7 @@ using SharpDX;
 
 namespace Karthus
 {
-    public class SpellHandler
+    public sealed class SpellHandler
     {
         private Karthus Instance { get; set; }
 

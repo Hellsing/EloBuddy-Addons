@@ -21,7 +21,7 @@ namespace Karthus.Modes
 
         private void OnUnkillableMinion(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args)
         {
-            if (UnkillableE.CurrentValue && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
+            if (UnkillableE.CurrentValue && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit)))
             {
                 // Check if target is in E range and killable with E
                 if (E.IsReady() && E.IsInRange(target) && !IsDefileActive && target.TotalShieldHealth() < Player.Instance.GetSpellDamage(target, E.Slot))

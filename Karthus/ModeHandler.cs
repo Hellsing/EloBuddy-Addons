@@ -7,7 +7,7 @@ using Karthus.Modes;
 
 namespace Karthus
 {
-    public class ModeHandler
+    public sealed class ModeHandler
     {
         private Karthus Instance { get; set; }
         public List<ModeBase> Modes { get; private set; }

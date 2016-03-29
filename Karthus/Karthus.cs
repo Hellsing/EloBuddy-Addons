@@ -13,7 +13,7 @@ using Color = System.Drawing.Color;
 
 namespace Karthus
 {
-    public class Karthus
+    public sealed class Karthus
     {
         private static Karthus _instance;
         public static Karthus Instance
