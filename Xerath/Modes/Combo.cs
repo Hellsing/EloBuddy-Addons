@@ -82,7 +82,7 @@ namespace Xerath.Modes
             if (R.IsEnabledAndReady(Orbwalker.ActiveModes.Combo) && !SpellManager.IsCastingUlt)
             {
                 var target = R.GetTarget();
-                if (target != null && R.GetRealDamage(target) * 3 > target.Health)
+                if (target != null && R.GetRealDamage(target) * SpellManager.MaxCharges > target.Health)
                 {
                     // Only activate ult if the target can die from it
                     R.Cast(target);

@@ -31,7 +31,7 @@ namespace Xerath
             // R
             if (SpellManager.R.IsReady() || SpellManager.IsCastingUlt)
             {
-                damage += SpellManager.R.GetRealDamage(target) * (SpellManager.IsCastingUlt ? SpellManager.ChargesRemaining : 3);
+                damage += SpellManager.R.GetRealDamage(target) * (SpellManager.IsCastingUlt ? SpellManager.ChargesRemaining : SpellManager.MaxCharges);
             }
 
             return damage;
@@ -82,8 +82,9 @@ namespace Xerath
 
                 case SpellSlot.R:
 
-                    // Xerath ascends to his true form, becoming rooted in place and gaining 3 Arcane Barrages. This magic artillery deals 190/245/300 (+0.43) magic damage to all enemies hit.
-                    damage = new float[] { 190, 245, 300 }[spellLevel] + 0.43f * Player.Instance.TotalMagicalDamage;
+                    // Xerath calls down a blast of arcane energy to the target area which strikes after 0.5 seconds delay,
+                    // dealing magic damage to all enemies within. Each cast has a static cooldown of 0.8 seconds.
+                    damage = new float[] { 200, 230, 260 }[spellLevel] + 0.43f * Player.Instance.TotalMagicalDamage;
                     break;
             }
 

@@ -27,7 +27,7 @@ namespace Xerath.Modes
             {
                 // Get targets that can die with R
                 var killableTargets = EntityManager.Heroes.Enemies
-                    .Where(h => h.IsValidTarget(R.Range) && h.Health < (SpellManager.IsCastingUlt ? SpellManager.ChargesRemaining : 3) * R.GetRealDamage(h))
+                    .Where(h => h.IsValidTarget(R.Range) && h.Health < (SpellManager.IsCastingUlt ? SpellManager.ChargesRemaining : SpellManager.MaxCharges) * R.GetRealDamage(h))
                     .OrderByDescending(h => R.GetRealDamage(h)).ToArray();
 
                 if (killableTargets.Length > 0)
@@ -59,7 +59,7 @@ namespace Xerath.Modes
                         }
 
                         // Get first time target
-                        if (_lastUltTarget == null || SpellManager.ChargesRemaining == 3)
+                        if (_lastUltTarget == null || SpellManager.ChargesRemaining == SpellManager.MaxCharges)
                         {
                             var target = R.GetTarget();
                             if (target != null && R.Cast(target))
@@ -69,7 +69,7 @@ namespace Xerath.Modes
                             }
                         }
                         // Next target
-                        else if (SpellManager.ChargesRemaining < 3)
+                        else if (SpellManager.ChargesRemaining < SpellManager.MaxCharges)
                         {
                             // Shoot the same target again if in range
                             if ((!_targetWillDie || Environment.TickCount - SpellManager.LastChargeTime > R.CastDelay + 100) && _lastUltTarget.IsValidTarget(R.Range))

@@ -28,6 +28,10 @@ namespace Xerath
         }
         public static int LastChargeTime { get; private set; }
         public static Vector3 LastChargePosition { get; private set; }
+        public static int MaxCharges
+        {
+            get { return !R.IsLearned ? 3 : 2 + R.Level; }
+        }
         public static int ChargesRemaining { get; private set; }
 
         public static bool TapKeyPressed { get; private set; }
@@ -105,7 +109,7 @@ namespace Xerath
                     case "XerathLocusOfPower2":
                         LastChargePosition = Vector3.Zero;
                         LastChargeTime = 0;
-                        ChargesRemaining = 3;
+                        ChargesRemaining = MaxCharges;
                         TapKeyPressed = false;
                         break;
                     // Ult charge usage
