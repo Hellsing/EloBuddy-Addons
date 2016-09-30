@@ -20,7 +20,7 @@ If you wanna get the best ultimate usage for Gnar out there then please, install
 ## [Kalista](https://www.elobuddy.net/topic/28-/) (needs update)
 The popular Kalista addon from where everyone takes it's sources from to make their own Kalista addon PJSalt. But seriously, this is the source, this was the one of the very first Kalista addons out there and also one of the advanced ones.
 
-## Karthus (beta)
+## Karthus
 This is currently being developed, I have played a lot of matches with this addon already, so far only a slightly better lane clear logic and a little improved ultimate alerter is needed and it's ready to leave the beta stage
 
 ## Kindred (project dropped)
@@ -29,5 +29,5 @@ At first I wanted to make a nice Kindred addon but then I lost the motivation do
 ## TheSupport (planned)
 This is right now just a proof of concept for a Support AIO only containing Blitzcrank so far.
 
-## [Xerath](https://www.elobuddy.net/topic/6020-/) (needs update)
+## [Xerath](https://www.elobuddy.net/topic/6020-/)
 Precise casting of all spells and highly configureable ultimate castings will guarantee you a nice game where everyone will either say you are a challenger or a scripter Keepo.
