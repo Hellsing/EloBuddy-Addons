@@ -44,7 +44,7 @@ namespace Xerath
 
             // Initialize damage indicator
             DamageIndicator.Initialize(Damages.GetTotalDamage);
-            DamageIndicator.DrawingColor = System.Drawing.Color.Aqua;
+            DamageIndicator.DrawingColor = System.Drawing.Color.Goldenrod;
 
             // Listend to required events
             Drawing.OnDraw += OnDraw;
