@@ -132,7 +132,9 @@ namespace Xerath.Modes
 
                         // Only for tap key
                         if (Config.Ultimate.CurrentMode == 4 && !SpellManager.TapKeyPressed)
+                        {
                             break;
+                        }
 
                         // Get all enemy heroes in a distance of 500 from the mouse
                         var targets = EntityManager.Heroes.Enemies.Where(h => h.IsValidTarget(R.Range) && h.IsInRange(Game.CursorPos, 500)).ToArray();

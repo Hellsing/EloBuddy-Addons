@@ -41,7 +41,9 @@ namespace Xerath.Modes
 
             // Check mana
             if (Settings.ManaUsage > Player.ManaPercent)
+            {
                 return;
+            }
 
             if (Q.IsEnabledAndReady(Orbwalker.ActiveModes.LaneClear))
             {
