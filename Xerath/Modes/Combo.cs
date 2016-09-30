@@ -85,7 +85,7 @@ namespace Xerath.Modes
                 if (target != null && R.GetRealDamage(target) * 3 > target.Health)
                 {
                     // Only activate ult if the target can die from it
-                    R.Cast();
+                    R.Cast(target);
                 }
             }
         }
