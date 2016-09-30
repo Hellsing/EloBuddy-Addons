@@ -81,7 +81,7 @@ namespace Karthus
                 }
                 case SpellSlot.R:
                 {
-                    if (Player.Instance.GetSpellDamage(target, R.Slot) > target.TotalShieldHealth() + 100 && R.Cast())
+                    if (R.GetRealDamage(target) > target.TotalShieldHealth() + 100 && R.Cast())
                     {
                         // R was casted
                         return true;

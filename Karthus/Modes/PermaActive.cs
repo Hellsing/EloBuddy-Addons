@@ -24,7 +24,7 @@ namespace Karthus.Modes
             if (UnkillableE.CurrentValue && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit)))
             {
                 // Check if target is in E range and killable with E
-                if (E.IsReady() && E.IsInRange(target) && !IsDefileActive && target.TotalShieldHealth() < Player.Instance.GetSpellDamage(target, E.Slot))
+                if (E.IsReady() && E.IsInRange(target) && !IsDefileActive && target.TotalShieldHealth() < E.GetRealDamage(target))
                 {
                     // Cast E
                     CastDefilePulse();

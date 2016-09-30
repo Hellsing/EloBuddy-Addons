@@ -59,7 +59,7 @@ namespace Karthus.Modes
                 var minions = EntityManager.MinionsAndMonsters.GetLaneMinions(radius: E.Range, addBoundingRadius: false).ToArray();
                 if (minions.Length >= KillcountE.CurrentValue)
                 {
-                    var killable = minions.Count(minion => Player.Instance.GetSpellDamage(minion, E.Slot) > minion.TotalShieldHealth());
+                    var killable = minions.Count(minion => E.GetRealDamage(minion) > minion.TotalShieldHealth());
                     if (killable >= KillcountE.CurrentValue && CastDefilePulse())
                     {
                         // E was casted

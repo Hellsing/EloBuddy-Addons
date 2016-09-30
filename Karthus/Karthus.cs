@@ -43,6 +43,7 @@ namespace Karthus
         public Menu DrawingMenu { get; private set; }
         public SpellHandler SpellHandler { get; private set; }
         public ModeHandler ModeHandler { get; private set; }
+        public UltimateAlerter UltimateAlerter { get; private set; }
         public bool Initialized { get; private set; }
 
         public bool IsDead
@@ -107,6 +108,13 @@ namespace Karthus
 
             #endregion
 
+            // Setup damage indicator
+            DamageIndicator.Initialize(target => Damages.GetTotalDamage(this, target));
+            DamageIndicator.DrawingColor = Color.Goldenrod;
+
+            // Setup ultimate alerter
+            UltimateAlerter = new UltimateAlerter(this);
+
             // Listen to required events
             Game.OnTick += OnTick;
             Drawing.OnDraw += OnDraw;
@@ -166,52 +174,6 @@ namespace Karthus
             }
 
             #endregion
-
-            // Ultimate killable notification
-            if (SpellHandler.R.IsLearned)
-            {
-                var killable = new Dictionary<AIHeroClient, float>();
-                foreach (var enemy in EntityManager.Heroes.Enemies.Where(o => !o.IsDead && o.Health > 0))
-                {
-                    var damage = Player.Instance.GetSpellDamage(enemy, SpellSlot.R);
-                    if (damage > enemy.TotalShieldHealth())
-                    {
-                        killable.Add(enemy, damage);
-                    }
-                }
-
-                if (killable.Count > 0)
-                {
-                    if (killable.Count > 1)
-                    {
-                        // Sort killable by percent damage on target
-                        killable = killable.OrderBy(o => o.Value / o.Key.TotalShieldHealth()).ToDictionary(o => o.Key, o => o.Value);
-                    }
-
-                    // Draw info near mouse
-                    var pos = Game.CursorPos2D + new Vector2(-50, 50);
-                    Drawing.DrawText(pos, SpellHandler.R.IsReady() ? Color.GreenYellow : Color.OrangeRed, "Targets killable: " + killable.Count, 10);
-                    foreach (var target in killable)
-                    {
-                        pos += new Vector2(0, 20);
-                        var formatString = "{0} - {1}%";
-                        int alliesNearby;
-                        if (!target.Key.IsHPBarRendered)
-                        {
-                            formatString += " (invisible)";
-                        }
-                        else if ((alliesNearby = target.Key.CountAlliesInRange(1000)) > 0)
-                        {
-                            formatString += string.Format(" ({0} allies nearby)", alliesNearby);
-                        }
-                        else
-                        {
-                            formatString += " (free kill)";
-                        }
-                        Drawing.DrawText(pos, Color.NavajoWhite, string.Format(formatString, target.Key.ChampionName, Math.Floor(target.Value / target.Key.TotalShieldHealth() * 100)), 10);
-                    }
-                }
-            }
         }
 
         private void OnTick(EventArgs args)
