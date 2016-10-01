@@ -2,6 +2,7 @@
 using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Rendering;
 using SharpDX;
 using Color = System.Drawing.Color;
 
@@ -16,7 +17,8 @@ namespace Hellsing.Kalista
 
         private static DamageToUnitDelegate DamageToUnit { get; set; }
 
-        private static readonly Vector2 BarOffset = new Vector2(2, 10 + LineThickness / 2f);
+        private static readonly Vector2 BarOffset = new Vector2(1.25f, 14.25f);
+        private static readonly Vector2 PercentOffset = new Vector2(0, -15);
 
         private static Color _drawingColor;
         public static Color DrawingColor
@@ -24,6 +26,8 @@ namespace Hellsing.Kalista
             get { return _drawingColor; }
             set { _drawingColor = Color.FromArgb(170, value); }
         }
+
+        private static Line OverlayLine { get; set; }
 
         public static bool HealthbarEnabled { get; set; }
         public static bool PercentEnabled { get; set; }
@@ -34,6 +38,13 @@ namespace Hellsing.Kalista
             DamageToUnit = damageToUnit;
             DrawingColor = Color.Green;
             HealthbarEnabled = true;
+
+            // Initialize overlay line
+            OverlayLine = new Line
+            {
+                Antialias = true,
+                Width = LineThickness
+            };
 
             // Register event handlers
             Drawing.OnEndScene += OnEndScene;
@@ -57,22 +68,23 @@ namespace Hellsing.Kalista
                     if (HealthbarEnabled)
                     {
                         // Get remaining HP after damage applied in percent and the current percent of health
-                        var damagePercentage = ((unit.TotalShieldHealth() - damage) > 0 ? (unit.TotalShieldHealth() - damage) : 0) /
+                        var damagePercentage = (unit.TotalShieldHealth() - damage > 0 ? unit.TotalShieldHealth() - damage : 0) /
                                                (unit.MaxHealth + unit.AllShield + unit.AttackShield + unit.MagicShield);
                         var currentHealthPercentage = unit.TotalShieldHealth() / (unit.MaxHealth + unit.AllShield + unit.AttackShield + unit.MagicShield);
 
                         // Calculate start and end point of the bar indicator
-                        var startPoint = new Vector2((int) (unit.HPBarPosition.X + BarOffset.X + damagePercentage * BarWidth), (int) (unit.HPBarPosition.Y + BarOffset.Y) - 5);
-                        var endPoint = new Vector2((int) (unit.HPBarPosition.X + BarOffset.X + currentHealthPercentage * BarWidth) + 1, (int) (unit.HPBarPosition.Y + BarOffset.Y) - 5);
+                        var startPoint = new Vector2(unit.HPBarPosition.X + BarOffset.X + damagePercentage * BarWidth, unit.HPBarPosition.Y + BarOffset.Y - 5);
+                        var endPoint = new Vector2(unit.HPBarPosition.X + BarOffset.X + currentHealthPercentage * BarWidth + 1, unit.HPBarPosition.Y + BarOffset.Y - 5);
 
                         // Draw the line
+                        OverlayLine.Draw(DrawingColor, startPoint, endPoint);
                         Drawing.DrawLine(startPoint, endPoint, LineThickness, DrawingColor);
                     }
 
                     if (PercentEnabled)
                     {
                         // Get damage in percent and draw next to the health bar
-                        Drawing.DrawText(unit.HPBarPosition - new Vector2(0, 12), unit.TotalShieldHealth() < damage ? Color.LawnGreen : Color.Red, string.Concat(Math.Ceiling((damage / unit.TotalShieldHealth()) * 100), "%"), 10);
+                        Drawing.DrawText(unit.HPBarPosition + PercentOffset, DrawingColor, string.Concat(Math.Ceiling(damage / unit.TotalShieldHealth() * 100), "%"), 10);
                     }
                 }
             }

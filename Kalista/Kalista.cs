@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
@@ -24,7 +25,7 @@ namespace Hellsing.Kalista
         private static void OnLoadingComplete(EventArgs args)
         {
             // Validate champion
-            if (Player.Instance.ChampionName != "Kalista")
+            if (Player.Instance.Hero != Champion.Kalista)
             {
                 return;
             }
@@ -38,6 +39,7 @@ namespace Hellsing.Kalista
 
             // Enable E damage indicators
             DamageIndicator.Initialize(Damages.GetRendDamage);
+            DamageIndicator.DrawingColor = Color.Goldenrod;
 
             // Listen to some required events
             Drawing.OnDraw += OnDraw;
