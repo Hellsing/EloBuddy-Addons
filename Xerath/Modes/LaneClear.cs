@@ -26,7 +26,7 @@ namespace Xerath.Modes
                 // Check if we are on max range with the minions
                 if (minions.Max(m => m.Distance(Player, true)) < Q.RangeSquared)
                 {
-                    if (Q.Cast(EntityManager.MinionsAndMonsters.GetLineFarmLocation(minions, Q.Width, (int) Q.Range).CastPosition))
+                    if (Q.Cast(Q.GetBestLinearCastPosition(minions).CastPosition))
                     {
                         return;
                     }
@@ -50,7 +50,7 @@ namespace Xerath.Modes
                 if (minions.Length >= Settings.HitNumberQ)
                 {
                     // Check if we would hit enough minions
-                    if (EntityManager.MinionsAndMonsters.GetLineFarmLocation(minions, Q.Width, (int) Q.MaximumRange).HitNumber >= Settings.HitNumberQ)
+                    if (Q.GetBestLinearCastPosition(minions).HitNumber >= Settings.HitNumberQ)
                     {
                         // Start charging
                         Q.StartCharging();
@@ -63,7 +63,7 @@ namespace Xerath.Modes
             {
                 if (minions.Length >= Settings.HitNumberW)
                 {
-                    var farmLocation = EntityManager.MinionsAndMonsters.GetCircularFarmLocation(minions, W.Width, (int) W.Range);
+                    var farmLocation = W.GetBestCircularCastPosition(minions);
                     if (farmLocation.HitNumber >= Settings.HitNumberW)
                     {
                         if (W.Cast(farmLocation.CastPosition))
