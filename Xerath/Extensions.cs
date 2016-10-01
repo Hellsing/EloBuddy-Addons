@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
+using SharpDX;
 
 namespace Xerath
 {
@@ -55,6 +57,34 @@ namespace Xerath
         public static bool IsPassiveReady(this AIHeroClient target)
         {
             return target.IsMe && target.HasBuff("XerathAscended2OnHit");
+        }
+
+        public static EntityManager.MinionsAndMonsters.FarmLocation GetCircularFarmLocation(this Spell.Skillshot spell, IEnumerable<Obj_AI_Minion> entities)
+        {
+            var minions = entities.Cast<Obj_AI_Base>().ToArray();
+            var hitNumber = 0;
+            var castPosition = Vector2.Zero;
+            var predictionResultArray =
+                minions.Select(o => Prediction.Position.PredictCircularMissile(o, spell.Range, spell.Radius, spell.CastDelay, spell.Speed))
+                    .Where(o => o.CastPosition.IsInRange(spell.SourcePosition.HasValue ? spell.SourcePosition.Value.To2D() : Player.Instance.Position.To2D(), spell.Range + spell.Radius))
+                    .ToArray();
+
+            foreach (var predictionResult in predictionResultArray)
+            {
+                var pos = predictionResult;
+                var currentHitNumber = predictionResultArray.Count(o => o.CastPosition.IsInRange(pos.CastPosition, spell.Radius));
+                if (currentHitNumber >= hitNumber)
+                {
+                    castPosition = pos.CastPosition.To2D();
+                    hitNumber = currentHitNumber;
+                }
+            }
+
+            return new EntityManager.MinionsAndMonsters.FarmLocation
+            {
+                CastPosition = castPosition.To3DWorld(),
+                HitNumber = hitNumber
+            };
         }
     }
 }

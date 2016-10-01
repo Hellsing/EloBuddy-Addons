@@ -63,7 +63,7 @@ namespace Xerath.Modes
             {
                 if (minions.Length >= Settings.HitNumberW)
                 {
-                    var farmLocation = W.GetBestCircularCastPosition(minions);
+                    var farmLocation = W.GetCircularFarmLocation(minions);
                     if (farmLocation.HitNumber >= Settings.HitNumberW)
                     {
                         if (W.Cast(farmLocation.CastPosition))

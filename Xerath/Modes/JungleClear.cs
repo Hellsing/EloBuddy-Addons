@@ -51,7 +51,7 @@ namespace Xerath.Modes
 
             if (W.IsEnabledAndReady(Orbwalker.ActiveModes.JungleClear))
             {
-                var farmLocation = W.GetBestCircularCastPosition(minions);
+                var farmLocation = W.GetCircularFarmLocation(minions);
                 if (farmLocation.HitNumber > 0)
                 {
                     if (W.Cast(farmLocation.CastPosition))
