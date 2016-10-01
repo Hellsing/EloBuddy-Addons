@@ -18,6 +18,7 @@ namespace Xerath
         private static DamageToUnitDelegate DamageToUnit { get; set; }
 
         private static readonly Vector2 BarOffset = new Vector2(1.25f, 14.25f);
+        private static readonly Vector2 PercentOffset = new Vector2(0, -15);
 
         private static Color _drawingColor;
         public static Color DrawingColor
@@ -83,7 +84,7 @@ namespace Xerath
                     if (PercentEnabled)
                     {
                         // Get damage in percent and draw next to the health bar
-                        Drawing.DrawText(unit.HPBarPosition, Color.MediumVioletRed, string.Concat(Math.Ceiling(damage / unit.TotalShieldHealth() * 100), "%"), 10);
+                        Drawing.DrawText(unit.HPBarPosition + PercentOffset, DrawingColor, string.Concat(Math.Ceiling(damage / unit.TotalShieldHealth() * 100), "%"), 10);
                     }
                 }
             }
