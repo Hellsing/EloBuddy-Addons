@@ -140,7 +140,8 @@ namespace PerfectSmite
             if ((HoldKey.CurrentValue || ToggleKey.CurrentValue) && SmiteSpell.IsReady())
             {
                 // Get first smiteable monster
-                var smiteable = CurrentySmiteable.Where(o => Player.Instance.IsInRange(o, SmiteRange + Player.Instance.BoundingRadius + o.BoundingRadius)).OrderByDescending(o => o.MaxHealth).FirstOrDefault();
+                var smiteable =
+                    CurrentySmiteable.Where(o => Player.Instance.IsInRange(o, SmiteRange + Player.Instance.BoundingRadius + o.BoundingRadius)).OrderByDescending(o => o.MaxHealth).FirstOrDefault();
                 if (smiteable != null)
                 {
                     // Check if that monster is enabled
@@ -161,7 +162,7 @@ namespace PerfectSmite
         private static void OnDraw(EventArgs args)
         {
             // Check if summoner wants circles around smiteables
-            if (DrawRange.CurrentValue)
+            if (DrawRange.CurrentValue && (HoldKey.CurrentValue || ToggleKey.CurrentValue))
             {
                 foreach (var smiteable in CurrentySmiteable.Where(o => o.IsHPBarRendered).Where(smiteable => Player.Instance.IsInRange(smiteable, SmiteRange * 2)))
                 {
