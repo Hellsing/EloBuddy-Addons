@@ -44,6 +44,7 @@ namespace SkinChanger
             Menu = MainMenu.AddMenu("SkinChanger", "hellsingSkinChanger", "SkinChanger - by Hellsing");
             Menu.AddGroupLabel("Intro");
             Menu.AddLabel("Change the skins of any hero on the map!");
+            Menu.AddLabel("Select a hero from one of the submenus and choose their new skin.");
             Menu.AddLabel("You can also reset the skins of the heroes by clicking reset below.");
             Menu.AddLabel("(Does not work after reloading/restarting the game)");
 
