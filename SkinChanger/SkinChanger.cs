@@ -86,7 +86,7 @@ namespace SkinChanger
         private static void OnTick(EventArgs args)
         {
             // Validate all skins
-            foreach (var hero in EntityManager.Heroes.AllHeroes)
+            foreach (var hero in EntityManager.Heroes.AllHeroes.Where(hero => hero.IsHPBarRendered))
             {
                 // Get the menu for the hero
                 var menu = HeroMenus[hero.NetworkId];
