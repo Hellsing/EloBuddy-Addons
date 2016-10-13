@@ -173,45 +173,54 @@ namespace SkinChanger
 
         private static void DownloadSkinDataCompleted(object sender, DownloadStringCompletedEventArgs args)
         {
-            // Convert the json data to an object
-            var champData = JsonConvert.DeserializeObject<ChampionStaticData>(args.Result);
-
-            // Add the skins for each champ to the menu
-            foreach (var hero in EntityManager.Heroes.AllHeroes)
+            // Make it sync
+            Core.DelayAction(() =>
             {
-                var skins = champData.GetSkinData(hero.Hero);
-                if (skins.Count > 0)
+                // Convert the json data to an object
+                var champData = JsonConvert.DeserializeObject<ChampionStaticData>(args.Result);
+
+                // Add the skins for each champ to the menu
+                foreach (var hero in EntityManager.Heroes.AllHeroes)
                 {
-                    // Get the menu for the hero
-                    var menu = HeroMenus[hero.NetworkId];
-
-                    // Remove no-skin notifier
-                    menu.Remove("none");
-
-                    // Order skins
-                    skins = skins.OrderBy(o => o.id).ToList();
-
-                    // Add ComboBox containing all skins
-                    menu.AddLabel("Please select the skin you want to see for that chamion!");
-                    var comboBox = menu.Add("skins", new ComboBox("Selected skin", hero.SkinId, skins.Select(o => o.name).ToArray()));
-
-                    if (hero.IsMe)
+                    var skins = champData.GetSkinData(hero.Hero);
+                    if (skins.Count > 0)
                     {
-                        // Apply the saved skin
-                        Core.DelayAction(() =>
+                        // Get the menu for the hero
+                        var menu = HeroMenus[hero.NetworkId];
+
+                        // Remove no-skin notifier
+                        menu.Remove("none");
+
+                        // Order skins
+                        skins = skins.OrderBy(o => o.id).ToList();
+
+                        // Add ComboBox containing all skins
+                        menu.AddLabel("Please select the skin you want to see for that chamion!");
+                        var comboBox = menu.Add("skins", new ComboBox("Selected skin", hero.SkinId < skins.Count ? hero.SkinId : 0, skins.Select(o => o.name).ToArray()));
+
+                        if (hero.IsMe)
                         {
-                            hero.SetSkinId(comboBox.CurrentValue);
-                        }, 5000);
-                    }
+                            // Apply the saved skin
+                            Core.DelayAction(() =>
+                            {
+                                hero.SetSkinId(comboBox.CurrentValue);
+                            }, 5000);
+                        }
+                        else
+                        {
+                            // Don't load saved skins from other champs
+                            comboBox.CurrentValue = hero.SkinId;
+                        }
 
-                    // Handle value changes
-                    comboBox.OnValueChange += delegate(ValueBase<int> box, ValueBase<int>.ValueChangeArgs changeArgs)
-                    {
-                        // Apply skin change
-                        hero.SetSkinId(changeArgs.NewValue);
-                    };
+                        // Handle value changes
+                        comboBox.OnValueChange += delegate (ValueBase<int> box, ValueBase<int>.ValueChangeArgs changeArgs)
+                        {
+                            // Apply skin change
+                            hero.SetSkinId(changeArgs.NewValue);
+                        };
+                    }
                 }
-            }
+            }, 1);
         }
 
         public class ChampionStaticData
