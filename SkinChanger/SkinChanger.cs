@@ -198,7 +198,10 @@ namespace SkinChanger
                     if (hero.IsMe)
                     {
                         // Apply the saved skin
-                        hero.SetSkinId(comboBox.CurrentValue);
+                        Core.DelayAction(() =>
+                        {
+                            hero.SetSkinId(comboBox.CurrentValue);
+                        }, 5000);
                     }
 
                     // Handle value changes
