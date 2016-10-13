@@ -52,8 +52,8 @@ namespace SkinChanger
             Menu.AddSeparator();
 
             Menu.AddGroupLabel("General");
-            Menu.Add("random", new CheckBox("Apply random skin for everyone")).OnValueChange += OnRandomSkinsPress;
-            Menu.Add("reset", new CheckBox("Reset all to default skins")).OnValueChange += OnResetPress;
+            Menu.Add("random", new CheckBox("Apply random skin for everyone", false)).OnValueChange += OnRandomSkinsPress;
+            Menu.Add("reset", new CheckBox("Reset all to default skins", false)).OnValueChange += OnResetPress;
 
             // Add a submenu for each hero
             HeroMenus = new Dictionary<int, Menu>();
@@ -66,7 +66,10 @@ namespace SkinChanger
             }
 
             // Listen to game tick event
-            Game.OnTick += OnTick;
+            Core.DelayAction(() =>
+            {
+                Game.OnTick += OnTick;
+            }, 5000);
 
             // Initialize skin data download
             var WebClient = new WebClient();
