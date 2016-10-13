@@ -24,6 +24,8 @@ namespace SkinChanger
 
         private static readonly Dictionary<int, int> DefaultSkins = new Dictionary<int, int>();
 
+        private static readonly Random Random = new Random(DateTime.Now.Millisecond);
+
         private static Menu Menu { get; set; }
         private static Dictionary<int, Menu> HeroMenus { get; set; }
 
@@ -47,10 +49,11 @@ namespace SkinChanger
             Menu.AddLabel("Select a hero from one of the submenus and choose their new skin.");
             Menu.AddLabel("You can also reset the skins of the heroes by clicking reset below.");
             Menu.AddLabel("(Does not work after reloading/restarting the game)");
+            Menu.AddSeparator();
 
             Menu.AddGroupLabel("General");
-            // TODO: Menu.Add("random", new CheckBox("Apply random skins")).OnValueChange += OnRandomSkinsPress;
-            Menu.Add("reset", new CheckBox("Reset to default skins")).OnValueChange += OnResetPress;
+            Menu.Add("random", new CheckBox("Apply random skin for everyone")).OnValueChange += OnRandomSkinsPress;
+            Menu.Add("reset", new CheckBox("Reset all to default skins")).OnValueChange += OnResetPress;
 
             // Add a submenu for each hero
             HeroMenus = new Dictionary<int, Menu>();
@@ -59,8 +62,11 @@ namespace SkinChanger
                 var menuName = string.Format("{0} - {1}", hero.IsMe ? "Me" : hero.IsAlly ? "A" : "E", hero.ChampionName);
                 HeroMenus.Add(hero.NetworkId, Menu.AddSubMenu(menuName, menuName, string.Format("{0} - {1}", menuName, hero.Name)));
                 HeroMenus[hero.NetworkId].AddGroupLabel("Select a skin");
-                HeroMenus[hero.NetworkId].Add("none", new Label("No skins available, check console!"));
+                HeroMenus[hero.NetworkId].Add("none", new Label("No skins available, check debug console!"));
             }
+
+            // Listen to game tick event
+            Game.OnTick += OnTick;
 
             // Initialize skin data download
             var WebClient = new WebClient();
@@ -74,6 +80,31 @@ namespace SkinChanger
             catch (Exception)
             {
                 Logger.Info("[SkinChanger] Failed to download skin data.");
+            }
+        }
+
+        private static void OnTick(EventArgs args)
+        {
+            // Validate all skins
+            foreach (var hero in EntityManager.Heroes.AllHeroes)
+            {
+                // Get the menu for the hero
+                var menu = HeroMenus[hero.NetworkId];
+
+                try
+                {
+                    // Set the menu value for the hero
+                    var skins = menu.Get<ComboBox>("skins");
+                    if (hero.SkinId != skins.CurrentValue)
+                    {
+                        // Re-apply glitched skin
+                        hero.SetSkinId(skins.CurrentValue);
+                    }
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
             }
         }
 
@@ -106,6 +137,35 @@ namespace SkinChanger
 
         private static void OnRandomSkinsPress(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
         {
+            if (args.NewValue)
+            {
+                // Apply random skin for each champ
+                foreach (var menu in EntityManager.Heroes.AllHeroes.Select(hero => HeroMenus[hero.NetworkId]))
+                {
+                    try
+                    {
+                        // Set the menu value for the hero
+                        var skins = menu.Get<ComboBox>("skins");
+
+                        // Get a new unique random skin
+                        int skin;
+                        do
+                        {
+                            skin = Random.Next(skins.Overlay.Children.Count);
+                        } while (skin == skins.CurrentValue);
+
+                        // Apply random skin
+                        skins.CurrentValue = skin;
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
+                }
+
+                // Reset CheckBox
+                sender.CurrentValue = !args.NewValue;
+            }
         }
 
         private static void DownloadSkinDataCompleted(object sender, DownloadStringCompletedEventArgs args)
