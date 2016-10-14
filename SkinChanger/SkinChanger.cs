@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
@@ -17,10 +18,12 @@ namespace SkinChanger
 {
     public static class SkinChanger
     {
-        // From one of my banned accounts ofc Kappa
-        private const string ApiKey = "RGAPI-ccda7e3e-24cc-4348-969a-412c41d00c5c";
+        public static string Version { get; private set; }
 
-        private static readonly string RequestUrl = string.Format("https://global.api.pvp.net/api/lol/static-data/euw/v1.2/champion?champData=skins&api_key={0}", ApiKey);
+        private const string VersionUrl = "https://ddragon.leagueoflegends.com/api/versions.json";
+        private const string RequestFormat = "http://ddragon.leagueoflegends.com/cdn/{0}/data/en_US/champion/{1}.json";
+
+        private static readonly Dictionary<Champion, List<ChampionDataJson.Skin>> Skins = new Dictionary<Champion, List<ChampionDataJson.Skin>>();
 
         private static readonly Dictionary<int, int> DefaultSkins = new Dictionary<int, int>();
 
@@ -57,56 +60,34 @@ namespace SkinChanger
 
             // Add a submenu for each hero
             HeroMenus = new Dictionary<int, Menu>();
-            foreach (var hero in new[] { Player.Instance }.Concat(EntityManager.Heroes.Allies.Where(o => !o.IsMe)).Concat(EntityManager.Heroes.Enemies))
+            foreach (var hero in new[] { Player.Instance }.Concat(EntityManager.Heroes.Allies.Where(o => !o.IsMe))/*.Concat(EntityManager.Heroes.Enemies)*/)
             {
                 var menuName = string.Format("{0} - {1}", hero.IsMe ? "Me" : hero.IsAlly ? "A" : "E", hero.ChampionName);
-                HeroMenus.Add(hero.NetworkId, Menu.AddSubMenu(menuName, menuName, string.Format("{0} - {1}", menuName, hero.Name)));
-                HeroMenus[hero.NetworkId].AddGroupLabel("Select a skin");
-                HeroMenus[hero.NetworkId].Add("none", new Label("No skins available, check debug console!"));
-            }
+                var menu = Menu.AddSubMenu(menuName, menuName, string.Format("{0} - {1}", menuName, hero.Name));
+                HeroMenus.Add(hero.NetworkId, menu);
 
-            // Listen to game tick event
-            Core.DelayAction(() =>
-            {
-                Game.OnTick += OnTick;
-            }, 5000);
+                menu.AddGroupLabel("Info");
+                menu.AddLabel("Below you can select between several skins for this champion.");
+                menu.AddLabel("Skins marked with a [c] also have different chromas to select from.");
+                menu.AddSeparator();
+
+                menu.AddGroupLabel("Select a skin");
+                menu.Add("none", new Label("No skins available, check debug console!"));
+            }
 
             // Initialize skin data download
-            var WebClient = new WebClient();
-            WebClient.DownloadStringCompleted += DownloadSkinDataCompleted;
-
-            try
+            using (var webClient = new WebClient())
             {
-                // Download the version from Rito
-                WebClient.DownloadStringAsync(new Uri(RequestUrl, UriKind.Absolute));
-            }
-            catch (Exception)
-            {
-                Logger.Info("[SkinChanger] Failed to download skin data.");
-            }
-        }
-
-        private static void OnTick(EventArgs args)
-        {
-            // Validate all skins
-            foreach (var hero in EntityManager.Heroes.AllHeroes.Where(hero => hero.IsHPBarRendered))
-            {
-                // Get the menu for the hero
-                var menu = HeroMenus[hero.NetworkId];
+                webClient.DownloadStringCompleted += DownloadVersionStringCompleted;
 
                 try
                 {
-                    // Set the menu value for the hero
-                    var skins = menu.Get<ComboBox>("skins");
-                    if (hero.SkinId != skins.CurrentValue)
-                    {
-                        // Re-apply glitched skin
-                        hero.SetSkinId(skins.CurrentValue);
-                    }
+                    // Download version file
+                    webClient.DownloadStringAsync(new Uri(VersionUrl, UriKind.Absolute));
                 }
                 catch (Exception)
                 {
-                    // ignored
+                    Logger.Info("[SkinChanger] Failed to download ddragon version file.");
                 }
             }
         }
@@ -116,7 +97,7 @@ namespace SkinChanger
             if (args.NewValue)
             {
                 // Reset skins of all champs
-                foreach (var hero in EntityManager.Heroes.AllHeroes.Where(hero => hero.SkinId != DefaultSkins[hero.NetworkId]))
+                foreach (var hero in EntityManager.Heroes.AllHeroes.Where(hero => HeroMenus.ContainsKey(hero.NetworkId) && hero.SkinId != DefaultSkins[hero.NetworkId]))
                 {
                     // Get the menu for the hero
                     var menu = HeroMenus[hero.NetworkId];
@@ -143,7 +124,7 @@ namespace SkinChanger
             if (args.NewValue)
             {
                 // Apply random skin for each champ
-                foreach (var menu in EntityManager.Heroes.AllHeroes.Select(hero => HeroMenus[hero.NetworkId]))
+                foreach (var menu in EntityManager.Heroes.AllHeroes.Where(hero => HeroMenus.ContainsKey(hero.NetworkId)).Select(hero => HeroMenus[hero.NetworkId]))
                 {
                     try
                     {
@@ -171,89 +152,159 @@ namespace SkinChanger
             }
         }
 
-        private static void DownloadSkinDataCompleted(object sender, DownloadStringCompletedEventArgs args)
+        private static void DownloadVersionStringCompleted(object sender, DownloadStringCompletedEventArgs args)
         {
-            // Make it sync
-            Core.DelayAction(() =>
+            try
             {
-                // Convert the json data to an object
-                var champData = JsonConvert.DeserializeObject<ChampionStaticData>(args.Result);
+                // Convert version string
+                Version = JsonConvert.DeserializeObject<string[]>(args.Result)[0];
+            }
+            catch (Exception e)
+            {
+                Logger.Exception("[SkinChanger] Failed to convert version string to array!\nVersion string: {0}", e, args.Result);
+            }
 
-                // Add the skins for each champ to the menu
-                foreach (var hero in EntityManager.Heroes.AllHeroes)
+            // Validate version
+            if (string.IsNullOrWhiteSpace(Version))
+            {
+                return;
+            }
+
+            Task.Run(async () =>
+            {
+                // Download data for each champion
+                using (var webClient = new WebClient())
                 {
-                    var skins = champData.GetSkinData(hero.Hero);
-                    if (skins.Count > 0)
+                    webClient.DownloadStringCompleted += ChampionDataDownloaded;
+
+                    foreach (var hero in EntityManager.Heroes.AllHeroes.Select(o => o.Hero).Unique())
                     {
-                        // Get the menu for the hero
-                        var menu = HeroMenus[hero.NetworkId];
-
-                        // Remove no-skin notifier
-                        menu.Remove("none");
-
-                        // Order skins
-                        skins = skins.OrderBy(o => o.id).ToList();
-
-                        // Add ComboBox containing all skins
-                        menu.AddLabel("Please select the skin you want to see for that chamion!");
-                        var comboBox = menu.Add("skins", new ComboBox("Selected skin", hero.SkinId < skins.Count ? hero.SkinId : 0, skins.Select(o => o.name).ToArray()));
-
-                        if (hero.IsMe)
+                        while (webClient.IsBusy)
                         {
-                            // Apply the saved skin
-                            Core.DelayAction(() =>
-                            {
-                                hero.SetSkinId(comboBox.CurrentValue);
-                            }, 5000);
+                            await Task.Delay(50);
                         }
-                        else
-                        {
-                            // Don't load saved skins from other champs
-                            comboBox.CurrentValue = hero.SkinId;
-                        }
-
-                        // Handle value changes
-                        comboBox.OnValueChange += delegate (ValueBase<int> box, ValueBase<int>.ValueChangeArgs changeArgs)
-                        {
-                            // Apply skin change
-                            hero.SetSkinId(changeArgs.NewValue);
-                        };
+                        webClient.DownloadStringAsync(new Uri(string.Format(RequestFormat, Version, hero), UriKind.Absolute));
                     }
                 }
-            }, 1);
+            });
         }
 
-        public class ChampionStaticData
+        private static void ChampionDataDownloaded(object sender, DownloadStringCompletedEventArgs args)
         {
-            public Dictionary<string, ChampionDto> data { get; set; }
-
-            public List<SkinDto> GetSkinData(Champion champion)
+            // Check for invalid json result
+            if (string.IsNullOrWhiteSpace(args.Result))
             {
-                try
-                {
-                    return data[champion.ToString()].skins;
-                }
-                catch (Exception)
-                {
-                    Logger.Warn("[SkinChanger] Data did not contain champion '{0}'!", champion);
-                    return new List<SkinDto>();
-                }
+                return;
             }
+
+            // Convert json into an object
+            var champData = JsonConvert.DeserializeObject<ChampionDataJson>(args.Result);
+
+            // Get the champion
+            var champion = (Champion) Enum.Parse(typeof (Champion), champData.data.Keys.First());
+
+            // Synchronize further actions
+            Core.DelayAction(() =>
+            {
+                // Get the skins
+                Skins[champion] = champData.data[champion.ToString()].skins;
+
+                // Add the skins for each champ to the menu
+                foreach (var hero in EntityManager.Heroes.AllHeroes.Where(hero => hero.Hero == champion && HeroMenus.ContainsKey(hero.NetworkId)))
+                {
+                    // Get the menu for the hero
+                    var menu = HeroMenus[hero.NetworkId];
+
+                    // Remove no-skin notifier
+                    menu.Remove("none");
+
+                    // Add ComboBox containing all skins
+                    menu.AddLabel("Please select the skin you want to see for that chamion!");
+                    var comboBox = menu.Add("skins",
+                        new ComboBox("Selected skin",
+                            Skins[champion].Any(skin => skin.num == hero.SkinId)
+                                ? Skins[champion].FindIndex(skin => skin.num == hero.SkinId)
+                                : Skins[champion].Select(skin => skin.num).FirstOrDefault(skin => hero.SkinId - skin < 3),
+                            Skins[champion].Select(o => (o.chromas ? "[c] " : "") + o.name).ToArray()));
+
+                    // Add a blank line for possible chromas
+                    menu.AddSeparator();
+
+                    if (hero.IsMe)
+                    {
+                        // Apply the saved skin
+                        Core.DelayAction(() => { hero.SetSkinId(comboBox.CurrentValue); }, 5000);
+                    }
+                    else
+                    {
+                        // Don't load saved skins from other champs
+                        comboBox.CurrentValue = hero.SkinId;
+                    }
+
+                    // Trigger a fake change
+                    OnSkinChange(hero, comboBox.CurrentValue);
+
+                    // Handle value changes
+                    comboBox.OnValueChange += (s, a) => OnSkinChange(hero, a.NewValue, s);
+                }
+            }, 0);
         }
 
-        public class ChampionDto
+        private static void OnSkinChange(AIHeroClient hero, int skinId, ValueBase<int> sender = null)
         {
-            public int id { get; set; }
-            public string title { get; set; }
-            public string name { get; set; }
-            public List<SkinDto> skins { get; set; }
-        }
+            // Get real skin id
+            skinId = Skins[hero.Hero][skinId].num;
 
-        public class SkinDto
-        {
-            public int id { get; set; }
-            public string name { get; set; }
-            public int num { get; set; }
+            // Get the menu for the hero
+            var menu = HeroMenus[hero.NetworkId];
+
+            // Remove any chroma entry
+            Core.DelayAction(() =>
+            {
+                menu.Remove("chromaLabel");
+                menu.Remove("chromas");
+            }, 0);
+
+            // Check if the skin is a chroma
+            if (Skins[hero.Hero].Any(skin => skin.chromas && skin.num == skinId))
+            {
+                Core.DelayAction(() =>
+                {
+                    // Create a new chromas ComboBox
+                    menu.Add("chromaLabel", new Label("This skin also has several chromas, go try them out!"));
+                    var chromas = menu.Add("chromas", new ComboBox("Selected chroma", new[] { "No chroma", "Variation 1", "Variation 2", "Variation 3" }));
+
+                    // Don't save chroma for any other champ than ourself
+                    if (!hero.IsMe)
+                    {
+                        chromas.CurrentValue = 0;
+                    }
+
+                    // Create executor
+                    var applyChroma = new Action(() =>
+                    {
+                        // Apply chroma
+                        if (hero.SkinId != skinId + chromas.CurrentValue)
+                        {
+                            hero.SetSkinId(skinId + chromas.CurrentValue);
+                        }
+                    });
+
+                    // Apply chroma
+                    applyChroma();
+
+                    // Listen to chroma changes
+                    chromas.OnValueChange += delegate { applyChroma(); };
+                }, 0);
+
+                return;
+            }
+
+            // Apply skin change
+            if (hero.SkinId != skinId)
+            {
+                hero.SetSkinId(skinId);
+            }
         }
     }
 }
