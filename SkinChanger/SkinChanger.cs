@@ -134,7 +134,7 @@ namespace SkinChanger
             // Update child objects to the same skin as each hero
             Obj_AI_Base.OnBuffGain += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs eventArgs)
             {
-                if (sender.IsAlly && !sender.IsMinion() && !sender.IsWard())
+                if (sender.IsAlly && sender.Type != GameObjectType.AIHeroClient && !sender.IsMinion() && !sender.IsWard())
                 {
                     // Get the caster
                     var caster = eventArgs.Buff.Caster as AIHeroClient;
@@ -410,7 +410,7 @@ namespace SkinChanger
             if (hero != null)
             {
                 // Update all child objects
-                foreach (var obj in ObjectManager.Get<Obj_AI_Base>().Where(o => o.NetworkId != hero.NetworkId && !o.IsMinion() && !o.IsWard() && o.Buffs.Any(b => b.Caster.NetworkId == hero.NetworkId) && o.SkinId != hero.SkinId))
+                foreach (var obj in ObjectManager.Get<Obj_AI_Base>().Where(o => o.NetworkId != hero.NetworkId && o.Type != GameObjectType.AIHeroClient && !o.IsMinion() && !o.IsWard() && o.Buffs.Any(b => b.Caster.NetworkId == hero.NetworkId) && o.SkinId != hero.SkinId))
                 {
                     // Apply same skin
                     obj.SetSkinId(hero.SkinId);
