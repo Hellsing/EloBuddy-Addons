@@ -10,6 +10,7 @@ namespace SkinChanger
 
         public class Champion
         {
+            public int key { get; set; }
             public List<Skin> skins { get; set; }
         }
 

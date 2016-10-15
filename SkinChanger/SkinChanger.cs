@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -18,12 +19,17 @@ namespace SkinChanger
 {
     public static class SkinChanger
     {
-        public static string Version { get; private set; }
-
-        private const string VersionUrl = "https://ddragon.leagueoflegends.com/api/versions.json";
+        public static string DataVersion { get; private set; }
+        private const string DataVersionUrl = "https://ddragon.leagueoflegends.com/api/versions.json";
         private const string RequestFormat = "http://ddragon.leagueoflegends.com/cdn/{0}/data/en_US/champion/{1}.json";
 
+        public static string AirClientVersion { get; private set; }
+        public static string AirClientPath { get; private set; }
+        private static string AirClientChromaSwatchesPath { get; set; }
+        private static readonly Dictionary<int, List<int>> Chromas = new Dictionary<int, List<int>>();
+
         private static readonly Dictionary<Champion, List<ChampionDataJson.Skin>> Skins = new Dictionary<Champion, List<ChampionDataJson.Skin>>();
+        private static readonly Dictionary<Champion, List<int>> SkinChromas = new Dictionary<Champion, List<int>>();
 
         private static readonly Dictionary<int, int> DefaultSkins = new Dictionary<int, int>();
 
@@ -34,6 +40,55 @@ namespace SkinChanger
 
         public static void Main(string[] args)
         {
+            // Get air client path
+            AirClientPath = Path.Combine("..", "..", "..", "..", "..", "projects", "lol_air_client", "releases");
+            if (Directory.Exists(AirClientPath))
+            {
+                // Get the most recent version
+                AirClientVersion = Directory.GetDirectories(AirClientPath).Select(Path.GetFileName).Max(name => new System.Version(name)).ToString();
+
+                // Create chroma swatches path
+                AirClientChromaSwatchesPath = Path.Combine(AirClientPath, AirClientVersion, "deploy", "assets", "storeImages", "content", "svu", "chroma_swatches");
+                if (Directory.Exists(AirClientChromaSwatchesPath))
+                {
+                    // Get all chroma swatches
+                    var files = Directory.GetFiles(AirClientChromaSwatchesPath);
+
+                    // Parse files into ids
+                    var ids = new List<int>();
+                    foreach (var fileName in files.Select(Path.GetFileNameWithoutExtension))
+                    {
+                        int id;
+                        if (int.TryParse(fileName, out id))
+                        {
+                            ids.Add(id);
+                        }
+                    }
+
+                    // Parse chromas
+                    foreach (var id in ids.OrderBy(id => id))
+                    {
+                        var champId = id / 1000;
+                        var skinId = id % 1000;
+
+                        // Add chroma to list
+                        if (!Chromas.ContainsKey(champId))
+                        {
+                            Chromas.Add(champId, new List<int>());
+                        }
+                        Chromas[champId].Add(skinId);
+                    }
+                }
+                else
+                {
+                    Logger.Warn("[SkinChanger] Could not find air client path!\nValue: {0}", AirClientChromaSwatchesPath);
+                }
+            }
+            else
+            {
+                Logger.Warn("[SkinChanger] Could not find air client path!\nValue: {0}", AirClientPath);
+            }
+
             Loading.OnLoadingComplete += OnLoadingComplete;
         }
 
@@ -60,7 +115,7 @@ namespace SkinChanger
 
             // Add a submenu for each hero
             HeroMenus = new Dictionary<int, Menu>();
-            foreach (var hero in new[] { Player.Instance }.Concat(EntityManager.Heroes.Allies.Where(o => !o.IsMe))/*.Concat(EntityManager.Heroes.Enemies)*/)
+            foreach (var hero in new[] { Player.Instance }.Concat(EntityManager.Heroes.Allies.Where(o => !o.IsMe)) /*.Concat(EntityManager.Heroes.Enemies)*/)
             {
                 var menuName = string.Format("{0} - {1}", hero.IsMe ? "Me" : hero.IsAlly ? "A" : "E", hero.ChampionName);
                 var menu = Menu.AddSubMenu(menuName, menuName, string.Format("{0} - {1}", menuName, hero.Name));
@@ -75,7 +130,7 @@ namespace SkinChanger
                 menu.Add("none", new Label("No skins available, check debug console!"));
             }
 
-            // Initialize skin data download
+            // Download ddragon version file
             using (var webClient = new WebClient())
             {
                 webClient.DownloadStringCompleted += DownloadVersionStringCompleted;
@@ -83,7 +138,7 @@ namespace SkinChanger
                 try
                 {
                     // Download version file
-                    webClient.DownloadStringAsync(new Uri(VersionUrl, UriKind.Absolute));
+                    webClient.DownloadStringAsync(new Uri(DataVersionUrl, UriKind.Absolute));
                 }
                 catch (Exception)
                 {
@@ -157,7 +212,7 @@ namespace SkinChanger
             try
             {
                 // Convert version string
-                Version = JsonConvert.DeserializeObject<string[]>(args.Result)[0];
+                DataVersion = JsonConvert.DeserializeObject<string[]>(args.Result)[0];
             }
             catch (Exception e)
             {
@@ -165,7 +220,7 @@ namespace SkinChanger
             }
 
             // Validate version
-            if (string.IsNullOrWhiteSpace(Version))
+            if (string.IsNullOrWhiteSpace(DataVersion))
             {
                 return;
             }
@@ -177,13 +232,13 @@ namespace SkinChanger
                 {
                     webClient.DownloadStringCompleted += ChampionDataDownloaded;
 
-                    foreach (var hero in EntityManager.Heroes.AllHeroes.Select(o => o.Hero).Unique())
+                    foreach (var hero in EntityManager.Heroes.AllHeroes.Where(o => HeroMenus.ContainsKey(o.NetworkId)).Select(o => o.Hero).Unique())
                     {
                         while (webClient.IsBusy)
                         {
                             await Task.Delay(50);
                         }
-                        webClient.DownloadStringAsync(new Uri(string.Format(RequestFormat, Version, hero), UriKind.Absolute));
+                        webClient.DownloadStringAsync(new Uri(string.Format(RequestFormat, DataVersion, hero), UriKind.Absolute));
                     }
                 }
             });
@@ -208,6 +263,12 @@ namespace SkinChanger
             {
                 // Get the skins
                 Skins[champion] = champData.data[champion.ToString()].skins;
+
+                // Add chromas
+                if (Chromas.ContainsKey(champData.data[champion.ToString()].key))
+                {
+                    SkinChromas[champion] = Chromas[champData.data[champion.ToString()].key];
+                }
 
                 // Add the skins for each champ to the menu
                 foreach (var hero in EntityManager.Heroes.AllHeroes.Where(hero => hero.Hero == champion && HeroMenus.ContainsKey(hero.NetworkId)))
@@ -252,27 +313,34 @@ namespace SkinChanger
 
         private static void OnSkinChange(AIHeroClient hero, int skinId, ValueBase<int> sender = null)
         {
-            // Get real skin id
-            skinId = Skins[hero.Hero][skinId].num;
-
-            // Get the menu for the hero
-            var menu = HeroMenus[hero.NetworkId];
-
-            // Remove any chroma entry
             Core.DelayAction(() =>
             {
+                // Get real skin id
+                skinId = Skins[hero.Hero][skinId].num;
+
+                // Get the menu for the hero
+                var menu = HeroMenus[hero.NetworkId];
+
+                // Remove any chroma entry
                 menu.Remove("chromaLabel");
                 menu.Remove("chromas");
-            }, 0);
 
-            // Check if the skin is a chroma
-            if (Skins[hero.Hero].Any(skin => skin.chromas && skin.num == skinId))
-            {
-                Core.DelayAction(() =>
+                // Check if the skin is a chroma
+                if (Skins[hero.Hero].Any(skin => skin.chromas && skin.num == skinId))
                 {
+                    // Create combo box values
+                    var values = new List<string> { "No chroma" };
+                    if (SkinChromas.ContainsKey(hero.Hero))
+                    {
+                        for (var i = 0; i < SkinChromas[hero.Hero].Count; i++)
+                        {
+                            values.Add("Variation " + (i + 1));
+                        }
+                    }
+
                     // Create a new chromas ComboBox
                     menu.Add("chromaLabel", new Label("This skin also has several chromas, go try them out!"));
-                    var chromas = menu.Add("chromas", new ComboBox("Selected chroma", new[] { "No chroma", "Variation 1", "Variation 2", "Variation 3" }));
+                    var chromas = menu.Add("chromas", new ComboBox("Selected chroma", values));
 
                     // Don't save chroma for any other champ than ourself
                     if (!hero.IsMe)
@@ -284,9 +352,15 @@ namespace SkinChanger
                     var applyChroma = new Action(() =>
                     {
                         // Apply chroma
-                        if (hero.SkinId != skinId + chromas.CurrentValue)
+                        if (chromas.CurrentValue > 0)
                         {
-                            hero.SetSkinId(skinId + chromas.CurrentValue);
+                            // Set chroma variation
+                            hero.SetSkinId(SkinChromas[hero.Hero][chromas.CurrentValue - 1]);
+                        }
+                        else if(hero.SkinId != skinId)
+                        {
+                            // Set regular skin
+                            hero.SetSkinId(skinId);
                         }
                     });
 
@@ -295,16 +369,16 @@ namespace SkinChanger
 
                     // Listen to chroma changes
                     chromas.OnValueChange += delegate { applyChroma(); };
-                }, 0);
 
-                return;
-            }
+                    return;
+                }
 
-            // Apply skin change
-            if (hero.SkinId != skinId)
-            {
-                hero.SetSkinId(skinId);
-            }
+                // Apply skin change
+                if (hero.SkinId != skinId)
+                {
+                    hero.SetSkinId(skinId);
+                }
+            }, 0);
         }
     }
 }
