@@ -138,7 +138,7 @@ namespace SkinChanger
                 {
                     // Get the caster
                     var caster = eventArgs.Buff.Caster as AIHeroClient;
-                    if (caster != null)
+                    if (caster != null && caster.NetworkId != sender.NetworkId)
                     {
                         // Compare skins
                         if (sender.SkinId != caster.SkinId)
@@ -410,7 +410,7 @@ namespace SkinChanger
             if (hero != null)
             {
                 // Update all child objects
-                foreach (var obj in ObjectManager.Get<Obj_AI_Base>().Where(o => !o.IsMinion() && !o.IsWard() && o.Buffs.Any(b => b.Caster.NetworkId == hero.NetworkId) && o.SkinId != hero.SkinId))
+                foreach (var obj in ObjectManager.Get<Obj_AI_Base>().Where(o => o.NetworkId != hero.NetworkId && !o.IsMinion() && !o.IsWard() && o.Buffs.Any(b => b.Caster.NetworkId == hero.NetworkId) && o.SkinId != hero.SkinId))
                 {
                     // Apply same skin
                     obj.SetSkinId(hero.SkinId);
