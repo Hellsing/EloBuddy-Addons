@@ -362,9 +362,9 @@ namespace SkinChanger
                     var chromas = menu.Add("chromas", new ComboBox("Selected chroma", values));
 
                     // Don't save chroma for any other champ than ourself
-                    if (!hero.IsMe)
+                    if (!hero.IsMe || hero.SkinId != 0)
                     {
-                        chromas.CurrentValue = 0;
+                        chromas.CurrentValue = hero.SkinId;
                     }
 
                     // Create executor
