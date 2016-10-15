@@ -89,6 +89,7 @@ namespace SkinChanger
                 Logger.Warn("[SkinChanger] Could not find air client path!\nValue: {0}", AirClientPath);
             }
 
+            // Listen to loading complete event
             Loading.OnLoadingComplete += OnLoadingComplete;
         }
 
@@ -129,6 +130,24 @@ namespace SkinChanger
                 menu.AddGroupLabel("Select a skin");
                 menu.Add("none", new Label("No skins available, check debug console!"));
             }
+
+            // Update child objects to the same skin as each hero
+            Obj_AI_Base.OnBuffGain += delegate(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs eventArgs)
+            {
+                if (sender.IsAlly && !sender.IsMinion() && !sender.IsWard())
+                {
+                    // Get the caster
+                    var caster = eventArgs.Buff.Caster as AIHeroClient;
+                    if (caster != null)
+                    {
+                        // Compare skins
+                        if (sender.SkinId != caster.SkinId)
+                        {
+                            sender.SetSkinId(caster.SkinId);
+                        }
+                    }
+                }
+            };
 
             // Download ddragon version file
             using (var webClient = new WebClient())
@@ -355,12 +374,12 @@ namespace SkinChanger
                         if (chromas.CurrentValue > 0)
                         {
                             // Set chroma variation
-                            hero.SetSkinId(SkinChromas[hero.Hero][chromas.CurrentValue - 1]);
+                            SetSkin(hero, SkinChromas[hero.Hero][chromas.CurrentValue - 1]);
                         }
                         else if(hero.SkinId != skinId)
                         {
                             // Set regular skin
-                            hero.SetSkinId(skinId);
+                            SetSkin(hero, skinId);
                         }
                     });
 
@@ -376,9 +395,27 @@ namespace SkinChanger
                 // Apply skin change
                 if (hero.SkinId != skinId)
                 {
-                    hero.SetSkinId(skinId);
+                    SetSkin(hero, skinId);
                 }
             }, 0);
+        }
+
+        private static void SetSkin(Obj_AI_Base target, int id)
+        {
+            // Apply the skin
+            target.SetSkinId(id);
+
+            // Check if the target is a hero
+            var hero = target as AIHeroClient;
+            if (hero != null)
+            {
+                // Update all child objects
+                foreach (var obj in ObjectManager.Get<Obj_AI_Base>().Where(o => !o.IsMinion() && !o.IsWard() && o.Buffs.Any(b => b.Caster.NetworkId == hero.NetworkId) && o.SkinId != hero.SkinId))
+                {
+                    // Apply same skin
+                    obj.SetSkinId(hero.SkinId);
+                }
+            }
         }
     }
 }
