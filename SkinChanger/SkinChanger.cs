@@ -29,7 +29,6 @@ namespace SkinChanger
         private static readonly Dictionary<int, List<int>> Chromas = new Dictionary<int, List<int>>();
 
         private static readonly Dictionary<Champion, List<ChampionDataJson.Skin>> Skins = new Dictionary<Champion, List<ChampionDataJson.Skin>>();
-        private static readonly Dictionary<Champion, List<int>> SkinChromas = new Dictionary<Champion, List<int>>();
 
         private static readonly Dictionary<int, int> DefaultSkins = new Dictionary<int, int>();
 
@@ -281,12 +280,32 @@ namespace SkinChanger
             Core.DelayAction(() =>
             {
                 // Get the skins
+                var champId = champData.data[champion.ToString()].key;
                 Skins[champion] = champData.data[champion.ToString()].skins;
 
                 // Add chromas
-                if (Chromas.ContainsKey(champData.data[champion.ToString()].key))
+                if (Chromas.ContainsKey(champId))
                 {
-                    SkinChromas[champion] = Chromas[champData.data[champion.ToString()].key];
+                    // Get all chroma skins
+                    var i = 0;
+                    foreach (var skin in Skins[champion].Where(skin => skin.chromas))
+                    {
+                        // Apply chromas
+                        skin.ChromaIds = Chromas[champId];
+
+                        // Check for multiple chromas on same champ (Rito pls :money:)
+                        if (i > 0)
+                        {
+                            if (i == 1)
+                            {
+                                // Print debug message
+                                Logger.Info("[SkinChanger] Found multiple chromas on champion '{0}'!", champion.ToString());
+                            }
+                        }
+
+                        // Increase index
+                        i++;
+                    }
                 }
 
                 // Add the skins for each champ to the menu
@@ -345,13 +364,14 @@ namespace SkinChanger
                 menu.Remove("chromas");
 
                 // Check if the skin is a chroma
-                if (Skins[hero.Hero].Any(skin => skin.chromas && skin.num == skinId))
+                var chroma = Skins[hero.Hero].FirstOrDefault(skin => skin.chromas && skin.num == skinId);
+                if (chroma != null)
                 {
                     // Create combo box values
                     var values = new List<string> { "No chroma" };
-                    if (SkinChromas.ContainsKey(hero.Hero))
+                    if (chroma.ChromaIds != null)
                     {
-                        for (var i = 0; i < SkinChromas[hero.Hero].Count; i++)
+                        for (var i = 0; i < chroma.ChromaIds.Count; i++)
                         {
                             values.Add("Variation " + (i + 1));
                         }
@@ -374,9 +394,9 @@ namespace SkinChanger
                         if (chromas.CurrentValue > 0)
                         {
                             // Set chroma variation
-                            SetSkin(hero, SkinChromas[hero.Hero][chromas.CurrentValue - 1]);
+                            SetSkin(hero, chroma.ChromaIds[chromas.CurrentValue - 1]);
                         }
-                        else if(hero.SkinId != skinId)
+                        else if (hero.SkinId != skinId)
                         {
                             // Set regular skin
                             SetSkin(hero, skinId);
@@ -410,7 +430,13 @@ namespace SkinChanger
             if (hero != null)
             {
                 // Update all child objects
-                foreach (var obj in ObjectManager.Get<Obj_AI_Base>().Where(o => o.NetworkId != hero.NetworkId && o.Type != GameObjectType.AIHeroClient && !o.IsMinion() && !o.IsWard() && o.Buffs.Any(b => b.Caster.NetworkId == hero.NetworkId) && o.SkinId != hero.SkinId))
+                foreach (
+                    var obj in
+                        ObjectManager.Get<Obj_AI_Base>()
+                            .Where(
+                                o =>
+                                    o.NetworkId != hero.NetworkId && o.Type != GameObjectType.AIHeroClient && !o.IsMinion() && !o.IsWard() && o.Buffs.Any(b => b.Caster.NetworkId == hero.NetworkId) &&
+                                    o.SkinId != hero.SkinId))
                 {
                     // Apply same skin
                     obj.SetSkinId(hero.SkinId);

@@ -20,6 +20,9 @@ namespace SkinChanger
             public int num { get; set; }
             public string name { get; set; }
             public bool chromas { get; set; }
+
+            // Not in json
+            public List<int> ChromaIds { get; set; } 
         }
     }
 }
