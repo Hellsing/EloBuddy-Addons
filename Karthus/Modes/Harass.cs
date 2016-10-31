@@ -9,6 +9,7 @@ namespace Karthus.Modes
     // ReSharper disable ConvertIfStatementToReturnStatement
     public sealed class Harass : ModeBase
     {
+        private KeyBind HarassToggleKey { get; set; }
         private Dictionary<SpellSlot, CheckBox> SpellUsage { get; set; }
         private Slider ManaUsage { get; set; }
 
@@ -18,6 +19,10 @@ namespace Karthus.Modes
             SpellUsage = new Dictionary<SpellSlot, CheckBox>();
 
             // Setup menu
+            Menu.AddGroupLabel("Key bindings");
+            HarassToggleKey = Menu.Add("key", new KeyBind("Toggle harass mode", false, KeyBind.BindTypes.PressToggle, 'h'));
+
+            Menu.AddSeparator();
             Menu.AddGroupLabel("Spell usage");
             SpellUsage[SpellSlot.Q] = Menu.Add("Q", new CheckBox("Use Q"));
             SpellUsage[SpellSlot.E] = Menu.Add("E", new CheckBox("Use E"));
@@ -29,7 +34,7 @@ namespace Karthus.Modes
 
         public override bool ShouldBeExecuted(Orbwalker.ActiveModes activeModes)
         {
-            return activeModes.HasFlag(Orbwalker.ActiveModes.Harass);
+            return activeModes.HasFlag(Orbwalker.ActiveModes.Harass) || HarassToggleKey.CurrentValue;
         }
 
         public override bool Execute()
