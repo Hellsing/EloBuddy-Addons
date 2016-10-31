@@ -20,7 +20,7 @@ namespace Karthus.Modes
 
             // Setup menu
             Menu.AddGroupLabel("Key bindings");
-            HarassToggleKey = Menu.Add("key", new KeyBind("Toggle harass mode", false, KeyBind.BindTypes.PressToggle, 'h'));
+            HarassToggleKey = Menu.Add("key", new KeyBind("Toggle harass mode", false, KeyBind.BindTypes.PressToggle, 'H'));
 
             Menu.AddSeparator();
             Menu.AddGroupLabel("Spell usage");
